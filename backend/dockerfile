@@ -1,0 +1,17 @@
+# Usa un'immagine base di Python per il backend
+FROM python:3.12.4
+
+# Imposta la working directory
+WORKDIR /app
+
+# Copia i file del backend
+COPY . /app
+
+# Installa le dipendenze
+RUN pip install -r requirements.txt
+
+# Espone la porta 5000
+EXPOSE 5000
+
+# Comando per avviare il server Flask
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5000"]

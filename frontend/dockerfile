@@ -1,0 +1,13 @@
+# Usa una base image di Nginx
+FROM nginx:alpine
+
+# Copia i tuoi file nella directory appropriata di Nginx
+COPY ./static /usr/share/nginx/html/static
+COPY ./templates /usr/share/nginx/html/templates
+COPY ./config/nginx.conf /etc/nginx/nginx.conf
+
+# Espone la porta 5001
+EXPOSE 5001
+
+
+CMD ["nginx", "-g", "daemon off;"]
