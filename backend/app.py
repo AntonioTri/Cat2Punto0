@@ -1,6 +1,11 @@
+# Importing dei framework Flask e CORS per l'inizializzazione del servizio API
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+# Import del database
+from db.db import database
+
+# Definizione dell'istanza dell'app
 app = Flask(__name__)
 CORS(app=app)
 
@@ -22,34 +27,44 @@ def increment_counter():
     counter += 1
     return jsonify({"counter": counter})
 
-
+# Rotta per la registrazione, metodo POST
 @app.route('/login', methods=['POST'])
 def register_user():
+    # Estrazione dei data dalla richiesta
     data = request.get_json()
 
-    if data in utenti:
-        return message("Utente già presente nel DB.", 404)
-    else:
-        utenti.append(data)
-        return message("Utente registrato correttamente.", 200)
-    
+    # Controlli di integrità dei dati
+    if "username" not in data and password not in data:
+        return {"msg": "Errore nella richiesta, deve contenere username e password come campi!"}, 404
 
+    # Estraiamo i dati dalla richiesta
+    username = data["username"]
+    password = data["password"]
+
+    # Registrazione del nuovo utente
+    return database.register_new_user(username=username, password=password)
+    
+# Rotta per il login, metodo PUT
 @app.route('/login', methods=['PUT'])
 def login_user():
+        # Estrazione dei data dalla richiesta
     data = request.get_json()
 
-    if data not in utenti:
-        return message("Credenziali errate.", 404)
-    elif data in utenti:
-        return message("Login effettuato", 200)
-    
-    return message("OPS. Qualcosa è andato storto ...", 404)
+    # Controlli di integrità dei dati
+    if "username" not in data and password not in data:
+        return {"msg": "Errore nella richiesta, deve contenere username e password come campi!"}, 404
+
+    # Estraiamo i dati dalla richiesta
+    username = data["username"]
+    password = data["password"]
+
+    # Registrazione del nuovo utente
+    return database.login_user(username=username, password=password)
+
 
 
 def message(message: str, code: int) -> dict:
     return {"msg" : message}, code
-
-
 
 
 if __name__ == '__main__':

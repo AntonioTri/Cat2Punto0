@@ -1,5 +1,6 @@
 version: "3.8"
 services:
+  
   frontend:
     build:
       context: ./frontend
@@ -15,7 +16,27 @@ services:
       - "5000:5000"
     networks:
       - app-network
+  
+  database: 
+    image: postgres:latest
+    container_name: cat_database
+    environment:
+      - POSTGRES_USER=antoniotrid
+      - POSTGRES_PASSWORD=napibrfan
+      - POSTGRES_DB=cat_database
+
+    volumes:
+      - cat_database_data:/var/lib/postgre/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5002:5432"
+    networks:
+      - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  cat_database_data:
+    driver: local
