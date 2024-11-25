@@ -8,20 +8,20 @@ logger = logging.getLogger(__name__)
 class PostgresDB():
 
     def __init__(self) -> None:
-                                            # Parametri di connessione al database
+                                # Parametri di connessione al database
         
-        host = 'localhost'          # Link per la connessione, nel mnio caso localhost perchè locale nel docker
-        port = 5002                 # Porta mappata nel docker-compose (se diversa, usa 5432)
-        database = 'cat_database'   # Nome del database
-        user = 'antoniotrid'        # Nome proprietario
-        password = 'napibrfan'      # Password del proprietario
+        host        =   'database'       # Link per la connessione, nel mio caso database perchè è il nome del servizio locale nel docker
+        port        =   5432             # Porta mappata nel docker-compose (viene usata la porta 5432 perchè è quella di default)
+        database    =   'cat_database'   # Nome del database
+        user        =   'antoniotrid'    # Nome proprietario
+        password    =   'napibrfan'      # Password del proprietario
         
         try:
             # Connessione al db
             self.connection = psycopg2.connect(host=host, port=port, database=database, user=user, password=password)
             logger.info("Connesione al db riuscita!")
         except Exception as e:
-            {"error": f"Qualcosa è andato storto durante la connesione. Errore:\n {e} \n"}, 400
+            logger.info(f"Qualcosa è andato storto durante la connesione. Errore:{e}")
 
 
 
@@ -40,9 +40,15 @@ class PostgresDB():
         
         # si catturano le eccezioni specifiche
         except Exception as e:
+
+            # Rollback della transazione in caso di errore
+            self.connection.rollback()
+            cursor.close()
+
             # Se il nome è già stato usato viene segnalato 409 (Conflict)
             if "duplicate key value" in str(e):
                 return {"error": f"Questo nome utente già esiste!"}, 409
+            
             # Altrimenti viene segnalato un errore del server
             return {"error": f"Qualcosa è andato storto. Errore: {e}"}, 500
 
@@ -82,11 +88,13 @@ class PostgresDB():
                     return {"msg": "La password non è corretta!"}, 401 
                 
                 # Se la password è corretta viene ritornato il codice di cuccesso ed effettuato il login dal foront end
+                cursor.close()
                 return {"msg" : "Login effettuato con successo!"}, 200
 
         # Per qualisasi problema viene segnalato che il server ha generato un errore non ben definito
         except Exception as e:
-            return {"error": f"Nome utente sbagliato:\n {e} \n"}, 500
+            cursor.close()
+            return {"error": f"Nome utente errato:\n {e} \n"}, 500
 
    
 

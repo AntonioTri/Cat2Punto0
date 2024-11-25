@@ -1,6 +1,35 @@
 version: "3.8"
 services:
+
+
+  # Servizio del database
+  database:
+
+  # Immagine presa da internet e definizione del nome del container
+    image: postgres:latest
+    container_name: cat_database
+
+    # Variabili di ambiente definite nel docker per impostare nomi e password di utenti generici
+    environment:
+      - POSTGRES_USER=antoniotrid
+      - POSTGRES_PASSWORD=napibrfan
+      - POSTGRES_DB=cat_database
+
+    # I volumi definiscono dove conservare i dati del db e da quale cartella eseguire l'inizializzazione
+    volumes:
+      - cat_database_data:/var/lib/postgre/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    # La porta sulla quale gli altri servizi si connettono tramite il local network è quella a destra
+    # Quella a sinistra è interna al container 
+    ports:
+      - "5002:5432"
+    networks:
+      - app-network
   
+
+
+  # Servizio del front end
   frontend:
     build:
       context: ./frontend
@@ -9,6 +38,9 @@ services:
     networks:
       - app-network
 
+
+
+  # Servizio del back end
   backend:
     build:
       context: ./backend
@@ -17,26 +49,14 @@ services:
     networks:
       - app-network
   
-  database: 
-    image: postgres:latest
-    container_name: cat_database
-    environment:
-      - POSTGRES_USER=antoniotrid
-      - POSTGRES_PASSWORD=napibrfan
-      - POSTGRES_DB=cat_database
-
-    volumes:
-      - cat_database_data:/var/lib/postgre/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5002:5432"
-    networks:
-      - app-network
-
+  
+# Definizione del network di counicazione
 networks:
   app-network:
     driver: bridge
 
+
+# Definizione del volume per i dati del db
 volumes:
   cat_database_data:
     driver: local
