@@ -1,6 +1,7 @@
 # Importing della libreria di Postgre
 import psycopg2
 import logging
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -16,12 +17,26 @@ class PostgresDB():
         user        =   'antoniotrid'    # Nome proprietario
         password    =   'napibrfan'      # Password del proprietario
         
-        try:
-            # Connessione al db
-            self.connection = psycopg2.connect(host=host, port=port, database=database, user=user, password=password)
-            logger.info("Connesione al db riuscita!")
-        except Exception as e:
-            logger.info(f"Qualcosa è andato storto durante la connesione. Errore:{e}")
+        # I docker sono desincronizzati e questo ciclo while mi permette di ritentare
+        # La connessione al db fin quando non è avvenuta con successo
+        
+        # Inizialmente la connessione e' uguale a Non
+        self.connection = None
+        # fin quando la connessione e' none, viene rifatto un tentativo di connessione
+        while self.connection is None:
+            try_number = 0
+            logger.info(f"Tentativo di connessione numero: {try_number}")
+
+            try:
+                # Connessione al db
+                self.connection = psycopg2.connect(host=host, port=port, database=database, user=user, password=password)
+                logger.info("Connesione al db riuscita!")
+            
+            # L'exception segnala che la connessione non è avvenuta e dopo l'attesa di un secondo riprova a connettersi
+            except Exception as e:
+                logger.info(f"Qualcosa è andato storto durante la connesione. Errore:{e}")
+                try_number += 1
+                time.sleep(1)
 
 
 
@@ -103,6 +118,3 @@ class PostgresDB():
             self.connection.close()
             logger.info("Connessione al db chiusa.")
    
-
-# Definizione dell'istanza
-database = PostgresDB()

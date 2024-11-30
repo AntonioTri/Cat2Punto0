@@ -1,3 +1,5 @@
+// Import della variabile API_URL settata in automatico nel file di config
+import {API_URL} from './config.js';
 const URL = `${API_URL}/login`;
 
 // Selezione del form
@@ -13,7 +15,7 @@ loginForm.addEventListener("submit", async function(event) {
 
     try {
         // Invio della richiesta al server
-        const response = await fetch(`http://localhost:5000/api/login`, {
+        const response = await fetch(URL, {
             method: "PUT", 
             headers: {
                 "Content-Type": "application/json"

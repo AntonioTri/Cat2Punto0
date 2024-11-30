@@ -1,4 +1,5 @@
 
+import {API_URL} from './config.js';
 const URL = `${API_URL}/counter`;
 
 // Elementi della pagina
@@ -8,7 +9,7 @@ const counterDisplay = document.getElementById("counter-display");
 // Funzione per aggiornare il contatore
 async function updateCounter() {
     try {
-        const response = await fetch(`http://localhost:5000/api/counter`);
+        const response = await fetch(URL);
         const data = await response.json();
         counterDisplay.textContent = `Contatore: ${data.counter}`;
     } catch (error) {
@@ -19,7 +20,7 @@ async function updateCounter() {
 // Funzione per incrementare il contatore
 async function incrementCounter() {
     try {
-        const response = await fetch(`http://localhost:5000/api/counter`, { method: "POST" });
+        const response = await fetch(URL, { method: "POST" });
         const data = await response.json();
         console.log(data)
         counterDisplay.textContent = `Contatore: ${data.counter}`;

@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 # Import del database
-from db.db import database
+from db.db import PostgresDB
 
 # Definizione dell'istanza dell'app
 app = Flask(__name__)
@@ -13,6 +13,9 @@ CORS(app=app)
 counter = 0
 # Utenti globali 
 utenti = []
+
+# Definizione dell'istanza del database
+database = PostgresDB()
 
 # Endpoint per ottenere il valore attuale del contatore
 @app.route('/api/counter', methods=['GET'])
@@ -34,7 +37,7 @@ def register_user():
     data = request.get_json()
 
     # Controlli di integrità dei dati
-    if "username" not in data and password not in data:
+    if "username" not in data and "password" not in data:
         return {"msg": "Errore nella richiesta, deve contenere username e password come campi!"}, 404
 
     # Estraiamo i dati dalla richiesta
