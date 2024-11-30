@@ -1,13 +1,22 @@
+// Import della variabile API_URL settata in automatico nel file di config
+import {API_URL} from './config.js';
+const URL = `${API_URL}/login`;
 
-document.getElementById("login-form").addEventListener("submit", async function(event) {
-    event.preventDefault(); // Evita l'invio predefinito del form
+// Selezione del form
+const loginForm = document.getElementById("login_form");
 
+// Aggiunta dell'evento submit al form
+loginForm.addEventListener("submit", async function(event) {
+    event.preventDefault(); // Previene il comportamento predefinito del form
+
+    // Raccolta dei dati
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/login", {
-            method: "PUT",
+        // Invio della richiesta al server
+        const response = await fetch(URL, {
+            method: "PUT", 
             headers: {
                 "Content-Type": "application/json"
             },
@@ -17,15 +26,14 @@ document.getElementById("login-form").addEventListener("submit", async function(
         const data = await response.json();
 
         if (response.ok) {
-            //Alert mi restituisce un pop up in cima alla pagina con il messaggio definito in input
-            //alert(data.msg);
-            window.location.replace("../templates/button.html"); // Percorso relativo
-
+            // Reindirizzamento in caso di successo
+            window.location.replace("../templates/button.html");
         } else {
-            alert(`Errore: ${data.msg}`);
+            // Gestione degli errori dal server
+            alert(`Errore: ${data.msg || "Credenziali non valide."}`);
         }
-
     } catch (error) {
+        // Gestione degli errori di rete o runtime
         console.error("Errore durante la richiesta:", error);
         alert("Si è verificato un errore durante la comunicazione con il server.");
     }
