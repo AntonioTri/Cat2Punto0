@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <link rel="stylesheet" href="../static/welcome.css">
+</head>
+<body>
+
+    <div id="form" class="form_class">
+
+        <!-- Usare un form per una migliore gestione dell'evento submit -->
+        <form id="login_form">
+    
+            <!-- The table is used to contain all the form to compile and various buttons -->
+            <table class="insert_data" id="input_credentials">
+    
+                <!-- Form to insert the username -->
+                <tr id="username_row">
+                    <td>
+                        <label for="username" class="general_text">Insert your username:</label><br>
+                        <input type="text" name="username_input" class="input_form" id="username" placeholder="Username">
+                    </td>
+                </tr>
+    
+                <!-- Form to insert the password -->
+                <tr id="password_row">
+                    <td>
+                        <label for="password" class="general_text">Insert your password:</label><br>
+                        <input type="password" name="password_input" class="input_form" id="password" placeholder="Password">
+                    </td>
+                </tr>
+    
+                <!-- Button to submit the request -->
+                <tr>
+                    <td>
+                        <button id="submit_button" type="submit">Submit</button>
+                    </td>
+                </tr>
+    
+            </table>
+    
+        </form>
+    
+    </div>
+    
+    <script src="../static/login.js"></script>
+    
+</body>
+</html>

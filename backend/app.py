@@ -15,20 +15,20 @@ counter = 0
 utenti = []
 
 # Endpoint per ottenere il valore attuale del contatore
-@app.route('/counter', methods=['GET'])
+@app.route('/api/counter', methods=['GET'])
 def get_counter():
     return jsonify({"counter": counter})
 
 
 # Endpoint per incrementare il contatore
-@app.route('/counter', methods=['POST'])
+@app.route('/api/counter', methods=['POST'])
 def increment_counter():
     global counter
     counter += 1
     return jsonify({"counter": counter})
 
 # Rotta per la registrazione, metodo POST
-@app.route('/login', methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def register_user():
     # Estrazione dei data dalla richiesta
     data = request.get_json()
@@ -45,13 +45,13 @@ def register_user():
     return database.register_new_user(username=username, password=password)
     
 # Rotta per il login, metodo PUT
-@app.route('/login', methods=['PUT'])
+@app.route('/api/login', methods=['PUT'])
 def login_user():
         # Estrazione dei data dalla richiesta
     data = request.get_json()
 
     # Controlli di integrità dei dati
-    if "username" not in data and password not in data:
+    if "username" not in data or "password" not in data:
         return {"msg": "Errore nella richiesta, deve contenere username e password come campi!"}, 404
 
     # Estraiamo i dati dalla richiesta

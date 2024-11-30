@@ -96,6 +96,12 @@ class PostgresDB():
             cursor.close()
             return {"error": f"Nome utente errato:\n {e} \n"}, 500
 
+    # questo metodo chiude la connessione al database quando questa non è più necessaria
+    def close(self):
+        """ Metodo per chiudere la connessione al database """
+        if self.connection:
+            self.connection.close()
+            logger.info("Connessione al db chiusa.")
    
 
 # Definizione dell'istanza

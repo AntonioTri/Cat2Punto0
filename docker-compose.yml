@@ -1,46 +1,31 @@
 version: "3.8"
-services:
 
+services:
 
   # Servizio del database
   database:
-
-  # Immagine presa da internet e definizione del nome del container
     image: postgres:latest
     container_name: cat_database
-
-    # Variabili di ambiente definite nel docker per impostare nomi e password di utenti generici
     environment:
       - POSTGRES_USER=antoniotrid
       - POSTGRES_PASSWORD=napibrfan
       - POSTGRES_DB=cat_database
-
-    # I volumi definiscono dove conservare i dati del db e da quale cartella eseguire l'inizializzazione
     volumes:
-      - cat_database_data:/var/lib/postgre/data
+      - cat_database_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-
-    # La porta sulla quale gli altri servizi si connettono tramite il local network è quella a destra
-    # Quella a sinistra è interna al container 
     ports:
       - "5002:5432"
     networks:
       - app-network
-  
 
-
-  # Servizio del front end
+  # Servizio del frontend
   frontend:
     build:
       context: ./frontend
-    ports:
-      - "5001:5001"
     networks:
       - app-network
 
-
-
-  # Servizio del back end
+  # Servizio del backend
   backend:
     build:
       context: ./backend
@@ -48,15 +33,29 @@ services:
       - "5000:5000"
     networks:
       - app-network
-  
-  
-# Definizione del network di counicazione
+    depends_on:
+      - database
+
+  # Reverse proxy Nginx
+  reverse_proxy:
+    image: nginx
+    container_name: reverse_proxy
+    volumes:
+      - ./frontend/config/nginx.conf:/etc/nginx/nginx.conf  # Monta il file nginx.conf principale
+      - ./frontend:/usr/share/nginx/html  # I file statici del frontend
+    ports:
+      - "5003:5003"  # Espone la porta 5003 del reverse proxy
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+
+
 networks:
   app-network:
     driver: bridge
 
-
-# Definizione del volume per i dati del db
 volumes:
   cat_database_data:
     driver: local
