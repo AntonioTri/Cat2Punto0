@@ -1,4 +1,5 @@
 # Importing della libreria di Postgre
+from flask_jwt_extended import create_access_token
 import psycopg2
 import logging
 import time
@@ -40,14 +41,14 @@ class PostgresDB():
 
 
 
-    def register_new_user(self, username: str = "", password: str = ""):
+    def register_new_user(self, username: str = "", password: str = "", role: str = ""):
         # Reference al cursore
         cursor = self.connection.cursor()
 
         # Inseriamo il nuovo utente
         try:
             # Usare i placeholder (%s) per passare i valori come parametri
-            cursor.execute("INSERT INTO users (username, user_password) VALUES (%s, %s)", (username, password))
+            cursor.execute("INSERT INTO users (username, user_password, role) VALUES (%s, %s, %s)", (username, password, role))
             # Commit delle modifiche
             self.connection.commit()  
             cursor.close()
@@ -70,8 +71,8 @@ class PostgresDB():
 
 
 
-    # Metodo per effettuare il login
-    def login_user(self, username: str = "", password: str = "") -> bool:
+    # Metodo per ottenere un utente sulla base di nome e password
+    def get_user(self, username: str = "", password: str = ""):
 
         # Reference al cursore
         cursor = self.connection.cursor()
@@ -81,7 +82,7 @@ class PostgresDB():
         # Se invece viene trovata la password relativa al'utente selezionato, viene fatto un match per vedere se la
         # password e' quella corretta
 
-        query = "SELECT user_password FROM users WHERE username = %s"
+        query = "SELECT user_password, role FROM users WHERE username = %s"
 
         try:
             cursor.execute(query, (username,))
@@ -90,26 +91,29 @@ class PostgresDB():
             # Se l'array di risposte è vuoto viene segnalato che l'utente non esiste (Not Found)
             if result is None:
                 cursor.close()
-                return {"msg": f"Username errato!"}, 404
+                return None, 404
             
             # Altrimenti l'utente è stato trovato e la password viene salvata localmente per effettuare i controlli
-            else:
-                # Password memorizzata
-                stored_password = result[0]
-                
-                # Se la password è sbagliata viene segnalato (401 Unautorized)
-                if stored_password != password:
-                    cursor.close()
-                    return {"msg": "La password non è corretta!"}, 401 
-                
-                # Se la password è corretta viene ritornato il codice di cuccesso ed effettuato il login dal foront end
+            # Password memorizzata
+            stored_password = result[0]
+            
+            # Se la password è sbagliata viene segnalato (401 Unautorized)
+            if stored_password != password:
                 cursor.close()
-                return {"msg" : "Login effettuato con successo!"}, 200
+                return None, 401
+            
+            # Se la password è corretta viene estratto anche il ruolo
+            role = result[1]
+            cursor.close()
 
-        # Per qualisasi problema viene segnalato che il server ha generato un errore non ben definito
+            # Ritorno di un dizionario contenente i valori trovati
+            return {"username" : username, "role" : role}, 200
+
+        # Per qualsiasi problema viene segnalato che il server ha generato un errore non ben definito
         except Exception as e:
             cursor.close()
-            return {"error": f"Nome utente errato:\n {e} \n"}, 500
+            return e, 500
+
 
     # questo metodo chiude la connessione al database quando questa non è più necessaria
     def close(self):
@@ -118,3 +122,5 @@ class PostgresDB():
             self.connection.close()
             logger.info("Connessione al db chiusa.")
    
+
+database = PostgresDB()

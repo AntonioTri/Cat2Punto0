@@ -1,0 +1,1 @@
+SECRET_KEY = 'my_secret_jwt_key'
