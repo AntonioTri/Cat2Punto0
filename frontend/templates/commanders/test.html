@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posizionamento</title>
+    <style>
+        #source {
+            width: 100px;
+            height: 100px;
+            background-color: red;
+            position: absolute; /* Importante per posizionarlo con coordinate */
+            left: 100px;
+            top: 100px;
+        }
+
+        #target {
+            width: 50px;
+            height: 50px;
+            background-color: blue;
+            position: absolute; /* Necessario per spostarlo con left e top */
+        }
+    </style>
+</head>
+<body>
+    <div id="source">Source</div>
+    <div id="target">Target</div>
+
+    <script>
+        // Funzione per sovrapporre due elementi
+        function positionTargetOverSource() {
+            const source = document.getElementById('source');
+            const target = document.getElementById('target');
+
+            // Ottieni le coordinate di 'source'
+            const rect = source.getBoundingClientRect();
+
+            // Applica le coordinate a 'target'
+            target.style.left = `${rect.left}px`;
+            target.style.top = `${rect.top}px`;
+        }
+
+        // Esegui la funzione al caricamento della pagina
+        window.onload = positionTargetOverSource;
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+/* Stile base */
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #000;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+/* Contenitore della sfera */
+.sphere-container {
+    width: 400px;
+    height: 400px;
+    perspective: 800px;
+    position: relative; /* Aggiunto per posizionare correttamente i label */
+}
+
+/* Sfera */
+.sphere {
+    width: 100%;
+    height: 100%;
+    position: absolute; /* Cambiato da "relative" a "absolute" per gestire il posizionamento */
+    transform-style: preserve-3d;
+    transition: transform 0.2s ease; /* Per rendere la rotazione più fluida */
+    top: 0;
+    left: 0;
+}
+
+/* Punti sulla sfera */
+.point {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: red;
+    border-radius: 50%;
+    transform-origin: center;
+    transform: rotateX(calc(var(--lat) * 1deg)) rotateY(calc(var(--long) * 1deg)) translateZ(150px);
+}
+
+/* Scritte */
+.label {
+    position: absolute;
+    font-size: 16px;
+    font-weight: bold;
+    opacity: 1;
+    transform-style: flat;
+    transition: transform 0.2s ease;
+    pointer-events: none; /* Per evitare che le scritte blocchino la rotazione */
+}

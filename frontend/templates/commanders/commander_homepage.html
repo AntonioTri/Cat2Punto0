@@ -1,12 +1,36 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comandante</title>
-    <link rel="stylesheet" href="../../static/commander/commander_styles/commander_homepage.css">
+    <title>Sfera Interattiva</title>
+    <link rel="stylesheet" href="../../static/commander/commander_styles/commander_homepage.css"></head>
 </head>
 <body>
+
+    <div class="sphere-container">
+
+        <div class="sphere">
+            <!-- Punti della sfera -->
+            <div class="point" style="--lat: 45; --long: 0;"></div>
+            <div class="point" style="--lat: 45; --long: 120;"></div>
+            <div class="point" style="--lat: 45; --long: 240;"></div>
+            <div class="point" style="--lat: -45; --long: 60;"></div>
+            <div class="point" style="--lat: -45; --long: 180;"></div>
+        </div>
+        
+        <!-- Scritte che seguono i punti -->
+        <div class="label" data-point="0">HTML</div>
+        <div class="label" data-point="1">CSS</div>
+        <div class="label" data-point="2">JS</div>
+        <div class="label" data-point="3">React</div>
+        <div class="label" data-point="4">Node</div>
+    
+    </div>
+
+    <script src="../../static/commander/scripts/commander_homepage_script.js"></script>
     
 </body>
 </html>
+
