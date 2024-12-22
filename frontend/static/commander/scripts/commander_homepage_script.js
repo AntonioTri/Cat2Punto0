@@ -1,115 +1,122 @@
-const labels = document.querySelectorAll('.label');
+ // Aggiungiamo il canvas per fare le animazioni nell'html al documento ch eimporta lo script
+        const canvas = document.createElement('canvas');
+        // Ne settiamo le dimensioni
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        // Ed estraiamo il contesto bidimensionale
+        const context = canvas.getContext('2d');
 
-let isDragging = false;
-let previousMousePosition = { x: 0, y: 0 };
-let rotation = { x: 0, y: 0 };
-let force = 3;
-let radius = 70;
+        // Andiamo a definire ora l'array delle corde ed il numero delle sfere
+        let balls = [];
+        let numberOfballs = 45;
+        let minimumCordDistance = 130;
+        
 
-// Inizializza le posizioni
-labels.forEach(label => {
-    const rect = label.getBoundingClientRect();
-    label.style.top = `${rect.top}px`;
-    label.style.left = `${rect.left}px`;
-    label.style.position = 'absolute'; // Assicura che i valori top/left funzionino
-});
-
-// Eventi per rotazione
-document.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    
-});
-
-labels.forEach((lable) => {
-
-    lable.addEventListener('mousedown', (e) => {
-
-        isDragging = true;
-        lable.style.cursor = 'grabbing';
-        offset = {
-            x: e.clientX - lable.getBoundingClientRect().left,
-            y: e.clientY - lable.getBoundingClientRect().top
-        };
-    });
-});
+        // Per ogni sfera creiamo una corda con positioni iniziali randomiche
+        for (let i = 0; i < numberOfballs; i++) {
+            balls.push({
+                x: Math.random() * innerWidth,
+                y: Math.random() * innerWidth,
+                speedX: (Math.random() - 0.5) * 1.27,
+                speedY: (Math.random() - 0.5) * 1.27
+            });
+        }
 
 
-labels.forEach((lable) => {
+        function updatePosition(){
+            for (let i = 0; i < balls.length; i++) {
+                let ball = balls[i];
+                ball.x += ball.speedX;
+                ball.y += ball.speedY;
+            }
 
-    lable.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
+            // Viene eseguito il controllo per l'effetto PacMan
+            checkBallHitBorders();
 
-        const x = e.clientX - offset.x;
-        const y = e.clientY - offset.y;
-
-        lable.style.left = `${x}px`;
-        lable.style.top = `${y}px`;
-
-
-    });
-
-});
-
-document.addEventListener('mouseup', () => {
-    isDragging = false;
-});
-
-document.addEventListener('mouseleave', () => {
-    isDragging = false;
-});
+            draw();
+        }
 
 
-// Funzione per aggiornare le posizioni delle scritte
-// Funzione per aggiornare le posizioni delle scritte
-function applyForces() {
+        // Questa funzione controlla se le palline hanno raggiunto la fine del canvas
+        // In quel caso inverte la direzione del movimento
+        function checkBallHitBorders(){
 
-    // Calcoliamo un array delle posizioni, restituisco un dizionario
-    // contenente l'elemento e la sua posiione x ed y
-    const positions = Array.from(labels).map(label => {
+            for (let i = 0; i < balls.length; i++) {
+                let ball = balls[i];
+                // Se la palla supera un borso laterale viene posizionata sul lato opposto
+                if (ball.x > canvas.width + 2) {
+                    ball.x = -2;
+                } else if(ball.x < -2){
+                    ball.x = canvas.width + 2;
+                }
 
-        const rect = label.getBoundingClientRect();
-        return {
-            element: label,
-            x: rect.left + rect.width/2,
-            y: rect.top + rect.height/2
-        };
+                // La stessa logica viene applicata ai bordi superiori ed inferiori
+                if (ball.y > canvas.height + 2) {
+                    ball.y = -2;
+                } else if (ball.y < -2){
+                    ball.y = canvas.height + 2;
+                }
 
-    });
+            }
+        }
 
-    // Calcoliamo le forze
-    positions.forEach((pointA, i) => {
 
-        let forceX = 0;
-        let forceY = 0;
+        function drawBubbles(){
+            // Questo for disegna le palline
+            for (let index = 0; index < balls.length; index++) {
+                let ball = balls[index];
+                context.beginPath();
+                context.arc(ball.x, ball.y, 5, 0, Math.PI * 2, false);
+                context.stroke();
+                context.fill();
+            }
+        }
 
-        positions.forEach((pointB, j) => {
+        function drawCords(){
 
-            if (i !== j) {
-                const dx = pointA.x - pointB.x;
-                const dy = pointA.y - pointB.y;
-                const distance = Math.sqrt(dx*dx + dy+dy);
+            // Qui invece disegnamo le linee tra le palline
+            context.beginPath();
+            // Iniziamo a scorrere l'array delle palline.
+            // Per ogni pallina andiamo a disegnare una linea verso le altre palline vicine
+            for (let i = 0; i < balls.length; i++) {
+                let lineStart = balls[i];
+                context.moveTo(lineStart.x, lineStart.y);
 
-                if(distance < radius && distance > 0){
-                    forceX += (dx/distance) * force;
-                    forceY += (dx/distance) * force;
+                // Ciclo for interno che definisce dove disegnare la fine della linea
+                for (let j = 0; j < balls.length; j++) {
+                    if (j !== i && distance(balls[i], balls[j]) < minimumCordDistance) {
+                        let lineEnd = balls[j];
+                        context.lineTo(lineEnd.x, lineEnd.y);
+                    }
                 }
             }
-        });
 
-        const element = pointA.element;
-        const currentTop = parseFloat(element.style.top);
-        const currentLeft = parseFloat(element.style.left);
-        element.style.top = `${Math.min(Math.max(currentTop + forceY, 0), window.innerHeight - element.offsetHeight )}px`
-        element.style.left = `${Math.min(Math.max(currentLeft + forceX, 0), window.innerWidth - element.offsetWidth )}px`
+            context.stroke();
 
-    });
+        }
 
-}
+        // Questa funzione serve a capire se due punti sono vicini tra loro
+        function distance(point1, point2){
 
-function animate(){
-    applyForces();
-    requestAnimationFrame(animate);
-}
+            let deltaX = point1.x - point2.x;
+            let deltaY = point1.y - point2.y;
+               
+            let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
+            return distance;
 
-animate()
+        }
+
+        function draw(){
+            drawBubbles();
+            drawCords();
+        }
+
+        // La funzione animate quando chiamata inizia il ciclo di animazione delle palline
+        function animate(){
+            requestAnimationFrame(animate);
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            updatePosition();
+        }
+
+        animate();
