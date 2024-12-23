@@ -9,8 +9,77 @@ body {
     color: white;
 }
 
+#new_note_button{
 
-#neural_background{
-    position: fixed;
-    z-index: -1;
+    position: absolute;
+    left: 90%;
+    top: 5%;
+    border-radius: 50%;
+    background-color: rgba(225, 228, 217, 0.923);
+    border-style: hidden;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.5);
+    
+
 }
+
+#burger_menu_button{
+    position: relative;
+}
+
+.burger_menu {
+    padding: 5%;
+    width: auto;
+    position: absolute;
+    height: 300px;
+    border-radius: 15px;
+    transition: ease-in-out; /* Per abilitare transizioni fluide */
+    background-color: rgb(225, 228, 217);
+    box-shadow: 0px 0px 25px 1px rgba(0, 0, 0, 0.5);
+
+    /* Posizionamento nascosto */
+    top: 1%; /* Allinea il menu alla parte superiore dello schermo */
+    left: -450px; /* Sposta il menu fuori dal viewport a sinistra */
+    max-width: 300px; /* Imposta una larghezza massima per il menu */
+    height: 97%; /* Imposta l'altezza del menu per coprire l'intero schermo */
+}
+
+
+.action_button{
+
+    margin: 5px;
+    border: none;
+    text-decoration: none;
+    padding-top: 6px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 6px;
+    padding-bottom: 6px;
+    transition: all 0.2s ease-in-out;
+
+}
+
+.action_button:active{
+    background-color: gray;
+    transform: scale(0.98);
+}
+
+
+
+
+
+
+ul {
+
+    list-style: none;
+    padding: 0; /* Rimuove il padding predefinito */
+    margin: 0; /* Rimuove il margine predefinito */
+}
+
+
+ul li{
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+}
+

@@ -23,7 +23,7 @@
 
     // Andiamo a definire ora l'array delle corde ed il numero delle sfere
     let balls = [];
-    let numberOfballs = 45;
+    let numberOfballs = 32;
     let minimumCordDistance = 130;
 
     
