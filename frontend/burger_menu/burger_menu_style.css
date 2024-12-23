@@ -1,0 +1,98 @@
+
+#burger_menu_button{
+    
+    top: 0%;
+    left: 0%;
+    width: 30px;
+    padding: 7px;
+    height: 25px;
+    margin: 14px;
+    display: flex;
+    cursor: pointer;
+    position: absolute;
+    border-radius: 5px;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: rgb(225, 228, 217);
+    box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.5);
+
+
+
+}
+
+/*animazione del burger menu che diventa una x alla pressione*/
+#burger_menu_button.clicked .bar:nth-child(1){
+    transform: translateY(10px) rotate(45deg);
+}
+#burger_menu_button.clicked .bar:nth-child(2){
+    opacity: 0;
+}
+#burger_menu_button.clicked .bar:nth-child(3){
+    transform: translateY(-10px)  rotate(-45deg);
+}
+
+.burger_menu {
+
+    padding: 5%;
+    width: auto;
+    position: absolute;
+    height: 300px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    transition: ease-in-out; /* Per abilitare transizioni fluide */
+    background-color: rgb(225, 228, 217);
+    box-shadow: 0px 0px 25px 1px rgba(0, 0, 0, 0.5);
+
+    /* Posizionamento nascosto */
+    top: 1%; /* Allinea il menu alla parte superiore dello schermo */
+    left: -300px; /* Sposta il menu fuori dal viewport a sinistra */
+    max-width: 300px; /* Imposta una larghezza massima per il menu */
+    height: 97%; /* Imposta l'altezza del menu per coprire l'intero schermo */
+}
+
+
+.action_button {
+    margin: 5px;
+    border: none;
+    text-decoration: none;
+    padding: 6px 15px;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.action_button:active {
+    transform: scale(0.98); /* Effetto immediato al click */
+}
+
+.action_button.clicked {
+    color: white;
+    transform: scale(0.98); /* Mantenere il leggero scaling */
+    background-color: #0099CC; /* Colore durante l'animazione */
+    transition: all 0.1s ease-in-out;
+}
+
+
+
+.bar {
+    height: 5px;
+    background-color: #545353;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+
+ul {
+
+    list-style: none;
+    padding: 0; /* Rimuove il padding predefinito */
+    margin: 0; /* Rimuove il margine predefinito */
+}
+
+
+ul li{
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+}
+

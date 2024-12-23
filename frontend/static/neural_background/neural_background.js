@@ -23,17 +23,18 @@
 
     // Andiamo a definire ora l'array delle corde ed il numero delle sfere
     let balls = [];
-    let numberOfballs = 32;
+    let numberOfballs = 20;
     let minimumCordDistance = 130;
 
     
+
     // Per ogni sfera creiamo una corda con positioni iniziali randomiche
     for (let i = 0; i < numberOfballs; i++) {
         balls.push({
             x: Math.random() * innerWidth,
             y: Math.random() * innerWidth,
-            speedX: (Math.random() - 0.5) * 1.27,
-            speedY: (Math.random() - 0.5) * 1.27
+            speedX: (Math.random() - 0.5) * 1.11,
+            speedY: (Math.random() - 0.5) * 1.11
         });
     }
 
