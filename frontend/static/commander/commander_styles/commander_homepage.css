@@ -1,0 +1,16 @@
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+
+#neural_background{
+    position: fixed;
+    z-index: -1;
+}

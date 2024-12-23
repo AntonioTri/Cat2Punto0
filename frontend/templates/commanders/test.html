@@ -1,5 +1,16 @@
- // Aggiungiamo il canvas per fare le animazioni nell'html al documento ch eimporta lo script
-        const canvas = document.createElement('canvas');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Animation</title>
+</head>
+<body>
+    <canvas id="myCanvas" width="400" height="400" style="border: 1px solid black;"></canvas>
+    <script>
+        const canvasd = document.createElement('canvas');
+        // Estraiamo il canvas per fare le animazioni dall'html
+        const canvas = document.getElementById('myCanvas');
         // Ne settiamo le dimensioni
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -120,3 +131,8 @@
         }
 
         animate();
+
+
+    </script>
+</body>
+</html>
