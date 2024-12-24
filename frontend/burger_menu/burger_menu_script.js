@@ -53,7 +53,13 @@ const burger_button = document.getElementById('burger_menu_button')
 // Aggiungiamo lo script per fare l'animazione del burger menu al clck del bottone
 burger_button.addEventListener('click', () => {
     
+    // All'evento click si aprono e si mostrano i burger menu
+    // e il role tag
     openCloseBurgerMenu();
+    slideRoleTag();
+
+    // Switch della variabile
+    opened = !opened;
 
 });
   
@@ -68,6 +74,11 @@ actionButtons.forEach(button => {
 
         // Nascondiamo il burger menu
         openCloseBurgerMenu();
+        // Nascondo il role tag
+        slideRoleTag();
+
+        // Switch della variabile
+        opened = !opened;
 
         // Rimuove la classe `.clicked` dopo che l'animazione è completata (0.2s in questo caso)
         setTimeout(() => {
@@ -95,15 +106,29 @@ function openCloseBurgerMenu(){
     // Altrimenti verso l'esterno
     } else {
         burger_menu.style.transition = 'transform 1s ease-in';
-        burger_menu.style.transform = 'translateX(-300px)';
+        burger_menu.style.transform = 'translateX(-120px)';
         burger_button.style.transition = 'transform 1s ease-in-out';
         burger_button.style.transform = 'translateX(0px)';
         // Togliamo la classe clicked al burger button per le animazioni
         burger_button.classList.remove('clicked');
     }
 
-    // Switch della variabile
-    opened = !opened;
 
+}
+
+// Qesta funzione sposta il role tag da una posizione all'altra quando invocata
+function slideRoleTag() {
+
+    const roleTag = document.getElementById('role_tag');
+
+    if (!opened) {
+        // Quando la flag è false, spostiamo il role tag a destra e lo rendiamo invisibile
+        roleTag.style.transform = 'translateX(130px)'; // Aggiusta la distanza a destra come preferisci
+        roleTag.style.opacity = '0';
+    } else {
+        // Quando la flag è true, torniamo alla posizione originale e visibilità piena
+        roleTag.style.transform = 'translateX(0)';
+        roleTag.style.opacity = '1';
+    }
 
 }

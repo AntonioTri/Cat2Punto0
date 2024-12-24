@@ -39,6 +39,8 @@ class ControllerManageUsersAUTH():
         
         # Se tutti i controlli sono passati, l'utente esiste e pertanto viene generato un token di accesso
         # Il token dura solo due ore poi scade e bisogna rifare il login
+        # Assieme al token viene restituito anche il ruolo, che serve al fron end per servire le pagine
         return {"access_token" : create_access_token(identity = str(response["username"]),\
                                                      additional_claims = {"role": response["role"]},\
-                                                     expires_delta = timedelta(hours=2))}, 200
+                                                     expires_delta = timedelta(hours=2)),
+                "role" : response["role"]}, 200

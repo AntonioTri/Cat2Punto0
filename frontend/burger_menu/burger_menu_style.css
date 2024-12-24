@@ -33,13 +33,13 @@
 
 .burger_menu {
 
-    padding: 5%;
     width: auto;
-    position: absolute;
+    padding: 5%;
     height: 300px;
+    position: absolute;
+    transition: ease-in-out;
     border-top-right-radius: 15px;
     border-bottom-right-radius: 15px;
-    transition: ease-in-out; /* Per abilitare transizioni fluide */
     background-color: rgb(225, 228, 217);
     box-shadow: 0px 0px 25px 1px rgba(0, 0, 0, 0.5);
 

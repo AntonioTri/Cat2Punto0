@@ -32,12 +32,18 @@ loginForm.addEventListener("submit", async function(event) {
         if (response.ok) {
             
             let access_token = data.access_token;
-            console.log(access_token)
-
+            let role = formatRole(data.role);
+            console.log(access_token);
+            console.log(role);
+            
+            // Conserviamo nel local storage l'access token ed il ruolo
+            // Il ruolo viene conservato come formattato e non formattato
+            localStorage.setItem('unformatted_role', data.role);
             localStorage.setItem('access_token', access_token);
+            localStorage.setItem('role', role);
             
             // Reindirizzamento in caso di successo
-            window.location.replace("../templates/button.html");
+            window.location.replace(`../templates/${role}/${role}_homepage.html`);
 
         } else {
             // Gestione degli errori dal server
@@ -50,3 +56,31 @@ loginForm.addEventListener("submit", async function(event) {
         alert("Si è verificato un errore durante la comunicazione con il server.");
     }
 });
+
+
+function formatRole(role){
+
+    // Sulla base del ruolo viene restituito un particolare indice dal quale
+    // navigare l'albero del ruolo
+    switch (role) {
+        case 'ADMIN':
+            return 'admin';
+
+        case 'COMANDANTE':
+            return 'commander';
+
+        case 'DETECTIVE':
+            return 'detective';    
+
+        case 'ESPLORATORE':
+            return 'explorer';  
+
+        case 'DECRITTATORE':
+            return 'decripter';
+
+        default:
+            return 'commander';
+
+    }
+
+}
