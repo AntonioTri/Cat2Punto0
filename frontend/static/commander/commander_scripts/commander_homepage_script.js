@@ -1,8 +1,5 @@
-import {CardManager} from '../../admin/card_manager.js';
+import { BurgerMenuManager } from "../../burger_menu/burger_menu_script.js";
 
 
-const cardManager = new CardManager();
-
-
-cardManager.addCardWithIdAndPosition('action_one', 50, 50, 'Card di prova');
+const burgerMenuManager = new BurgerMenuManager();
 

@@ -59,9 +59,23 @@ export class CardManager {
         this.container.appendChild(card);
     }
 
+    // Metodo per aggiungere una cads con una classe, id e posizione
+    addCardWithClassIDAndPosition(className, id, top, left, content = '') {
+        const card = this._createCard();
+        card.id = id;
+        card.classList.add(className);
+        card.style.position = 'absolute';
+        card.style.top = `${top}%`;
+        card.style.left = `${left}%`;
+        card.style.transform = 'translate(-50%, -50%)'
+        card.innerText = content;
+        this.container.appendChild(card);
+    }
+
     // Metodo privato per creare una card con il design standard
     _createCard() {
         const card = document.createElement('div');
+        card.classList.add('inactive');
         card.style.color = 'black';
         card.style.textAlign = 'center';
         card.style.position = 'absolute';
