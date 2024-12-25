@@ -1,0 +1,19 @@
+.action_card {
+    width: 90%;
+    height: 150%;
+    margin-top: 0;
+    position: absolute;
+    transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+}
+
+.action_card.inactive {
+    transform: translate(50%, 50%); /* Posiziona fuori dallo schermo a destra */
+    opacity: 0; /* Invisibile */
+}
+
+.action_card.active {
+    
+    transform: translate(0%, 0%); /* Posiziona al centro */
+    left: 0%;
+    opacity: 1; /* Visibile */
+}
