@@ -8,6 +8,35 @@ export class CardManager {
         this.container = document.querySelector(containerSelector);
     }
 
+    // Questo metodo muove la carta attiva sulla destra
+    // Metodo usato dal burger menu per spostare da sinistra a destra
+    // l'attuale card attiva per fare spazio al menu
+    moveCardToLeft(width){
+        try {
+            let selectedCard = document.querySelector('.action_card.active');
+            
+            selectedCard.style.transform = `translateX(${width}px)`;
+            selectedCard.style.opacity = '0';
+            
+        } catch (error) {
+            console.log(error);
+        }
+
+
+    }
+
+    moveCardToRight(){
+
+        try {
+            let selectedCard = document.querySelector('.action_card.active');
+            selectedCard.style.transform = `translateX(0%)`;
+            selectedCard.style.opacity = '1';
+            
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     // Metodo per aggiungere una card con un ID
     addCardWithId(id, content = '') {
         const card = this._createCard();
@@ -27,10 +56,8 @@ export class CardManager {
     // Metodo per aggiungere una card con una posizione assoluta (top, left)
     addCardWithPosition(top, left, content = '') {
         const card = this._createCard();
-        card.style.position = 'absolute';
         card.style.top = `${top}%`;
         card.style.left = `${left}%`;
-        card.style.transform = 'translate(-50%, -50%)'
         card.innerText = content;
         this.container.appendChild(card);
     }
@@ -39,10 +66,8 @@ export class CardManager {
     addCardWithIdAndPosition(id, top, left, content = '') {
         const card = this._createCard();
         card.id = id;
-        card.style.position = 'absolute';
         card.style.top = `${top}%`;
         card.style.left = `${left}%`;
-        card.style.transform = 'translate(-50%, -50%)'
         card.innerText = content;
         this.container.appendChild(card);
     }
@@ -51,10 +76,8 @@ export class CardManager {
     addCardWithClassAndPosition(className, top, left, content = '') {
         const card = this._createCard();
         card.classList.add(className);
-        card.style.position = 'absolute';
         card.style.top = `${top}%`;
         card.style.left = `${left}%`;
-        card.style.transform = 'translate(-50%, -50%)'
         card.innerText = content;
         this.container.appendChild(card);
     }
@@ -64,10 +87,7 @@ export class CardManager {
         const card = this._createCard();
         card.id = id;
         card.classList.add(className);
-        card.style.position = 'absolute';
-        card.style.top = `${top}%`;
-        card.style.left = `${left}%`;
-        card.style.transform = 'translate(-50%, -50%)'
+        card.style.top = `${top}px`;
         card.innerText = content;
         this.container.appendChild(card);
     }
@@ -76,6 +96,8 @@ export class CardManager {
     _createCard() {
         const card = document.createElement('div');
         card.classList.add('inactive');
+        card.style.margin = '2%'; 
+        card.style.width = '90%';
         card.style.color = 'black';
         card.style.textAlign = 'center';
         card.style.position = 'absolute';
@@ -85,7 +107,6 @@ export class CardManager {
         card.style.fontFamily = `'Courier New', Courier, monospace`;
         card.style.backgroundColor = 'rgb(225, 228, 217)';
         card.style.boxShadow = '0px 0px 25px 1px rgba(0, 0, 0, 0.5)';
-        card.style.transition = 'transform 1s ease-in-out, opacity 1s ease-in-out';
         return card;
     }
 }

@@ -55,7 +55,9 @@ export class ActionButtonManager{
     // Questo metodo prende in input una lista di azioni e crea i bottoni 
     // specifici nel burger menu, ad ogni bottone corrisponde una card dal card manager
     addActionButton(actionList){
-
+        // Questa variabile serve a capire la larghezza del role tag per poter settare poi la posizione giusta alle action card
+        const roleTagHeight = document.getElementById('role_tag').getBoundingClientRect().height;
+ 
         // Per ogni elemento della lista, estraiamo la scritta
         // E la usiamo per identificare tutti i componenti associati
         actionList.forEach(actionText => {
@@ -73,8 +75,9 @@ export class ActionButtonManager{
             li.appendChild(button);
             this.container.appendChild(li);
             
+
             // Aggiungiamo la card dedicata al bottone usando il testo come id
-            this.cardManager.addCardWithClassIDAndPosition('action_card', actionText, 50, 50, actionText);
+            this.cardManager.addCardWithClassIDAndPosition('action_card', actionText, roleTagHeight + 20, 0, actionText);
         
         });
 
@@ -106,6 +109,7 @@ export class ActionButtonManager{
                         // Cambio dello stato alla action card per applicarvi le animazioni
                         if (element.classList.contains('inactive')) {
                             element.classList.remove('inactive');
+                            element.style.transform = 'translate(0%, 0%)';
                             element.classList.add('active');
                         }
                     
@@ -114,11 +118,16 @@ export class ActionButtonManager{
                         // Cambio dello stato alla action card per applicarvi le animazioni
                         if (element.classList.contains('active')) {
                             element.classList.remove('active');
+                            element.style.transform = 'translate(50%, 50%)';
                             element.classList.add('inactive');
                         }
                     }
                 });
             });
         });
+    }
+
+    getCardManager(){
+        return this.cardManager;
     }
 }

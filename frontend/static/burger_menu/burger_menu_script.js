@@ -130,6 +130,8 @@ export class BurgerMenuManager{
             this.burgerMenuButton.style.transform = `translateX(${menuRect.width}px)`; // Spostiamo il bottone (menu + 20px)
             // Aggiungiamo la classe clicked al burger button per le animazioni
             this.burgerMenuButton.classList.add('clicked');
+            //Si richiama il metodo del card manager per far muovere l'attuale card attiva
+            this.actionButtonManager.getCardManager().moveCardToLeft(menuRect.width);
 
         // Altrimenti verso l'esterno
         } else {
@@ -139,6 +141,8 @@ export class BurgerMenuManager{
             this.burgerMenuButton.style.transform = 'translateX(0px)';
             // Togliamo la classe clicked al burger button per le animazioni
             this.burgerMenuButton.classList.remove('clicked');
+            //Si richiama il metodo del card manager per far muovere l'attuale card attiva
+            this.actionButtonManager.getCardManager().moveCardToRight();
         }
 
     }
