@@ -2,10 +2,13 @@
 from flask_jwt_extended import JWTManager, get_jwt, jwt_required
 from JWT.auth_decorator import require_role
 from blueprint.auth import auth_blueprint
+from blueprint.user_pool import team_blueprint
 from config.secret_key import SECRET_KEY
 from flask import Flask, jsonify
 from entity.role import ROLE
 from flask_cors import CORS
+# Import per la libreria dei servizi streaming
+from flask_socketio import SocketIO, emit
 
 # Definizione dell'istanza dell'app
 app = Flask(__name__)
@@ -13,26 +16,10 @@ CORS(app=app)
 app.config['JWT_SECRET_KEY'] = SECRET_KEY 
 jwt = JWTManager(app)
 app.register_blueprint(auth_blueprint, url_prefix='/api')
+app.register_blueprint(team_blueprint, url_prefix='/api')
 
-# Contatore globale
-counter = 0
-
-
-# Endpoint per ottenere il valore attuale del contatore
-@app.route('/api/counter', methods=['GET'])
-@require_role(ROLE.COMANDANTE.value)
-def get_counter():
-    return jsonify({"counter": counter})
-
-
-# Endpoint per incrementare il contatore
-@app.route('/api/counter', methods=['POST'])
-@require_role(ROLE.COMANDANTE.value)
-def increment_counter():
-    global counter
-    counter += 1
-    return jsonify({"counter": counter})
-
+# Creazione dell'istanza dei servizi streaming
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Endpoint per ottenere le rotte dell'api
 @app.route('/api/routes', methods=['GET'])
@@ -56,6 +43,11 @@ def get_me():
     me = get_jwt()
     return {"username": me["username"], "role": me["role"]}, 200
 
+# Rotta di test per i servizi streaming
+@socketio.on('connect')
+def handle_connect():
+    print('Un client si è connesso.')
+
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=5000)

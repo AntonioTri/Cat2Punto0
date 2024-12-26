@@ -40,79 +40,269 @@ class PostgresDB():
                 time.sleep(1)
 
 
-
-    def register_new_user(self, username: str = "", password: str = "", role: str = ""):
+    # Metodo che quando invocato crea un team con un nome
+    def create_team(self, team_name: str):
+        """
+        Metodo che quando invocato crea un team con un nome
+        """
         # Reference al cursore
         cursor = self.connection.cursor()
 
-        # Inseriamo il nuovo utente
         try:
-            # Usare i placeholder (%s) per passare i valori come parametri
-            cursor.execute("INSERT INTO users (username, user_password, role) VALUES (%s, %s, %s)", (username, password, role))
-            # Commit delle modifiche
-            self.connection.commit()  
-            cursor.close()
-            return {"msg": "Utente registrato con successo"}, 200
-        
-        # si catturano le eccezioni specifiche
-        except Exception as e:
+            # Esecuzione della query per inserire un nuovo team
+            cursor.execute("INSERT INTO teams (team_name) VALUES (%s) RETURNING team_id", (team_name,))
+            team_id = cursor.fetchone()[0]
 
+            # Richiamo alla funzione per agiungere i sottogruppi al team
+            _, sc1 = self.create_team_group(team_id=team_id, team_type="COMANDANTE")
+            _, sc2 = self.create_team_group(team_id=team_id, team_type="DECRITTATORE")
+            _, sc3 = self.create_team_group(team_id=team_id, team_type="DETECTIVE")
+            _, sc4 = self.create_team_group(team_id=team_id, team_type="ESPLORATORE")
+
+            # Se uno dei create team group fallisce viene segnalato
+            if sc1 != 201 or sc2 != 201 or sc3 != 201 or sc4 != 201:
+                self.connection.rollback()
+                return {"msg": f"Errore durante la creazione dei team group"}, 500
+
+            # Commit delle modifiche
+            self.connection.commit()
+
+            # Restituzione dell'ID del team creato
+            return {"msg": f"Team '{team_name}' creato con successo"}, 201
+
+        except Exception as e:
+            # Rollback in caso di errore
+            self.connection.rollback()
+            return {"msg": f"Errore durante la creazione del team: {e}"}, 500
+
+        finally:
+            cursor.close()
+
+
+    # Metodo che permette di creare un nuovo team group associato ad un team esistente
+    def create_team_group(self, team_id: int, team_type: str):
+        """
+        Metodo che permette di creare un nuovo team group associato ad un team esistente
+        """
+        # Reference al cursore
+        cursor = self.connection.cursor()
+
+        try:
+            # Check per controllare che il team esista
+            if not self.team_exists(team_id):
+                return {"msg": f"Il team con id {team_id} NON esiste"}, 404
+
+            # Esecuzione della query per inserire un nuovo team group
+            cursor.execute("INSERT INTO team_group (team_id, team_type) VALUES (%s, %s)", (team_id, team_type))
+            # Commit delle modifiche
+            self.connection.commit()
+
+            # Restituzione dell'ID del team group creato
+            return {"msg": f"Team group '{team_type}' per il team {team_id} creato con successo"}, 201
+
+        except Exception as e:
+            # Rollback in caso di errore
+            self.connection.rollback()
+            return {"msg": f"Errore durante la creazione del team group: {e}"}, 500
+
+        finally:
+            cursor.close()
+
+
+    # Metodo per ottenere tutti i team disponibili
+    def get_all_teams(self):
+        """
+        Metodo per ottenere tutti i team disponibili
+        
+        """
+        # reference al cursore
+        cursor = self.connection.cursor()
+
+        try:
+            # Esecuzione della query
+            cursor.execute("SELECT team_name, team_id FROM teams")
+            # Estrazione dei risultati
+            teams = cursor.fetchall()
+            # Se il risutato è none viene comunque ritornato un array vuoto
+            return teams if isinstance(teams, list) else []
+
+        # L'eccezione ritorna un messaggio di errore
+        except Exception as e:
+            return {"msg": "Errore durante la ricerca dei team nel database"}
+        
+        finally:
+            cursor.close()
+        
+
+    # Metodo per ottenere tutti i team disponibili
+    def get_all_team_group(self, team_id:int):
+        """
+        Metodo per ottenere tutti i team disponibili
+        """
+        # reference al cursore
+        cursor = self.connection.cursor()
+
+        try:
+            # Check per controllare che il team esista
+            if not self.team_exists(team_id):
+                return {"msg": f"Il team con id {team_id} NON esiste"}, 404
+            
+            # Esecuzione della query
+            cursor.execute(f"SELECT team_type, team_id FROM team_group WHERE team_id = {team_id}")
+            # Estrazione dei risultati
+            team_group = cursor.fetchall()
+            # Se il risutato è none viene comunque ritornato un array vuoto
+            return team_group if isinstance(team_group, list) else []
+
+        # L'eccezione ritorna un messaggio di errore
+        except Exception as e:
+            return {"msg": "Errore durante la ricerca dei team group nel database"}
+        
+        finally:
+            cursor.close()
+
+
+    # Metodo per ottenere tutti gli utenti di uno specifico team
+    def get_all_team_members(self, team_id: int):
+        """
+        Metodo per ottenere tutti gli utenti di uno specifico team
+        """
+        # reference al cursore
+        cursor = self.connection.cursor()
+
+        try:
+            # Check per controllare che il team esista
+            if not self.team_exists(team_id):
+                return {"msg": f"Il team con id {team_id} NON esiste"}, 404
+            
+            # Esecuzione della query
+            cursor.execute("SELECT tm.name AS member_name, \
+                            tm.id_personale AS member_id, \
+                            tm.password AS member_password, \
+                            tm.role AS member_role, \
+                            t.team_name AS team_name \
+                            FROM team_member tm JOIN team_group tg ON tm.group_id = tg.group_id \
+                            JOIN teams t ON tg.team_id = t.team_id WHERE t.team_id = %s", (team_id,))
+            
+            # Estrazione dei risultati
+            team_members = cursor.fetchall()
+            # Se il risutato è none viene comunque ritornato un array vuoto
+            return team_members if isinstance(team_members, list) else []
+
+        # L'eccezione ritorna un messaggio di errore
+        except Exception as e:
+            return {"msg": f"Errore durante la ricerca dei team members con team id = {team_id}, Error: {e}"}, 500
+        
+        finally:
+            cursor.close()
+
+
+    # Metodo per vedere se il team scelto esiste
+    def team_exists(self, team_id: int):
+        """
+        Metodo per verificare l'esistenza di un team con id specifico
+        """
+        # Reference al cursore
+        cursor = self.connection.cursor()
+
+        try:
+            # Esecuzione della query
+            cursor.execute("SELECT COUNT(*) FROM teams WHERE team_id = %s", (team_id,))
+            # Estrazione del risultato
+            result = cursor.fetchall()
+
+            # Se il conteggio è maggiore di 0, il team esiste
+            return  len(result) > 0
+
+        # Gestione degli errori con un messaggio
+        except Exception as e:
+            return {"msg": f"Errore durante il controllo dell'esistenza del team: {e}"}
+
+        # Chiusura del cursore (opzionale se si usa context manager)
+        finally:
+            cursor.close()
+
+
+
+    def register_new_user(self, username: str = "some_user", password: str = "some_user_password", role: str = "COMANDANTI", team_id: int = 0):
+        """
+        Metodo per registrare un nuovo utente nel sistema
+        I ROLE vanno mandati al plurale
+        """
+        # Reference al cursore
+        cursor = self.connection.cursor()
+
+        try:
+            # Estraiamo l'id tel team group di appartenenza
+            cursor.execute("SELECT group_id FROM team_group WHERE team_id = %s AND team_type = %s", (team_id, role))
+            group_row = cursor.fetchone()
+
+            # Controllo se la query ha restituito un risultato
+            if group_row is None:
+                return {"error": f"Il team ID {team_id} con il ruolo {role} non esiste."}, 404
+
+            # Estrazione del group_id dalla riga
+            group_id = group_row[0]
+
+            # Inserimento del nuovo utente
+            cursor.execute("INSERT INTO team_member (name, password, role, group_id) VALUES (%s, %s, %s, %s)", 
+                        (username, password, role, group_id))
+
+            # Commit delle modifiche
+            self.connection.commit()
+            return {"msg": "Utente registrato con successo"}, 200
+
+        except Exception as e:
             # Rollback della transazione in caso di errore
             self.connection.rollback()
-            cursor.close()
 
-            # Se il nome è già stato usato viene segnalato 409 (Conflict)
+            # Gestione di errori specifici come duplicati
             if "duplicate key value" in str(e):
-                return {"error": f"Questo nome utente già esiste!"}, 409
-            
-            # Altrimenti viene segnalato un errore del server
+                return {"error": "Questo nome utente già esiste!"}, 409
+
+            # Ritorno di un errore generico per altri casi
             return {"error": f"Qualcosa è andato storto. Errore: {e}"}, 500
 
+        finally:
+            cursor.close()
 
 
 
-    # Metodo per ottenere un utente sulla base di nome e password
+
+    # Metodo per ottenere un utente o un amministratore
     def get_user(self, username: str = "", password: str = ""):
-
-        # Reference al cursore
         cursor = self.connection.cursor()
 
-        # La logica applicata e' la seguente:
-        # viene fatta una queri sulla password matchando l'utente, se fallisce l'utente non esiste e viene segnalato
-        # Se invece viene trovata la password relativa al'utente selezionato, viene fatto un match per vedere se la
-        # password e' quella corretta
-
-        query = "SELECT user_password, role FROM users WHERE username = %s"
-
+        # Controlla prima tra gli amministratori
+        admin_query = "SELECT user_password, role FROM admin WHERE username = %s"
         try:
-            cursor.execute(query, (username,))
+            cursor.execute(admin_query, (username,))
             result = cursor.fetchone()
+            if result:
+                stored_password, role = result
+                if stored_password != password:
+                    cursor.close()
+                    return None, 401
+                return {"username": username, "role": role, "is_admin": True}, 200
 
-            # Se l'array di risposte è vuoto viene segnalato che l'utente non esiste (Not Found)
-            if result is None:
+            # Controlla tra gli utenti normali
+            user_query = "SELECT password, role FROM team_member WHERE name = %s"
+            cursor.execute(user_query, (username,))
+            result = cursor.fetchone()
+            if not result:
                 cursor.close()
                 return None, 404
-            
-            # Altrimenti l'utente è stato trovato e la password viene salvata localmente per effettuare i controlli
-            # Password memorizzata
-            stored_password = result[0]
-            
-            # Se la password è sbagliata viene segnalato (401 Unautorized)
+
+            stored_password, role = result
             if stored_password != password:
                 cursor.close()
                 return None, 401
-            
-            # Se la password è corretta viene estratto anche il ruolo
-            role = result[1]
-            cursor.close()
 
-            # Ritorno di un dizionario contenente i valori trovati
-            return {"username" : username, "role" : role}, 200
+            return {"username": username, "role": role, "is_admin": False}, 200
 
-        # Per qualsiasi problema viene segnalato che il server ha generato un errore non ben definito
         except Exception as e:
             cursor.close()
-            return e, 500
+            return {"error": f"Errore durante l'accesso: {e}"}, 500
 
 
     # questo metodo chiude la connessione al database quando questa non è più necessaria
