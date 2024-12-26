@@ -8,7 +8,8 @@ from flask import Flask, jsonify
 from entity.role import ROLE
 from flask_cors import CORS
 # Import per la libreria dei servizi streaming
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
+from streaming_socket.socket import Socket
 
 # Definizione dell'istanza dell'app
 app = Flask(__name__)
@@ -20,6 +21,7 @@ app.register_blueprint(team_blueprint, url_prefix='/api')
 
 # Creazione dell'istanza dei servizi streaming
 socketio = SocketIO(app, cors_allowed_origins="*")
+socketio.on_namespace(Socket('/socket'))
 
 # Endpoint per ottenere le rotte dell'api
 @app.route('/api/routes', methods=['GET'])

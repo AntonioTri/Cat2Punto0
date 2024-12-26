@@ -43,4 +43,5 @@ class ControllerManageUsersAUTH():
         return {"access_token" : create_access_token(identity = str(response["username"]),\
                                                      additional_claims = {"role": response["role"]},\
                                                      expires_delta = timedelta(hours=2)),
-                "role" : response["role"]}, 200
+                "role" :        response["role"],
+                "personal_id" : response["personal_id"]}, 200

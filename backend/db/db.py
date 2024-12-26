@@ -6,7 +6,6 @@ import time
 
 logger = logging.getLogger(__name__)
 
-#TODO: Definizione della classe di connessione
 class PostgresDB():
 
     def __init__(self) -> None:
@@ -284,33 +283,174 @@ class PostgresDB():
                     cursor.close()
                     return None, 401
                 return {"username": username, "role": role, "is_admin": True}, 200
-
+            
+            #TODO: Fare in modo che gli utenti non siano ambigui sula base di pass ed email
             # Controlla tra gli utenti normali
-            user_query = "SELECT password, role FROM team_member WHERE name = %s"
+            user_query = "SELECT password, role, id_personale FROM team_member WHERE name = %s"
             cursor.execute(user_query, (username,))
             result = cursor.fetchone()
             if not result:
                 cursor.close()
                 return None, 404
 
-            stored_password, role = result
+            stored_password, role, id_personale = result
             if stored_password != password:
                 cursor.close()
                 return None, 401
 
-            return {"username": username, "role": role, "is_admin": False}, 200
+            return {"username": username, "role": role, "personal_id": id_personale, "is_admin": False}, 200
 
         except Exception as e:
             cursor.close()
             return {"error": f"Errore durante l'accesso: {e}"}, 500
 
 
-    # questo metodo chiude la connessione al database quando questa non è più necessaria
+
+    # Questo metodo aggiunge all'utente selezionato, la socked id inviata
+    def update_socket_id(self, user_id: int, socket_id: str):
+        """
+        Metodo per aggiornare il socket_id di un utente esistente
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Eseguire la query
+            cursor.execute("UPDATE team_member SET socket_id = %s WHERE id_personale = %s", (socket_id, user_id))
+            # Confermare le modifiche
+            self.connection.commit()
+            return {"msg": f"Socket ID aggiornato per l'utente con ID {user_id}"}, 200
+
+        except Exception as e:
+            # Rollback in caso di errore
+            self.connection.rollback()
+            return {"error": f"Errore durante l'aggiornamento del socket ID: {e}"}, 500
+
+        finally:
+            cursor.close()
+
+
+    # Metodo per ottenere tutte le socket id dei membri di uno stesso gruppo di un utente
+    def get_socket_ids_by_member_id(self, user_id: int):
+        """
+        Metodo per ottenere tutte le socket_id dei membri che fanno parte dello stesso team_group 
+        partendo dall'id_personale di un membro.
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Esecuzione della query
+            cursor.execute("""
+                SELECT tm.socket_id
+                FROM team_member tm
+                JOIN team_group tg ON tm.group_id = tg.group_id
+                WHERE tm.group_id = (
+                    SELECT group_id 
+                    FROM team_member 
+                    WHERE id_personale = %s
+                )
+                AND tm.socket_id IS NOT NULL
+                AND tm.id_personale != %s;
+            """, (user_id, user_id))
+
+            # Estrazione dei risultati
+            socket_ids = cursor.fetchall()
+
+            # Restituisci un elenco di socket_id
+            return [row[0] for row in socket_ids], 200
+
+        except Exception as e:
+            return {"error": f"Errore durante la ricerca delle socket_id: {e}"}, 500
+
+        finally:
+            cursor.close()
+
+
+    # Metodo che restituisce tutte le socket id del team
+    def get_all_team_socket_ids(self, member_id: int):
+        """
+        Metodo per ottenere tutte le socket_id dei membri del team generale
+        escludendo la propria socket_id partendo dall'id_personale.
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Esecuzione della query
+            cursor.execute("""
+                SELECT tm.socket_id
+                FROM team_member tm
+                JOIN team_group tg ON tm.group_id = tg.group_id
+                JOIN teams t ON tg.team_id = t.team_id
+                WHERE tg.team_id = (
+                    SELECT tg.team_id
+                    FROM team_member tm
+                    JOIN team_group tg ON tm.group_id = tg.group_id
+                    WHERE tm.id_personale = %s
+                )
+                AND tm.socket_id IS NOT NULL
+                AND tm.id_personale != %s;
+            """, (member_id, member_id))
+
+            # Estrazione dei risultati
+            socket_ids = cursor.fetchall()
+
+            # Restituisci un elenco di socket_id
+            return [row[0] for row in socket_ids], 200
+
+        except Exception as e:
+            return {"error": f"Errore durante la ricerca delle socket_id: {e}"}, 500
+
+        finally:
+            cursor.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # Questo metodo chiude la connessione al database quando questa non è più necessaria
     def close(self):
         """ Metodo per chiudere la connessione al database """
         if self.connection:
             self.connection.close()
             logger.info("Connessione al db chiusa.")
    
+
+
+    # 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 database = PostgresDB()
