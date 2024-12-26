@@ -1,5 +1,7 @@
 from flask_socketio.namespace import Namespace
 from flask_socketio import emit
+from flask import request
+from flask_jwt_extended import get_jwt
 from JWT.socket_auth_decorator import socket_require_role
 from entity.role import ROLE
 from controller.controller_personal_functions import ControllerPersonalFunctions
@@ -12,12 +14,17 @@ from controller.controller_personal_functions import ControllerPersonalFunctions
 class Socket(Namespace):
 
     # Questa funzione serve ad aggiungere alla pool di utenze il nuovo socked id
-    def on_connect(self, data):
-        # Estraiamo l'id dalla socket
-        if "id" not in data:
-            return {"mgs": f"id non presente nel corpo della richiesta. Dati inviati: {data}"}
+    def on_connect(self):
+        # Estraiamo l'id dagli args
+        user_id = request.args.get("id")
+        if not user_id:
+            return {"msg" : f"Errore, id non presente negli headers della richiesta. Headers: {request.args}"}        
+        user_id = request.args.get("id")
+
+        # Estrazione del sid
+        socketID = request.sid
         # Richiamo al controller per updatare la socket
-        return ControllerPersonalFunctions.update_personal_socket(data.get("id"))
+        return ControllerPersonalFunctions.update_personal_socket(user_id=user_id, socket_id=socketID)
         
 
     # Questo metodo permette ai comandanti di inviare un messaggio a tutti gli utenti del team
@@ -36,8 +43,8 @@ class Socket(Namespace):
         team_sockets = ControllerPersonalFunctions.get_team_members_socket_ids(user_id=personal_id)
         
         # Se vi sono stati errori vengono ritornati
-        if isinstance(team_sockets, dict):
-            return team_sockets, 500
+        if not team_sockets or not isinstance(team_sockets, list):
+            return {"msg": "Errore nella ricerca delle socket degli utenti del team", "details": team_sockets}, 500
         
         # Creazione del messaggio
         message_to_send = {
@@ -45,7 +52,8 @@ class Socket(Namespace):
             "commander_id"  : personal_id
         }
 
-        # Emit del messaggio
-        emit('commander_message_sent', message_to_send, room=team_sockets)
+        # Invio del messaggio a ciascun socket
+        for sid in team_sockets:
+            emit('commander_message_sent', message_to_send, to=sid)
 
 

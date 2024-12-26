@@ -306,23 +306,20 @@ class PostgresDB():
 
 
 
-    # Questo metodo aggiunge all'utente selezionato, la socked id inviata
+    # Questo metodo aggiorna la socket relativa a un utente
     def update_socket_id(self, user_id: int, socket_id: str):
-        """
-        Metodo per aggiornare il socket_id di un utente esistente
-        """
         cursor = self.connection.cursor()
 
         try:
-            # Eseguire la query
+            # Aggiorna il socket_id
             cursor.execute("UPDATE team_member SET socket_id = %s WHERE id_personale = %s", (socket_id, user_id))
-            # Confermare le modifiche
             self.connection.commit()
             return {"msg": f"Socket ID aggiornato per l'utente con ID {user_id}"}, 200
 
         except Exception as e:
-            # Rollback in caso di errore
+            # Gestione degli errori
             self.connection.rollback()
+            print(f"Errore durante l'aggiornamento del socket ID per l'utente {user_id}: {e}")
             return {"error": f"Errore durante l'aggiornamento del socket ID: {e}"}, 500
 
         finally:
@@ -393,14 +390,19 @@ class PostgresDB():
             # Estrazione dei risultati
             socket_ids = cursor.fetchall()
 
+            if not socket_ids:
+                return [], 200  # Nessun risultato, restituisci una lista vuota
+
             # Restituisci un elenco di socket_id
             return [row[0] for row in socket_ids], 200
 
         except Exception as e:
+            print(f"Errore durante la ricerca delle socket_id per il membro {member_id}: {e}")
             return {"error": f"Errore durante la ricerca delle socket_id: {e}"}, 500
 
         finally:
             cursor.close()
+
 
 
 
