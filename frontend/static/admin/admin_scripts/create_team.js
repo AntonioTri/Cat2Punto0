@@ -63,12 +63,13 @@ export class CreateTeamManager{
             if (response.ok) {
                 // La risposta è stata corretta
                 const data = await response.json();  // Converte la risposta in JSON
-                // Puoi eseguire altre azioni qui, come aggiornare l'interfaccia utente o navigare a una nuova pagina
-                // TODO: aggiungere la card di animazione del check mark verde ed il messaggio in 
-                // sovrimpressione
+                // TODO: aggiungere il messaggio in sovrimpressione
                 console.log(data);
                 // Compare il check mark per il successo
                 this.checkMark.success();
+                // Inviamo il segnale per indicare che il team è stato registrato,
+                // in modo da poter aggiornare la pagina della creazione degli utenti
+                this.sendCustomEvent();
 
             } else {
                 // La risposta non è stata OK
@@ -208,6 +209,19 @@ export class CreateTeamManager{
         element.style.fontFamily = `'Courier New', Courier, monospace`;
 
     }
+
+    // Quando invocata questa funzione lancia un evento globale per segnalare
+    // che il team è stato creato
+    sendCustomEvent(){
+
+        // Creazione del segnale
+        const teamRegistered = new CustomEvent('newTeamRegistered', {});
+        // Lancio del segnale
+        document.dispatchEvent(teamRegistered);
+        // Log
+        console.log('Segnale di creazione team inviato con successo');
+
+    };
 
     // Questo metodo quando invocato inserisce nella classe gli url e le rotte per le chiamate API
     setURLS(){

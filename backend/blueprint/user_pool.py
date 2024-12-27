@@ -31,7 +31,7 @@ def register_new_user_to_team():
         return {"msg": "La richiesta deve contenere un JSON valido."}, 400
         
     # Verifica che tutti i campi necessari siano presenti
-    required_fields = ["username", "password", "role", "team_id"]
+    required_fields = ["username", "role", "team_id"]
     for field in required_fields:
         if field not in data:
             return {"msg": f"Il campo {field} è obbligatorio."}, 400
@@ -39,7 +39,9 @@ def register_new_user_to_team():
     # Chiamata al controller per registrare l'utente
     return ControllerTeamPool.register_new_user_to_team(
         username=data["username"], 
-        password=data["password"], 
+        # Importante notare come il campo password sia generato casualmente
+        # TODO: inserire il password generator
+        password="abcd1234", 
         role=data["role"], 
         team_id=data["team_id"]
     )

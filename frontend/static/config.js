@@ -1,4 +1,4 @@
-const ENVIROMENT_VARIABLE = "PRODUCTION"
+const ENVIROMENT_VARIABLE = "PRODUCTION";
 
 // let dovrebbe inizializzare la variabile in modo correto
 let API_URL = "";

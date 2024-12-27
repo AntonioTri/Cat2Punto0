@@ -23,20 +23,21 @@ class ControllerTeamPool:
     def get_all_teams():
 
         # Otteniamo i team disponibili dal database
-        avaiable_teams = database.get_all_teams()
+        avaiable_teams, status_code = database.get_all_teams()
 
         formatted_teams = []
         # Per ogni team definiamo un suo dizionario da rispedire al front end
-        for team in avaiable_teams:
-            formatted_teams.append({
+        if status_code == 200:
+            for team in avaiable_teams:
+                formatted_teams.append({
 
-                "team_name": team[0],
-                "team_id": team[1]
+                    "team_name": team[0],
+                    "team_id": team[1]
 
-            }) 
+                }) 
 
         # Ritorniamo i team formattati
-        return formatted_teams, 200
+        return formatted_teams, status_code
     
     # Questo metodo restituisce la lista di team group disponibili
     @staticmethod

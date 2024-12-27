@@ -127,11 +127,11 @@ class PostgresDB():
             # Estrazione dei risultati
             teams = cursor.fetchall()
             # Se il risutato è none viene comunque ritornato un array vuoto
-            return teams if isinstance(teams, list) else []
+            return teams if isinstance(teams, list) else [], 200
 
         # L'eccezione ritorna un messaggio di errore
         except Exception as e:
-            return {"msg": "Errore durante la ricerca dei team nel database"}
+            return {"msg": "Errore durante la ricerca dei team nel database"}, 500
         
         finally:
             cursor.close()
