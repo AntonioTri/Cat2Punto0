@@ -1,14 +1,17 @@
 import {ActionButtonManager} from '../burger_menu/action_button_manager.js';
+import { CheckMark } from '../../static/check_mark/check_mark.js';
 
 // Questa classe quando inizializzata gestisce e crea il burger menu con tutte le sue funzioni
 // Incapsula anche l'action button manager che
 export class BurgerMenuManager{
 
     // Otteniamo il contesto in cui fare le operazioni
-    constructor(container = 'body'){
+    constructor(container = 'body', checkMark = new CheckMark()){
 
         // Reference al container di lavoro
         this.container = document.querySelector(container);
+        // Reference alla check box
+        this.checkMark = checkMark;
         // Richiamo dell'inizializzatore
         this.init();
         
@@ -80,6 +83,7 @@ export class BurgerMenuManager{
             // e il role tag
             this.openCloseBurgerMenu();
             this.slideRoleTag();
+            
 
             // Switch della variabile di stato opened
             this.opened = !this.opened;
@@ -132,8 +136,8 @@ export class BurgerMenuManager{
             this.burgerMenuButton.classList.add('clicked');
             //Si richiama il metodo del card manager per far muovere l'attuale card attiva
             this.actionButtonManager.getCardManager().moveCardToLeft(menuRect.width);
-
-        // Altrimenti verso l'esterno
+            
+            // Altrimenti verso l'esterno
         } else {
             this.burgerMenu.style.transition = 'transform 1s ease-in';
             this.burgerMenu.style.transform = 'translateX(-120px)';
@@ -143,6 +147,7 @@ export class BurgerMenuManager{
             this.burgerMenuButton.classList.remove('clicked');
             //Si richiama il metodo del card manager per far muovere l'attuale card attiva
             this.actionButtonManager.getCardManager().moveCardToRight();
+
         }
 
     }

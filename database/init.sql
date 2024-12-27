@@ -7,12 +7,12 @@ CREATE TABLE IF NOT EXISTS admin (
 );
 
 INSERT INTO admin (username, user_password, role) VALUES ('antoniotrid', 'Napibrfan@2001', 'ADMIN');
-
+INSERT INTO admin (username, user_password, role) VALUES ('francesca', 'abracadabra', 'ADMIN');
 
 -- Creazione della tabella Team
 CREATE TABLE teams (
     team_id SERIAL PRIMARY KEY, -- ID incrementale automatico
-    team_name VARCHAR(255) NOT NULL -- Nome del team
+    team_name VARCHAR(255) NOT NULL UNIQUE -- Nome del team
 );
 
 -- Creazione della tabella team_group

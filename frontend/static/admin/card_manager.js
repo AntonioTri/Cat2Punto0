@@ -88,7 +88,18 @@ export class CardManager {
         card.id = id;
         card.classList.add(className);
         card.style.top = `${top}px`;
-        card.innerText = content;
+        card.style.left = `${left}px`;
+        card.firstChild.innerText = content;
+        this.container.appendChild(card);
+    }
+
+    // Metodo per aggiungere una cads con una classe, id e posizione
+    addCardWithClassIDAndPositionNoChild(className, id, top, left) {
+        const card = this._noChildCreateCard();
+        card.id = id;
+        card.classList.add(className);
+        card.style.top = `${top}px`;
+        card.style.left = `${left}px`;
         this.container.appendChild(card);
     }
 
@@ -107,6 +118,38 @@ export class CardManager {
         card.style.fontFamily = `'Courier New', Courier, monospace`;
         card.style.backgroundColor = 'rgb(225, 228, 217)';
         card.style.boxShadow = '0px 0px 25px 1px rgba(0, 0, 0, 0.5)';
+
+        const textLable = document.createElement('div');
+        textLable.position = 'relative';
+        textLable.style.margin = '1%';
+        card.appendChild(textLable);
+        
+        const innerContent = document.createElement('div');
+        innerContent.position = 'relative';
+        innerContent.style.margin = '1%';
+        innerContent.id = 'inner_content';
+        card.appendChild(innerContent);
+
+        return card;
+    }
+
+
+    // Metodo privato per creare una card con il design standard
+    _noChildCreateCard() {
+        const card = document.createElement('div');
+        card.classList.add('inactive');
+        card.style.margin = '2%'; 
+        card.style.width = '90%';
+        card.style.color = 'black';
+        card.style.textAlign = 'center';
+        card.style.position = 'absolute';
+        card.style.borderRadius = '7px';
+        card.style.justifyContent = 'center';
+        card.style.padding = '6px 10px';
+        card.style.fontFamily = `'Courier New', Courier, monospace`;
+        card.style.backgroundColor = 'rgb(225, 228, 217)';
+        card.style.boxShadow = '0px 0px 25px 1px rgba(0, 0, 0, 0.5)';
+
         return card;
     }
 }

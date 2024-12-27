@@ -94,7 +94,8 @@
             context.arc(ball.x, ball.y, 6, 0, Math.PI * 2, false);
             context.fill();
             context.stroke();
-            
+
+
             // Sfera nera sopra
             context.globalAlpha = alpha;
             context.beginPath();
