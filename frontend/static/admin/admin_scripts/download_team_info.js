@@ -13,11 +13,10 @@ export class DownloadCardManager extends AbstractCardManager{
 
     init(){
 
+        // Variabile che conserva i nomi dei team
+        this.teamsName = [{team : 'None'}];
         super.addSelector('team_selector', []);
-        super.addInputTag('username');
-        super.addResponseMessage();
         super.addSubmitButton();
-        this.apiMessage.innerHTML = 'MAMMT';
 
     };
 

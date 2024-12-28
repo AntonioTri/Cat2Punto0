@@ -14,6 +14,7 @@ export class CheckMark{
         this.init();
 
         this.cardManager = null;
+        this.canBeShown = true;
 
     }
 
@@ -38,6 +39,11 @@ export class CheckMark{
 
     success() {
 
+        // Se il bottone non si puo mostrare la funzione ritorna
+        if (!this.canBeShown) return;
+        // Altrimenti prosegue e come prima cosa viene impedita una nuova animazione
+        this.canBeShown = false;
+
         this.canvas.style.backgroundColor = 'rgb(109, 196, 23)';
         this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -60,12 +66,19 @@ export class CheckMark{
         // Puliamo il canvas dopo che è stato nascosto
         setTimeout(() => {
             this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
+            // viene reimpostata la possibilità di comparire
+            this.canBeShown = true;
         }, this.timeToElapse + this.canvasAnimationTime + this.popUoutTime * 2);
     }
     
 
 
     error(){
+
+        // Se il bottone non si puo mostrare la funzione ritorna
+        if (!this.canBeShown) return;
+        // Altrimenti prosegue e come prima cosa viene impedita una nuova animazione
+        this.canBeShown = false;
 
         this.canvas.style.backgroundColor = 'rgb(219, 35, 35)';
         this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -89,6 +102,8 @@ export class CheckMark{
         // Puliamo il canvas dopo che è stato nascosto
         setTimeout(() => {
             this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
+            // viene reimpostata la possibilità di comparire
+            this.canBeShown = true;
         }, this.timeToElapse + this.canvasAnimationTime + this.popUoutTime * 2);
     }
 
