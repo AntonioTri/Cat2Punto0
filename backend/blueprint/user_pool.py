@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, send_file
 from controller.controller_team_pool import ControllerTeamPool
 from JWT.auth_decorator import require_role
 from entity.role import ROLE
@@ -94,3 +94,25 @@ def get_all_team_members():
     # Ritorna i team group formattati con il codice di stato
     return {"team_members": team_members}, status_code
 
+
+
+
+# Ottieni tutti i team
+@team_blueprint.route("/get_team_pdf", methods=['GET'])
+@require_role(ROLE.ADMIN.value)
+def get_team_pdf():
+    #Estrazione del team_id dal json e controlli
+    data = request.get_json()
+    if "team_id" not in data:
+        return {"msg": f"Il campo 'team_id' è obbligatorio. Dati inviati {data}"}, 404
+
+    # Chiamata al controller per ottenere tutti i team
+    pdf_content, status_code = ControllerTeamPool.generate_team_pdf(team_id=data["team_id"])
+
+    # Ritorno del pdf contenente le info del team
+    return send_file(
+        pdf_content,
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'team_info.pdf'
+    ), status_code

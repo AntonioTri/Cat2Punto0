@@ -2,6 +2,7 @@ from db.db import database
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
+
 class ControllerManageUsersAUTH():
 
     # La funzione register user registra un nuvo utente sulla base dle dizionario
