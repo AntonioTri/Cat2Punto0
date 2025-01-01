@@ -52,6 +52,7 @@ export class AddTeamMemberManager extends AbstractCardManager{
         if (inputData === false){
             console.log('Qualche campo negli input field sta mancando! Inserisci bene i dati e riprova.');
             this.checkMark.error();
+            this.showResponseMessage('Inserire tutti i dati!');
             this.canSendRequest = true;
             return;
         }
@@ -62,7 +63,7 @@ export class AddTeamMemberManager extends AbstractCardManager{
         try {
 
             // Inviamo la richiesta con 'fetch'
-            const response = await fetch(this.dockerPathAddMember, {  // Usa 'await' per aspettare la risposta
+            const response = await fetch(this.URL_ADD_TEAM_MEMBER, {  // Usa 'await' per aspettare la risposta
                 method: "POST",  // Cambia il metodo in POST, poiché stai inviando dati
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem('access_token')}`,  // Aggiungi il token di autorizzazione
@@ -79,10 +80,31 @@ export class AddTeamMemberManager extends AbstractCardManager{
                 console.log(data);
                 // Compare il check mark per il successo
                 this.checkMark.success();
+                // Si mostra il messaggio di successo
+                this.showResponseMessage('Membro aggiunto con successo!');
 
             } else {
                 // La risposta non è stata OK
                 console.log("Errore nella registrazione del membro del team:", response);
+                // In base al caso viene mostrato un messaggio specifico
+                switch (response.status) {
+
+                    case 409:
+                        super.showResponseMessage('Nome non disponibile.');
+                        break;
+
+                    case 404:
+                        super.showResponseMessage('Team non trovato.');
+                        break;
+                        
+                    case 500:
+                        super.showResponseMessage('Errore del server.');
+                        break;
+                        
+                    default:
+                        super.showResponseMessage('Errore del server.');
+                        break;
+                }
                 // Compare il check mark per l'errore
                 this.checkMark.error();
             }
@@ -110,7 +132,7 @@ export class AddTeamMemberManager extends AbstractCardManager{
         try {
 
             // Inviamo la richiesta con 'fetch'
-            const response = await fetch(this.dockerPathTeams, {  // Usa 'await' per aspettare la risposta
+            const response = await fetch(this.URL_GET_ALL_TEAMS, {  // Usa 'await' per aspettare la risposta
                 method: "GET",  // Cambia il metodo in POST, poiché stai inviando dati
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem('access_token')}`,  // Aggiungi il token di autorizzazione
@@ -128,6 +150,7 @@ export class AddTeamMemberManager extends AbstractCardManager{
                 this.teamsName = data.teams;
                 // Update della lista di team
                 this.updateTeamSelector();
+                this.sendAvaiableTeamsList();
 
             } else {
                 // La risposta non è stata OK
@@ -186,9 +209,25 @@ export class AddTeamMemberManager extends AbstractCardManager{
             // e poi aggiorna il selettore
             console.log('Segnale di aggiunta team ricevuto. Update della lista in corso...');
             this.updateTeamList();
+            
         });
 
     }
+    
+    // Quando invocata questa funzione lancia un evento globale per inviare
+    // I team disponibili
+    sendAvaiableTeamsList(){
+
+        // Creazione del segnale
+        const teamList = new CustomEvent('teamList', {
+            detail: this.teamsName
+        });
+        // Lancio del segnale
+        document.dispatchEvent(teamList);
+        // Log
+        console.log('Segnale globale di aggiornamento team inviato.');
+
+    };
 
 
     // Metodo che setta gli URL

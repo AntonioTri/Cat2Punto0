@@ -75,7 +75,7 @@ class PostgresDB():
             
             # Se il nome del team già esisteva viene segnalato
             if "duplicate key value" in str(e):
-                return {"error": "Questo nome utente già esiste!"}, 409
+                return {"error": "Questo nome TEAM già esiste!"}, 409
             return {"msg": f"Errore durante la creazione del team: {e}"}, 500
 
         finally:

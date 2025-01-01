@@ -92,73 +92,58 @@ class ControllerTeamPool:
 
 
     @staticmethod
-    def generate_team_pdf(team_id:int = 0):
+    def generate_team_pdf(team_id: int = 0):
 
         # Estraiamo prima tutti i membri del team
         users, status_code = ControllerTeamPool.get_all_team_members(team_id=team_id)
 
-        # Se lo status code non è corretto allora viene segnalato
-        if status_code != 200 or users == []:
-            return "Errore durante la ricerca degli utenti.", 200
-        
-        # in caso contrario estraiamo i dati che ci interessano
-        team_name = users[0]["team_name"]
+        # Se lo status code non è corretto o non ci sono utenti
+        if status_code != 200 or not users:
+            return b"Errore durante la ricerca degli utenti.", 404
+
+        # In caso contrario estraiamo i dati che ci interessano
+        team_name = users[0].get("team_name", "Unknown Team")
 
         # Creazione di un buffer in memoria
         pdf_buffer = BytesIO()
+        c = canvas.Canvas(pdf_buffer)
         
         # Creazione del PDF
-        c = canvas.Canvas(pdf_buffer)
-        line_height = 600
-
-        # Setta il margine minimo sulla pagina
+        line_height = 750
         PAGE_MARGIN = 50
         LINE_HEIGHT_STEP = 13
         SEPARATOR_HEIGHT = 15
-        INITIAL_LINE_HEIGHT = 750
 
         c.setFont("Courier-Bold", 12)
-        c.drawString(50, INITIAL_LINE_HEIGHT, f"Team group: {team_name}")
-        line_height = INITIAL_LINE_HEIGHT - 20
+        c.drawString(50, line_height, f"Team group: {team_name}")
+        line_height -= 20
         c.drawString(50, line_height, "-" * 60)
         line_height -= SEPARATOR_HEIGHT
 
         c.setFont("Courier", 10)
-
-        # Itera attraverso la lista degli utenti
         for user in users:
-            username = user["name"]
-            password = user["password"]
-            role = user["role"]
-            
-            # Controlla se c'è spazio sufficiente per scrivere, altrimenti crea una nuova pagina
+            username = user.get("name", "N/A")
+            password = user.get("password", "N/A")
+            role = user.get("role", "N/A")
+
             if line_height <= PAGE_MARGIN:
-                # Crea una nuova pagina
-                c.showPage() 
-                c.setFont("Helvetica-Bold", 12)
-                c.drawString(50, INITIAL_LINE_HEIGHT, f"Team group: {team_name}")
-                line_height = INITIAL_LINE_HEIGHT - 20
+                c.showPage()
+                c.setFont("Courier-Bold", 12)
+                c.drawString(50, 750, f"Team group: {team_name}")
+                line_height = 730
                 c.drawString(50, line_height, "-" * 60)
                 line_height -= SEPARATOR_HEIGHT
-                c.setFont("Helvetica", 10)
-            
-            # Scrive i dettagli dell'utente
+                c.setFont("Courier", 10)
+
             c.drawString(50, line_height, f"USERNAME =>   {username}")
             line_height -= LINE_HEIGHT_STEP
             c.drawString(50, line_height, f"PASSWORD =>   {password}")
             line_height -= LINE_HEIGHT_STEP
             c.drawString(50, line_height, f"ROLE     =>   {role}")
             line_height -= SEPARATOR_HEIGHT
-            
-            # Aggiunge una linea separatrice
             c.drawString(50, line_height, "-" * 60)
             line_height -= LINE_HEIGHT_STEP
 
-        # Salva e chiude il PDF
         c.save()
-
-        # Riavvolgi il buffer
         pdf_buffer.seek(0)
-
-        # Ritorniamo il pdf buffer alla fine di tutto
-        return pdf_buffer, 200
+        return pdf_buffer.read(), 200

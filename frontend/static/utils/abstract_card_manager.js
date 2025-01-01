@@ -109,17 +109,47 @@ export class AbstractCardManager{
 
     // Questo metodo quando invocato crea un div che conterrà
     // generalmente le risposte del server
-    addResponseMessage(){
-        // creazione di un div
+    addResponseMessage() {
+        // Creazione del div
         let apiMessage = document.createElement('div');
+        
         // Applicazione degli stili
-        this.addGeneralStyleProperties(apiMessage, `${this.cardName}_api_message`)
-        // Aggiunta alla card
+        this.addGeneralStyleProperties(apiMessage, `${this.cardName}_api_message`);
+        
+        
+        // Stili iniziali per l'animazione (alpha = 0)
+        apiMessage.style.opacity = '0';
+        apiMessage.style.transition = 'opacity 0.5s ease-in-out';
+        apiMessage.style.position = 'relative';
+        apiMessage.style.left = '50%';
+        apiMessage.style.transform = 'translateX(-50%)';
+        
+        // Aggiunta al container
         this.container.appendChild(apiMessage);
+        
         // Reference nella classe
         this.apiMessage = apiMessage;
-
+    
     }
+
+
+    // Quando invocato questo metodo mostra mostra un messaggio in sovrimpressione
+    showResponseMessage(messageText = ""){
+        // Imposta il testo personalizzato nel div
+        this.apiMessage.innerText = messageText;
+
+        // Funzione per animare l'opacità
+        setTimeout(() => {
+            this.apiMessage.style.opacity = '1'; // Gradualmente appare
+            
+            // Dopo 2 secondi, l'opacità torna a 0 e l'elemento viene rimosso
+            setTimeout(() => {
+                this.apiMessage.style.opacity = '0';
+            }, 3000);
+
+        }, 10); // Ritardo per consentire al browser di applicare lo stile iniziale
+    }
+    
 
     // Metodo che serve a uniformare un array di scelte per i selector
     formatChoiches(array = [], format = true){

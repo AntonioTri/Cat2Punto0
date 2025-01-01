@@ -1,6 +1,7 @@
 from flask import Blueprint, request, send_file
 from controller.controller_team_pool import ControllerTeamPool
 from JWT.auth_decorator import require_role
+from io import BytesIO
 from entity.role import ROLE
 
 # Dichiarazione del blueprint sul quale vivono le rotte dei login e registrazione degli utenti
@@ -98,21 +99,25 @@ def get_all_team_members():
 
 
 # Ottieni tutti i team
-@team_blueprint.route("/get_team_pdf", methods=['GET'])
+@team_blueprint.route("/get_team_pdf", methods=['PUT'])
 @require_role(ROLE.ADMIN.value)
 def get_team_pdf():
-    #Estrazione del team_id dal json e controlli
+    # Estrazione del team_id dal JSON e controlli
     data = request.get_json()
     if "team_id" not in data:
-        return {"msg": f"Il campo 'team_id' è obbligatorio. Dati inviati {data}"}, 404
+        return {"msg": f"Il campo 'team_id' è obbligatorio. Dati inviati: {data}"}, 400
 
-    # Chiamata al controller per ottenere tutti i team
+    # Chiamata al controller per generare il PDF
     pdf_content, status_code = ControllerTeamPool.generate_team_pdf(team_id=data["team_id"])
 
-    # Ritorno del pdf contenente le info del team
+    if status_code != 200:
+        return {"msg": pdf_content.decode('utf-8')}, status_code  # Restituisci il messaggio come stringa
+
+    # Usa BytesIO per passare i dati binari a send_file
     return send_file(
-        pdf_content,
+        BytesIO(pdf_content),
         mimetype='application/pdf',
         as_attachment=True,
-        download_name=f'team_info.pdf'
+        download_name='team_info.pdf'
     ), status_code
+

@@ -16,6 +16,7 @@ export class CreateTeamManager extends AbstractCardManager{
         super.setCardProperty();
         super.addInputTag(`${this.cardName}_input_form`);
         super.addSubmitButton();
+        super.addResponseMessage();
 
     }
 
@@ -43,7 +44,7 @@ export class CreateTeamManager extends AbstractCardManager{
         try {
 
             // Inviamo la richiesta con 'fetch'
-            const response = await fetch(this.dockerPathAddTeam, {  // Usa 'await' per aspettare la risposta
+            const response = await fetch(this.URL_REGISTER_TEAM, {  // Usa 'await' per aspettare la risposta
                 method: "POST",  // Cambia il metodo in POST, poiché stai inviando dati
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem('access_token')}`,  // Aggiungi il token di autorizzazione
@@ -63,10 +64,27 @@ export class CreateTeamManager extends AbstractCardManager{
                 // Inviamo il segnale per indicare che il team è stato registrato,
                 // in modo da poter aggiornare la pagina della creazione degli utenti
                 this.sendCustomEvent();
+                // Viene mostrato il messaggio in sovrimpressione
+                super.showResponseMessage('Team creato con successo!');
 
             } else {
                 // La risposta non è stata OK
                 console.log("Errore nella creazione del team:", response);
+                // In base al caso viene mostrato un messaggio specifico
+                switch (response.status) {
+
+                    case 409:
+                        super.showResponseMessage('Nome non disponibile.');
+                        break;
+
+                    case 500:
+                        super.showResponseMessage('Errore del server.');
+                        break;
+                    
+                    default:
+                        super.showResponseMessage('Errore del server.');
+                        break;
+                }
                 // Compare il check mark per l'errore
                 this.checkMark.error();
             }
@@ -105,11 +123,8 @@ export class CreateTeamManager extends AbstractCardManager{
 
         // URL di registrazione team
         this.URL_REGISTER_TEAM = `${API_URL}/add_team`;
-        // URL di registrazione utente
-        this.URL_ADD_TEAM_MEMBER = `${API_URL}/register_user`;
         // Docker paths
         this.dockerPathAddTeam = 'http://localhost:5000/api/add_team';
-        this.dockerPathRegisterUser = 'http://localhost:5000/api/add_team';
 
     }
 
