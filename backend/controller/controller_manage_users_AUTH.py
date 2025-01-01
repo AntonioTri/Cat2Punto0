@@ -2,6 +2,7 @@ from db.db import database
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
+
 class ControllerManageUsersAUTH():
 
     # La funzione register user registra un nuvo utente sulla base dle dizionario
@@ -35,7 +36,12 @@ class ControllerManageUsersAUTH():
             if status_code == 401:
                 return {"msg": "La password non è corretta"}, 401
         if isinstance(response, Exception):
-            return {"error": f"Un errore è avvenuto durante l'esecuzione della query: {response}"}, 500    
+            return {"error": f"Un errore è avvenuto durante l'esecuzione della query: {response}"}, 500
+        
+        # Check per controllare se si è un admin
+        personal_id = 0
+        if not response["is_admin"]:
+            personal_id = response["personal_id"]
         
         # Se tutti i controlli sono passati, l'utente esiste e pertanto viene generato un token di accesso
         # Il token dura solo due ore poi scade e bisogna rifare il login
@@ -44,4 +50,4 @@ class ControllerManageUsersAUTH():
                                                      additional_claims = {"role": response["role"]},\
                                                      expires_delta = timedelta(hours=2)),
                 "role" :        response["role"],
-                "personal_id" : response["personal_id"]}, 200
+                "personal_id" : personal_id}, 200

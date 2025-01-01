@@ -1,0 +1,29 @@
+#check_mark_container{
+
+    position: relative;
+    background-color: rgb(109, 196, 23);
+    height: inherit;
+    border-radius: 50%;
+    margin-left: 0;
+    width: 100px;
+    height: 100px;
+    
+
+}
+
+
+#check_mark_canvas{
+
+
+    background-color: rgb(109, 196, 23);
+    position: relative;
+    width: inherit;
+    height: inherit;
+    border-radius: 50%;
+
+
+}
+
+#check_box{
+    transition: all 1s ease-in-out;
+}

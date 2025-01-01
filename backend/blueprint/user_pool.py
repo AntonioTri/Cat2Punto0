@@ -1,6 +1,7 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, send_file
 from controller.controller_team_pool import ControllerTeamPool
 from JWT.auth_decorator import require_role
+from io import BytesIO
 from entity.role import ROLE
 
 # Dichiarazione del blueprint sul quale vivono le rotte dei login e registrazione degli utenti
@@ -31,7 +32,7 @@ def register_new_user_to_team():
         return {"msg": "La richiesta deve contenere un JSON valido."}, 400
         
     # Verifica che tutti i campi necessari siano presenti
-    required_fields = ["username", "password", "role", "team_id"]
+    required_fields = ["username", "role", "team_id"]
     for field in required_fields:
         if field not in data:
             return {"msg": f"Il campo {field} è obbligatorio."}, 400
@@ -39,7 +40,9 @@ def register_new_user_to_team():
     # Chiamata al controller per registrare l'utente
     return ControllerTeamPool.register_new_user_to_team(
         username=data["username"], 
-        password=data["password"], 
+        # Importante notare come il campo password sia generato casualmente
+        # TODO: inserire il password generator
+        password="abcd1234", 
         role=data["role"], 
         team_id=data["team_id"]
     )
@@ -91,4 +94,30 @@ def get_all_team_members():
 
     # Ritorna i team group formattati con il codice di stato
     return {"team_members": team_members}, status_code
+
+
+
+
+# Ottieni tutti i team
+@team_blueprint.route("/get_team_pdf", methods=['PUT'])
+@require_role(ROLE.ADMIN.value)
+def get_team_pdf():
+    # Estrazione del team_id dal JSON e controlli
+    data = request.get_json()
+    if "team_id" not in data:
+        return {"msg": f"Il campo 'team_id' è obbligatorio. Dati inviati: {data}"}, 400
+
+    # Chiamata al controller per generare il PDF
+    pdf_content, status_code = ControllerTeamPool.generate_team_pdf(team_id=data["team_id"])
+
+    if status_code != 200:
+        return {"msg": pdf_content.decode('utf-8')}, status_code  # Restituisci il messaggio come stringa
+
+    # Usa BytesIO per passare i dati binari a send_file
+    return send_file(
+        BytesIO(pdf_content),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name='team_info.pdf'
+    ), status_code
 
