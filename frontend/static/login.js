@@ -30,16 +30,14 @@ loginForm.addEventListener("submit", async function(event) {
 
         // In caso di risposta positiva si memorizza nel local storage l'access token
         if (response.ok) {
-            
-            let access_token = data.access_token;
+
             let role = formatRole(data.role);
-            console.log(access_token);
-            console.log(role);
             
             // Conserviamo nel local storage l'access token ed il ruolo
             // Il ruolo viene conservato come formattato e non formattato
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('team_id', data.team_id);
             localStorage.setItem('unformatted_role', data.role);
-            localStorage.setItem('access_token', access_token);
             localStorage.setItem('role', role);
             
             // Reindirizzamento in caso di successo

@@ -38,6 +38,14 @@ class PostgresDB():
                 try_number += 1
                 time.sleep(1)
 
+        # Variabile di support per mappare i ruoli alle tabelle del db
+        self.role_progress_table = {
+                                    "COMANDANTE": "commander_progress",
+                                    "DECRITTATORE": "decritter_progress",
+                                    "DETECTIVE": "detective_progress",
+                                    "ESPLORATORE": "explorer_progress"
+                                    }
+
 
     # Metodo che quando invocato crea un team con un nome
     def create_team(self, team_name: str):
@@ -57,9 +65,11 @@ class PostgresDB():
             _, sc2 = self.create_team_group(team_id=team_id, team_type="DECRITTATORE")
             _, sc3 = self.create_team_group(team_id=team_id, team_type="DETECTIVE")
             _, sc4 = self.create_team_group(team_id=team_id, team_type="ESPLORATORE")
+            # Richiamo alla funzione per aggiungere i progressi al team
+            _, sc5 = self.add_progress_for_team(team_id=team_id)
 
             # Se uno dei create team group fallisce viene segnalato
-            if sc1 != 201 or sc2 != 201 or sc3 != 201 or sc4 != 201:
+            if sc1 != 201 or sc2 != 201 or sc3 != 201 or sc4 != 201 or sc5 != 201:
                 self.connection.rollback()
                 return {"msg": f"Errore durante la creazione dei team group"}, 500
 
@@ -248,8 +258,8 @@ class PostgresDB():
             group_id = group_row[0]
 
             # Inserimento del nuovo utente
-            cursor.execute("INSERT INTO team_member (name, password, role, group_id) VALUES (%s, %s, %s, %s)", 
-                        (username, password, role, group_id))
+            cursor.execute("INSERT INTO team_member (name, password, role, group_id, team_id) VALUES (%s, %s, %s, %s, %s)", 
+                        (username, password, role, group_id, team_id))
 
             # Commit delle modifiche
             self.connection.commit()
@@ -290,19 +300,19 @@ class PostgresDB():
             
             #TODO: Fare in modo che gli utenti non siano ambigui sula base di pass ed email
             # Controlla tra gli utenti normali
-            user_query = "SELECT password, role, id_personale FROM team_member WHERE name = %s"
+            user_query = "SELECT password, role, id_personale, team_id FROM team_member WHERE name = %s"
             cursor.execute(user_query, (username,))
             result = cursor.fetchone()
             if not result:
                 cursor.close()
                 return None, 404
 
-            stored_password, role, id_personale = result
+            stored_password, role, id_personale, team_id = result
             if stored_password != password:
                 cursor.close()
                 return None, 401
 
-            return {"username": username, "role": role, "personal_id": id_personale, "is_admin": False}, 200
+            return {"username": username, "role": role, "personal_id": id_personale, "team_id": team_id, "is_admin": False}, 200
 
         except Exception as e:
             cursor.close()
@@ -409,13 +419,154 @@ class PostgresDB():
 
 
 
+    def get_all_signals_by_team_id(self, team_id: int):
+        """
+        Metodo per ottenere tutti i signals memorizzati nella tabella signals
+        associati a un determinato team_id.
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Esecuzione della query
+            cursor.execute("""
+                SELECT s.signal
+                FROM signals s
+                JOIN progress p ON s.progress_id = p.id
+                WHERE p.team_id = %s;
+            """, (team_id,))
+
+            # Estrazione dei risultati
+            signals = cursor.fetchall()
+
+            if not signals:
+                return [], 200  # Nessun risultato, restituisci una lista vuota
+
+            # Restituisci un elenco di signals
+            return [row[0] for row in signals], 200
+
+        except Exception as e:
+            print(f"Errore durante la ricerca dei signals per il team {team_id}: {e}")
+            return {"error": f"Errore durante la ricerca dei signals: {e}"}, 500
+
+        finally:
+            cursor.close()
+
+
+    def get_role_progress_by_team_id(self, role: str, team_id: int):
+        """
+        Metodo per ottenere tutti i progressi di uno specifico ruolo
+        dato un ruolo e un team_id.
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Determina la tabella dei progressi in base al ruolo
+            role_table = self.role_progress_table.get(role.upper())
+
+            if not role_table:
+                return {"error": "Ruolo non valido. I ruoli accettati sono: COMANDANTE, DECRITTATORE, DETECTIVE, ESPLORATORE."}, 400
+
+            # Esecuzione della query
+            cursor.execute(f"""
+                SELECT rp.progress_done
+                FROM {role_table} rp
+                JOIN progress p ON rp.progress_id = p.id
+                WHERE p.team_id = %s;
+            """, (team_id,))
+
+            # Estrazione dei risultati
+            progress = cursor.fetchall()
+
+            if not progress:
+                return [], 200  # Nessun risultato, restituisci una lista vuota
+
+            # Restituisci un elenco di progress_done
+            return [row[0] for row in progress], 200
+
+        except Exception as e:
+            print(f"Errore durante la ricerca dei progressi per il ruolo {role} e il team {team_id}: {e}")
+            return {"error": f"Errore durante la ricerca dei progressi: {e}"}, 500
+
+        finally:
+            cursor.close()
 
 
 
+    def add_progress_for_team(self, team_id: int):
+        """
+        Metodo per aggiungere una nuova tupla alla tabella progress dato un team_id.
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Inserimento nella tabella progress
+            cursor.execute("""
+                INSERT INTO progress (team_id)
+                VALUES (%s)
+                RETURNING id;
+            """, (team_id,))
+
+            # Ottieni l'ID del nuovo progresso creato
+            progress_id = cursor.fetchone()[0]
+            self.connection.commit()
+            return {"progress_id": progress_id}, 201
+
+        except Exception as e:
+            self.connection.rollback()
+            print(f"Errore durante l'inserimento di un nuovo progresso per il team {team_id}: {e}")
+            return {"error": f"Errore durante l'inserimento del progresso: {e}"}, 500
+
+        finally:
+            cursor.close()
 
 
 
+    def add_role_progress(self, role: str, team_id: int, progress_done: str):
+        """
+        Metodo per aggiungere un progresso svolto nella tabella specifica per il ruolo dato il ruolo e il team_id.
+        """
+        cursor = self.connection.cursor()
 
+        try:
+            # Determina la tabella dei progressi in base al ruolo
+            role_table = self.role_progress_table.get(role.upper())
+
+            if not role_table:
+                return {"error": "Ruolo non valido. I ruoli accettati sono: COMANDANTE, DECRITTATORE, DETECTIVE, ESPLORATORE."}, 400
+
+            # Ottieni il progress_id dalla tabella progress associata al team_id
+            cursor.execute("""
+                SELECT id
+                FROM progress
+                WHERE team_id = %s;
+            """, (team_id,))
+            progress_id_row = cursor.fetchone()
+
+            if not progress_id_row:
+                return {"error": f"Nessun progresso trovato per il team {team_id}."}, 404
+
+            progress_id = progress_id_row[0]
+
+            # Inserimento nella tabella specifica del ruolo
+            cursor.execute(f"""
+                INSERT INTO {role_table} (progress_id, progress_done, group_team_id)
+                VALUES (%s, %s, (
+                    SELECT group_id
+                    FROM team_group
+                    WHERE team_id = %s AND team_type = %s
+                ));
+            """, (progress_id, progress_done, team_id, role.upper()))
+
+            self.connection.commit()
+            return {"msg": f"Progresso aggiunto con successo per il ruolo {role} nel team {team_id}."}, 201
+
+        except Exception as e:
+            self.connection.rollback()
+            print(f"Errore durante l'inserimento del progresso per il ruolo {role} e il team {team_id}: {e}")
+            return {"error": f"Errore durante l'inserimento del progresso: {e}"}, 500
+
+        finally:
+            cursor.close()
 
 
 

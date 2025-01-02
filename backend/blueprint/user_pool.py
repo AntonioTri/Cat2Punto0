@@ -3,6 +3,7 @@ from controller.controller_team_pool import ControllerTeamPool
 from JWT.auth_decorator import require_role
 from io import BytesIO
 from entity.role import ROLE
+from utils.password_generator import generate_password
 
 # Dichiarazione del blueprint sul quale vivono le rotte dei login e registrazione degli utenti
 team_blueprint = Blueprint('pool_api', __name__)
@@ -41,8 +42,7 @@ def register_new_user_to_team():
     return ControllerTeamPool.register_new_user_to_team(
         username=data["username"], 
         # Importante notare come il campo password sia generato casualmente
-        # TODO: inserire il password generator
-        password="abcd1234", 
+        password= generate_password(), 
         role=data["role"], 
         team_id=data["team_id"]
     )

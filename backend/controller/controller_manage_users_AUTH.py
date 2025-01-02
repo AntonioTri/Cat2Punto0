@@ -40,8 +40,10 @@ class ControllerManageUsersAUTH():
         
         # Check per controllare se si è un admin
         personal_id = 0
+        team_id = 0
         if not response["is_admin"]:
             personal_id = response["personal_id"]
+            team_id = response["team_id"]
         
         # Se tutti i controlli sono passati, l'utente esiste e pertanto viene generato un token di accesso
         # Il token dura solo due ore poi scade e bisogna rifare il login
@@ -50,4 +52,5 @@ class ControllerManageUsersAUTH():
                                                      additional_claims = {"role": response["role"]},\
                                                      expires_delta = timedelta(hours=2)),
                 "role" :        response["role"],
-                "personal_id" : personal_id}, 200
+                "personal_id" : personal_id,
+                "team_id" :     team_id}, 200
