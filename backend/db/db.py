@@ -297,8 +297,6 @@ class PostgresDB():
                     cursor.close()
                     return None, 401
                 return {"username": username, "role": role, "is_admin": True}, 200
-            
-            #TODO: Fare in modo che gli utenti non siano ambigui sula base di pass ed email
             # Controlla tra gli utenti normali
             user_query = "SELECT password, role, id_personale, team_id FROM team_member WHERE name = %s"
             cursor.execute(user_query, (username,))
@@ -413,6 +411,47 @@ class PostgresDB():
         except Exception as e:
             print(f"Errore durante la ricerca delle socket_id per il membro {member_id}: {e}")
             return {"error": f"Errore durante la ricerca delle socket_id: {e}"}, 500
+
+        finally:
+            cursor.close()
+
+
+    def add_signal_to_team(self, team_id: int, signal: str):
+        """
+        Metodo per aggiungere un segnale nella tabella signals dato un team_id e un segnale.
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Otteniamo l'ID del progresso associato al team_id
+            cursor.execute("""
+                SELECT id
+                FROM progress
+                WHERE team_id = %s;
+            """, (team_id,))
+            result = cursor.fetchone()
+
+            if not result:
+                return {"error": "Nessun progresso trovato per il team_id fornito."}, 404
+
+            progress_id = result[0]
+
+            # Inserimento del segnale nella tabella signals
+            cursor.execute("""
+                INSERT INTO signals (progress_id, signal)
+                VALUES (%s, %s)
+                RETURNING id;
+            """, (progress_id, signal))
+
+            # Ottieni l'ID del nuovo segnale creato
+            signal_id = cursor.fetchone()[0]
+            self.connection.commit()
+            return {"signal_id": signal_id, "msg": "Segnale aggiunto con successo."}, 201
+
+        except Exception as e:
+            self.connection.rollback()
+            print(f"Errore durante l'inserimento del segnale per il team_id {team_id}: {e}")
+            return {"error": f"Errore durante l'inserimento del segnale: {e}"}, 500
 
         finally:
             cursor.close()

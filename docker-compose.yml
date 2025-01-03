@@ -59,3 +59,6 @@ networks:
 volumes:
   cat_database_data:
     driver: local
+
+
+# https://youtube.com/shorts/Ny5vjwA-3hU?si=U0-g1KQH0k2FS373

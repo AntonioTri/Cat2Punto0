@@ -3,6 +3,7 @@ from flask_jwt_extended import JWTManager, get_jwt, jwt_required
 from JWT.auth_decorator import require_role
 from blueprint.auth import auth_blueprint
 from blueprint.user_pool import team_blueprint
+from blueprint.progress import progress_blueprint
 from config.secret_key import SECRET_KEY
 from flask import Flask, jsonify
 from entity.role import ROLE
@@ -16,8 +17,11 @@ app = Flask(__name__)
 CORS(app=app)
 app.config['JWT_SECRET_KEY'] = SECRET_KEY 
 jwt = JWTManager(app)
+
+# Registrazione dei blueprint
 app.register_blueprint(auth_blueprint, url_prefix='/api')
 app.register_blueprint(team_blueprint, url_prefix='/api')
+app.register_blueprint(progress_blueprint, url_prefix='/api')
 
 # Creazione dell'istanza dei servizi streaming
 socketio = SocketIO(app, cors_allowed_origins="*")
