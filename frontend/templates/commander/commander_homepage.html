@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=2.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
     <!-- Import di stile specifico della pagina, dello stile del burger menu, e del background -->
     <link rel="stylesheet" href="../../static/commander/commander_styles/commander_homepage.css">
@@ -11,12 +11,16 @@
     <link rel="stylesheet" href="../../static/burger_menu/action_cards.css">
     <link rel="stylesheet" href="../../static/neural_background/neural_style.css">
     
+    <!-- Import del cdn sel socket io per i servizi streaming -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    
     <title>Comandante</title>
 
 </head>
 <body>
 
     <!-- Import di SCRIPT specifico della pagina, dello stile del burger menu, e del background -->
+    <script src="../../static/utils/block_page.js"></script>
     <script src="../../static/neural_background/neural_background.js"></script>
     <script src="../../static/role_tag/role_tag_script.js"></script>
     <script type="module" src="../../static/commander/commander_scripts/commander_homepage_script.js"></script>

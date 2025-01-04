@@ -109,6 +109,7 @@ export class CardManager {
         card.classList.add('inactive');
         card.style.margin = '2%'; 
         card.style.width = '90%';
+        card.style.height = '90%';
         card.style.color = 'black';
         card.style.textAlign = 'center';
         card.style.position = 'absolute';
@@ -118,6 +119,7 @@ export class CardManager {
         card.style.fontFamily = `'Courier New', Courier, monospace`;
         card.style.backgroundColor = 'rgb(225, 228, 217)';
         card.style.boxShadow = '0px 0px 25px 1px rgba(0, 0, 0, 0.5)';
+        card.style.overflow = 'hidden';
 
         const textLable = document.createElement('div');
         textLable.position = 'relative';
@@ -127,11 +129,14 @@ export class CardManager {
         const innerContent = document.createElement('div');
         innerContent.position = 'relative';
         innerContent.style.margin = '1%';
+        innerContent.style.height = '90%';
         innerContent.id = 'inner_content';
         card.appendChild(innerContent);
 
         return card;
+    
     }
+
 
 
     // Metodo privato per creare una card con il design standard
@@ -149,6 +154,7 @@ export class CardManager {
         card.style.fontFamily = `'Courier New', Courier, monospace`;
         card.style.backgroundColor = 'rgb(225, 228, 217)';
         card.style.boxShadow = '0px 0px 25px 1px rgba(0, 0, 0, 0.5)';
+        card.style.overflow = 'hidden';
 
         return card;
     }

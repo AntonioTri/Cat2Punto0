@@ -150,6 +150,49 @@ export class AbstractCardManager{
         }, 10); // Ritardo per consentire al browser di applicare lo stile iniziale
     }
     
+    addScrollableList(id = "") {
+        
+        let scrollableList = document.createElement('div');
+        scrollableList.id = id;
+        scrollableList.classList.add('scrollable_div');
+        scrollableList.style.width = '94%';
+        scrollableList.style.marginTop = '2%';
+        scrollableList.style.padding = '2%';
+        scrollableList.style.height = 'calc(100% - 20px)'; // Adatta l'altezza al contenitore
+        scrollableList.style.transform = 'translateX(1%)';
+        scrollableList.style.display = 'flex';
+        scrollableList.style.flexDirection = 'column';
+        scrollableList.style.gap = '10px';
+        scrollableList.style.overflowY = 'auto'; 
+    
+        this.container.appendChild(scrollableList);
+        this.scrollableList = scrollableList;
+    }
+    
+    
+    
+    addElementToScrollableList(id = "", textContent = "None") {
+        let innerElement = document.createElement('div');
+        innerElement.id = id;
+        innerElement.style.width = '96%';
+        innerElement.style.padding = '10px';
+        innerElement.style.marginBottom = '10px'; // Aggiungi uno spazio tra gli elementi
+        innerElement.style.borderRadius = '7px';
+        innerElement.style.backgroundColor = 'white';
+        innerElement.style.zIndex = '10';
+        innerElement.style.display = 'flex';
+        innerElement.style.alignItems = 'center';
+        innerElement.style.justifyContent = 'center';
+        innerElement.style.textAlign = 'center';
+        innerElement.style.fontSize = '16px';
+        innerElement.style.fontWeight = 'bold';
+        innerElement.innerText = textContent;
+    
+        this.scrollableList.appendChild(innerElement);
+    }
+    
+    
+    
 
     // Metodo che serve a uniformare un array di scelte per i selector
     formatChoiches(array = [], format = true){
