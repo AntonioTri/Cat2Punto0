@@ -99,3 +99,16 @@ def add_role_progress():
     )
 
     return response, status_code
+
+@progress_blueprint.route('/get_detective_progresses', methods=['GET'])
+@require_role(ROLE.DETECTIVE.value)
+def det_detective_progresses():
+    
+    # Estraiamo il tipo di progresso selezionato dalla query args
+    selected_type = request.args.get('type', None)
+    selected_team = request.args.get('team_id', None)
+    if selected_type is None or selected_team is None:
+        return {"msg" : "Errore nella richiesta, un campo tra type e team_id manca."}, 404
+    
+    # Richiamo al metodo del controller
+    return ControllerManageProgress.get_detective_progress_by_type(team_id=selected_team, selected_type=selected_type)

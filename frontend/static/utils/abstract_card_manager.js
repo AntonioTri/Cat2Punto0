@@ -1,4 +1,5 @@
 import { CheckMark } from '../../static/check_mark/check_mark.js';
+import { EvidenceManager } from '../../static/utils/evidence_manager.js';
 
 export class AbstractCardManager{
 
@@ -10,6 +11,7 @@ export class AbstractCardManager{
         this.card = document.querySelector(`#${containerSelector}.action_card`);
         this.container = this.card.querySelector('#inner_content');
         this.checkMark = checkMark;
+        this.evidenceManager = new EvidenceManager();
 
         // Metodo da overraidare per l'inizializzazione
         this.init();
@@ -174,9 +176,9 @@ export class AbstractCardManager{
     addElementToScrollableList(id = "", textContent = "None") {
         let innerElement = document.createElement('div');
         innerElement.id = id;
-        innerElement.style.width = '96%';
+        innerElement.style.width = '94%';
         innerElement.style.padding = '10px';
-        innerElement.style.marginBottom = '10px'; // Aggiungi uno spazio tra gli elementi
+        innerElement.style.marginBottom = '10px'; 
         innerElement.style.borderRadius = '7px';
         innerElement.style.backgroundColor = 'white';
         innerElement.style.zIndex = '10';
@@ -187,6 +189,7 @@ export class AbstractCardManager{
         innerElement.style.fontSize = '16px';
         innerElement.style.fontWeight = 'bold';
         innerElement.innerText = textContent;
+        innerElement.setAttribute('evidence_id')
     
         this.scrollableList.appendChild(innerElement);
     }

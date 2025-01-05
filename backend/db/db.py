@@ -1,8 +1,10 @@
 # Importing della libreria di Postgre
 from flask_jwt_extended import create_access_token
+from content.evidences import PROGRESSES, get_starting_number_of_files
 import psycopg2
 import logging
 import time
+
 
 logger = logging.getLogger(__name__)
 
@@ -67,9 +69,11 @@ class PostgresDB():
             _, sc4 = self.create_team_group(team_id=team_id, team_type="ESPLORATORE")
             # Richiamo alla funzione per aggiungere i progressi al team
             _, sc5 = self.add_progress_for_team(team_id=team_id)
+            # Richiamo alla funzione per aggiungere i progressi standard al team
+            _, sc6 = self.add_standard_progresses(team_id=team_id)
 
             # Se uno dei create team group fallisce viene segnalato
-            if sc1 != 201 or sc2 != 201 or sc3 != 201 or sc4 != 201 or sc5 != 201:
+            if sc1 != 201 or sc2 != 201 or sc3 != 201 or sc4 != 201 or sc5 != 201 or sc6 != 201:
                 self.connection.rollback()
                 return {"msg": f"Errore durante la creazione dei team group"}, 500
 
@@ -503,15 +507,19 @@ class PostgresDB():
             role_table = self.role_progress_table.get(role.upper())
 
             if not role_table:
-                return {"error": "Ruolo non valido. I ruoli accettati sono: COMANDANTE, DECRITTATORE, DETECTIVE, ESPLORATORE."}, 400
+                return {
+                    "error": "Ruolo non valido. I ruoli accettati sono: COMANDANTE, DECRITTATORE, DETECTIVE, ESPLORATORE."
+                }, 400
 
             # Esecuzione della query
-            cursor.execute(f"""
-                SELECT rp.progress_done
+            query = f"""
+                SELECT rp.progress_type, rp.progress_code
                 FROM {role_table} rp
                 JOIN progress p ON rp.progress_id = p.id
-                WHERE p.team_id = %s;
-            """, (team_id,))
+                JOIN team_group tg ON rp.group_team_id = tg.group_id
+                WHERE tg.team_id = %s;
+            """
+            cursor.execute(query, (team_id,))
 
             # Estrazione dei risultati
             progress = cursor.fetchall()
@@ -519,8 +527,10 @@ class PostgresDB():
             if not progress:
                 return [], 200  # Nessun risultato, restituisci una lista vuota
 
-            # Restituisci un elenco di progress_done
-            return [row[0] for row in progress], 200
+            # Restituisci un elenco di dizionari con progress_type e progress_code
+            return [
+                {"progress_type": row[0], "progress_code": row[1]} for row in progress
+            ], 200
 
         except Exception as e:
             print(f"Errore durante la ricerca dei progressi per il ruolo {role} e il team {team_id}: {e}")
@@ -528,6 +538,7 @@ class PostgresDB():
 
         finally:
             cursor.close()
+
 
 
 
@@ -560,7 +571,7 @@ class PostgresDB():
 
 
 
-    def add_role_progress(self, role: str, team_id: int, progress_done: str):
+    def add_role_progress(self, role: str, team_id: int, progress_type: str, progress_code: int):
         """
         Metodo per aggiungere un progresso svolto nella tabella specifica per il ruolo dato il ruolo e il team_id.
         """
@@ -588,13 +599,13 @@ class PostgresDB():
 
             # Inserimento nella tabella specifica del ruolo
             cursor.execute(f"""
-                INSERT INTO {role_table} (progress_id, progress_done, group_team_id)
-                VALUES (%s, %s, (
+                INSERT INTO {role_table} (progress_id, progress_type, progress_code, group_team_id)
+                VALUES (%s, %s, %s, (
                     SELECT group_id
                     FROM team_group
                     WHERE team_id = %s AND team_type = %s
                 ));
-            """, (progress_id, progress_done, team_id, role.upper()))
+            """, (progress_id, progress_type, progress_code, team_id, role.upper()))
 
             self.connection.commit()
             return {"msg": f"Progresso aggiunto con successo per il ruolo {role} nel team {team_id}."}, 201
@@ -607,6 +618,66 @@ class PostgresDB():
         finally:
             cursor.close()
 
+
+
+
+    def add_standard_progresses(self, team_id):
+
+        """
+        Metodo per aggiungere i progressi generali ai singoli sottogruppi di un team.
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Ottieni il progress_id dalla tabella progress associata al team_id
+            cursor.execute("""
+                SELECT id
+                FROM progress
+                WHERE team_id = %s;
+            """, (team_id,))
+
+            progress_id_row = cursor.fetchone()
+
+            if not progress_id_row:
+                return {"error": f"Nessun progresso trovato per il team {team_id}."}, 404
+
+            progress_id = progress_id_row[0]
+
+            # per ogni ruolo inseriamo i suoi progressi standard
+            for key in self.role_progress_table.keys():
+                self.add_role_default_progress(cursor, progress_id, key)
+        
+            self.connection.commit()
+            return {"msg": f"Progressi standard aggiunti con successo al team {team_id}."}, 201
+
+        except Exception as e:
+            self.connection.rollback()
+            print(f"Errore durante l'inserimento del progressi standard al team {team_id}: {e}")
+            return {"error": f"Errore durante l'inserimento dei progressi standard: {e}"}, 500
+
+        finally:
+            cursor.close()
+
+
+
+    # All'invocazione dato un ruolo ed un progress id di riferimento, questo metodo aggiunge
+    # I progressi standard per ogni ruolo durante la creazione del team
+    def add_role_default_progress(self, cursor, progress_id: int, role: str):
+
+        # Progressi dei detective
+        if role == "DETECTIVE":
+            # Per ogni chiave andiamo a definire una tupla nel db
+            for i in range(get_starting_number_of_files()):
+
+                # Inserimento nella tabella specifica del ruolo
+                cursor.execute(f"""
+                    INSERT INTO {self.role_progress_table.get(role.upper())} (progress_id, progress_type, progress_code, group_team_id)
+                    VALUES (%s, %s, %s, (
+                        SELECT group_id
+                        FROM team_group
+                        WHERE team_id = %s AND team_type = %s
+                    ));
+                """, (progress_id, 'fascicoli', i + 1, progress_id, role))
 
 
 

@@ -55,7 +55,8 @@ CREATE TABLE signals (
 CREATE TABLE commander_progress (
     id SERIAL PRIMARY KEY, -- Id incrementale
     progress_id INT NOT NULL, -- Foreign key verso la tabella progress
-    progress_done TEXT NOT NULL, -- Progresso sbloccato
+    progress_type TEXT NOT NULL CHECK(progress_type IN ('permessi')), -- Tipo progresso sbloccato
+    progress_code INT NOT NULL, -- Codice sbloccato
     CONSTRAINT fk_progress_commander FOREIGN KEY (progress_id) REFERENCES progress (id) ON DELETE CASCADE,
     group_team_id INT NOT NULL, -- Id del group team di appartenenza
     CONSTRAINT fk_commander_group FOREIGN KEY (group_team_id) REFERENCES team_group (group_id) ON DELETE CASCADE
@@ -65,7 +66,8 @@ CREATE TABLE commander_progress (
 CREATE TABLE decritter_progress (
     id SERIAL PRIMARY KEY, -- Id incrementale
     progress_id INT NOT NULL, -- Foreign key verso la tabella progress
-    progress_done TEXT NOT NULL, -- Progresso sbloccato
+    progress_type TEXT NOT NULL CHECK(progress_type IN ('translator')), -- Tipo progresso sbloccato
+    progress_code INT NOT NULL, -- Codice sbloccato
     CONSTRAINT fk_progress_decritter FOREIGN KEY (progress_id) REFERENCES progress (id) ON DELETE CASCADE,
     group_team_id INT NOT NULL, -- Id del group team di appartenenza
     CONSTRAINT fk_decritter_group FOREIGN KEY (group_team_id) REFERENCES team_group (group_id) ON DELETE CASCADE
@@ -75,7 +77,8 @@ CREATE TABLE decritter_progress (
 CREATE TABLE detective_progress (
     id SERIAL PRIMARY KEY, -- Id incrementale
     progress_id INT NOT NULL, -- Foreign key verso la tabella progress
-    progress_done TEXT NOT NULL, -- Progresso sbloccato
+    progress_type TEXT NOT NULL CHECK(progress_type IN ('fascicoli')), -- Tipo progresso sbloccato
+    progress_code INT NOT NULL, -- Codice sbloccato
     CONSTRAINT fk_progress_detective FOREIGN KEY (progress_id) REFERENCES progress (id) ON DELETE CASCADE,
     group_team_id INT NOT NULL, -- Id del group team di appartenenza
     CONSTRAINT fk_detective_group FOREIGN KEY (group_team_id) REFERENCES team_group (group_id) ON DELETE CASCADE
@@ -85,9 +88,12 @@ CREATE TABLE detective_progress (
 CREATE TABLE explorer_progress (
     id SERIAL PRIMARY KEY, -- Id incrementale
     progress_id INT NOT NULL, -- Foreign key verso la tabella progress
-    progress_done TEXT NOT NULL, -- Progresso sbloccato
+    progress_type TEXT NOT NULL CHECK(progress_type IN ('fascicoli')), -- Tipo progresso sbloccato
+    progress_code INT NOT NULL, -- Codice sbloccato
     CONSTRAINT fk_progress_explorer FOREIGN KEY (progress_id) REFERENCES progress (id) ON DELETE CASCADE,
     group_team_id INT NOT NULL, -- Id del group team di appartenenza
     CONSTRAINT fk_explorer_group FOREIGN KEY (group_team_id) REFERENCES team_group (group_id) ON DELETE CASCADE
 );
+
+
 

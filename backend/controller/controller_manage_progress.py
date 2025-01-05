@@ -1,5 +1,5 @@
 from db.db import database
-
+from content.evidences import get_detective_files, get_selected_detective_progresses
 class ControllerManageProgress:
 
     @staticmethod
@@ -72,7 +72,7 @@ class ControllerManageProgress:
         if status_code != 200:
             return {"msg": "Errore nel recupero dei progressi per il ruolo specificato."}, status_code
 
-        formatted_progress = {"progress_done": [progress for progress in progresses]}
+        formatted_progress = [{ "progress_type": progress["progress_type"], "progress_code": progress["progress_code"] } for progress in progresses]
 
         return formatted_progress, status_code
 
@@ -90,3 +90,20 @@ class ControllerManageProgress:
         return {"msg": "Progresso aggiunto con successo.", "progress_id": result.get("progress_id")}, status_code
 
 
+    @staticmethod
+    def get_detective_progress_by_type(team_id: int = 0, selected_type: str = 'fascicoli'):
+        """ Metoo per ottenere gli attuali file sbloccati dai detective"""
+        # Estraiamo i progressi dei detective
+        progresses, status_code = ControllerManageProgress.get_team_group_progress(team_id=team_id, role="DETECTIVE")
+        # Check dello status code
+        if status_code != 200:
+            return progresses, status_code
+
+        # Filtriamo i codici dei progressi se il singolo tipo del dizionario restituito corrisponde
+        # a quello scelto, permettendo così di ottenere uno specifico tipo di progresso
+        filtered_codes = [item["progress_code"] for item in progresses if item["progress_type"] == selected_type]
+        # Sulla base dei codici filtrati formattiamo i dati provenienti dai progressi e li reinviamo
+        selected_progresses = get_selected_detective_progresses(selected_type, filtered_codes)
+
+        # Ritorniamo la risposta
+        return {selected_type : selected_progresses}, status_code
