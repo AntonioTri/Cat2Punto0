@@ -173,7 +173,7 @@ export class AbstractCardManager{
     
     
     
-    addElementToScrollableList(id = "", textContent = "None") {
+    addElementToScrollableList(id = "", textContent = "None", contenuto = "some_content") {
         let innerElement = document.createElement('div');
         innerElement.id = id;
         innerElement.style.width = '94%';
@@ -189,11 +189,31 @@ export class AbstractCardManager{
         innerElement.style.fontSize = '16px';
         innerElement.style.fontWeight = 'bold';
         innerElement.innerText = textContent;
-        innerElement.setAttribute('evidence_id')
-    
+        // innerElement.setAttribute('evidence_id')
+
+        // Aggiungiamo al local storage il contenuto da referenziare al click dell'elemento
+        if(localStorage.getItem(`fascicolo_numero_${id}`) === null){
+            localStorage.setItem(`fascicolo_numero_${id}`, contenuto);
+        }
+
+        // Mostriamo nella consocle il contenuto del fascicolo
+        console.log('Dati salvati nel local storage', localStorage.getItem(`fascicolo_numero_${id}`));
+
         this.scrollableList.appendChild(innerElement);
+        
+        return innerElement;
     }
     
+
+    // Questo metodo mostra una card che compare e scompare in sovrimpressione al click di uno specifico tasto
+    showInfoCard(storageKey = NaN, title = ""){
+
+        // Estraiamo il content salvato dal local storage tramite la key
+        const content = localStorage.getItem(storageKey);
+
+        this.evidenceManager.showCard(title, content);
+
+    }
     
     
 

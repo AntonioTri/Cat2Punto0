@@ -13,12 +13,39 @@ export class EvidenceManager{
     }
 
 
-    // Metodo che mostra la carta con il contenuto scelto
+    // Metodo che crea la carta, aggiungendo l'evento di scomparsa e cancellazione al tocco
+    showCard(title, content) {
+        // Creiamo la card tramite il manager associato
+        let evidenceCard = this.cardManager.addCardWithClassIDAndTitle('x', 'evidence_card', title, content);
+        
+        // Rimuovi la classe 'x' (predefinita) e assegna lo stato iniziale
+        evidenceCard.classList.remove('x');
 
-    // Metodo che costruisce il close Button
-
-    //
-
+        // Settaggio della giusta distanza dal bordo superiore
+        evidenceCard.style.top = '7%';
+    
+        // Forziamo lo stato iniziale (senza animazione, come definito nel CSS)
+        evidenceCard.classList.add('evidence_inactive');
+    
+        // Aggiungiamo un piccolo timeout per consentire al browser di "settare" lo stato iniziale
+        setTimeout(() => {
+            evidenceCard.classList.remove('evidence_inactive'); // Rimuovi lo stato iniziale
+            evidenceCard.classList.add('evidence_active');     // Applica lo stato attivo (animazione inizia)
+        }, 10);
+    
+        // Aggiungiamo l'evento `click` per la rimozione
+        evidenceCard.addEventListener('click', () => {
+            // Cambia lo stato a "inactive" per attivare l'animazione di scomparsa
+            evidenceCard.classList.remove('evidence_active');
+            evidenceCard.classList.add('evidence_inactive');
+    
+            // Timeout prima della rimozione (tempo della transizione)
+            setTimeout(() => {
+                evidenceCard.remove();
+            }, 500);
+        });
+    }
+    
 
 
 

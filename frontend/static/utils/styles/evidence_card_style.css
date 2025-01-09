@@ -1,0 +1,22 @@
+#evidence_card{
+
+    transform: scale(150%);
+    opacity: 0;
+
+}
+
+#evidence_card.evidence_active{
+
+    transition: all 0.5s ease-out;
+    transform: scale(102%);
+    opacity: 1;
+
+}
+
+#evidence_card.evidence_inactive{
+
+    transition: all 0.5s ease-in;
+    transform: scale(150%);
+    opacity: 0;
+}
+

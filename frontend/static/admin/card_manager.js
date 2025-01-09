@@ -37,12 +37,33 @@ export class CardManager {
         }
     }
 
-    // Metodo per aggiungere una card con un ID
-    addCardWithId(id, content = '') {
+    // Metodo per aggiungere una card con un ID ed un titolo
+    addCardWithIdAndTitle(id, title = 'Missing title', content = '') {
         const card = this._createCard();
         card.id = id;
-        card.innerText = content;
+        card.firstChild.innerText = title;
+        card.childNodes.item(1).innerHTML = content;
         this.container.appendChild(card);
+    }
+    
+    // Metodo per aggiungere una card con una classe ed un titolo
+    addCardWithClassAndTitle(className = '', title = 'Missing title', content = '') {
+        const card = this._createCard();
+        card.classList.add(className);
+        card.firstChild.innerText = title;
+        card.childNodes.item(1).innerHTML = content;
+        this.container.appendChild(card);
+    }
+    
+    // Metodo per aggiungere una card con una classe ed un titolo
+    addCardWithClassIDAndTitle(className = '', id = '', title = 'Missing title', content = '') {
+        const card = this._createCard();
+        card.classList.add(className);
+        card.id = id;
+        card.firstChild.innerText = title;
+        card.childNodes.item(1).innerHTML = content;
+        this.container.appendChild(card);
+        return card;
     }
 
     // Metodo per aggiungere una card con una classe
@@ -108,8 +129,9 @@ export class CardManager {
         const card = document.createElement('div');
         card.classList.add('inactive');
         card.style.margin = '2%'; 
+        card.style.left = '1%';
         card.style.width = '90%';
-        card.style.height = '90%';
+        card.style.height = '100%';
         card.style.color = 'black';
         card.style.textAlign = 'center';
         card.style.position = 'absolute';

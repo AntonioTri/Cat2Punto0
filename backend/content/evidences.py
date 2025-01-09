@@ -36,14 +36,14 @@ PROGRESSES = {
 
             4, # Numero iniziale di fascicoli disponibili
             {   
-                1: {"titolo" : FASCICOLO_1[0], "contenuto" : FASCICOLO_1[1]},
-                2: {"titolo" : FASCICOLO_2[0], "contenuto" : FASCICOLO_2[1]},
-                3: {"titolo" : FASCICOLO_3[0], "contenuto" : FASCICOLO_3[1]},
-                4: {"titolo" : FASCICOLO_4[0], "contenuto" : FASCICOLO_4[1]},
-                5: {"titolo" : FASCICOLO_5[0], "contenuto" : FASCICOLO_5[1]},
-                6: {"titolo" : FASCICOLO_6[0], "contenuto" : FASCICOLO_6[1]},
-                7: {"titolo" : FASCICOLO_7[0], "contenuto" : FASCICOLO_7[1]},
-                8: {"titolo" : FASCICOLO_8[0], "contenuto" : FASCICOLO_8[1]}
+                1: {"titolo" : FASCICOLO_1[0], "contenuto" : FASCICOLO_1[1], "id_fascicolo" : 1},
+                2: {"titolo" : FASCICOLO_2[0], "contenuto" : FASCICOLO_2[1], "id_fascicolo" : 2},
+                3: {"titolo" : FASCICOLO_3[0], "contenuto" : FASCICOLO_3[1], "id_fascicolo" : 3},
+                4: {"titolo" : FASCICOLO_4[0], "contenuto" : FASCICOLO_4[1], "id_fascicolo" : 4},
+                5: {"titolo" : FASCICOLO_5[0], "contenuto" : FASCICOLO_5[1], "id_fascicolo" : 5},
+                6: {"titolo" : FASCICOLO_6[0], "contenuto" : FASCICOLO_6[1], "id_fascicolo" : 6},
+                7: {"titolo" : FASCICOLO_7[0], "contenuto" : FASCICOLO_7[1], "id_fascicolo" : 7},
+                8: {"titolo" : FASCICOLO_8[0], "contenuto" : FASCICOLO_8[1], "id_fascicolo" : 8}
             } 
 
         ],
