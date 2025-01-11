@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class PostgresDB():
 
+
     def __init__(self) -> None:
                                 # Parametri di connessione al database
         
