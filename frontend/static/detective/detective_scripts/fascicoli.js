@@ -1,7 +1,7 @@
 import { AbstractCardManager } from '../../utils/abstract_card_manager.js';
 import { CheckMark } from '../../check_mark/check_mark.js';
 import { API_URL, SOCKET_URL } from '../../config.js';
-
+import { socket } from '../../utils/socket.js';
 
 export class FascicoliManager extends AbstractCardManager{
 
@@ -73,10 +73,23 @@ export class FascicoliManager extends AbstractCardManager{
         // mostrare la info card associata
         fascicoli.forEach(fascicolo => {
             // Aggiunta dell'elemento
-            const elementAdded = this.addElementToScrollableList(`${fascicolo.id_fascicolo}`, fascicolo.titolo, fascicolo.contenuto);
+            const elementAdded = this.addElementToScrollableList(`${fascicolo.id_fascicolo}`, fascicolo.titolo, fascicolo.contenuto, fascicolo.permission_required);
             // Aggiunta dell'event listener
             elementAdded.addEventListener('click', () => {
-                super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);
+                // Vengono aggiunti ed eseguiti i controlli per verificare se il file è protetto
+                if (fascicolo.permission_required) {
+                    // Se il fascicolo richiede il permesso viene effettuata la richiesta
+                    const data_to_send = {
+                        team_id : localStorage.getItem('team_id'),
+                        personal_socket : localStorage.getItem('socket'),
+                        fascicolo_id : fascicolo.id_fascicolo
+                    }
+
+                    // inviamo il segnale
+                    socket.emit('require_permission_for_file', data_to_send);
+                } else {
+                    super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);
+                }
             });
         
         });

@@ -14,7 +14,7 @@ from streaming_socket.socket import Socket
 
 # Definizione dell'istanza dell'app
 app = Flask(__name__)
-CORS(app=app)
+CORS(app, resources={r"/socket/*": {"origins": "*"}})
 app.config['JWT_SECRET_KEY'] = SECRET_KEY 
 jwt = JWTManager(app)
 
@@ -49,10 +49,6 @@ def get_me():
     me = get_jwt()
     return {"username": me["username"], "role": me["role"]}, 200
 
-# Rotta di test per i servizi streaming
-@socketio.on('connect')
-def handle_connect():
-    print('Un client si è connesso.')
 
 
 if __name__ == '__main__':

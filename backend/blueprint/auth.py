@@ -20,3 +20,5 @@ def login_user():
 
     # Login dell'utente, il controller si occupa di interfacciarsi con il db e di gestire le risposte
     return ControllerManageUsersAUTH.login_user(data)
+
+
