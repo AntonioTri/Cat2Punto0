@@ -93,7 +93,7 @@ class ControllerTeamPool:
     @staticmethod
     def get_all_team_group_socket(team_id: int = 0, role: str = "COMANDANTE"):
         """
-        Metodo per ottenere tutti i membri di uno specifico team
+        Metodo per ottenere tutti i membri di un ruolo di uno specifico team
         """
         # Otteniamo i membri del team dal database
         team_members = database.get_all_team_members(team_id=team_id)

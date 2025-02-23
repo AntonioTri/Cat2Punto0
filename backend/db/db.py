@@ -295,6 +295,7 @@ class PostgresDB():
         # Controlla prima tra gli amministratori
         admin_query = "SELECT user_password, role FROM admin WHERE username = %s"
         try:
+
             cursor.execute(admin_query, (username,))
             result = cursor.fetchone()
             if result:
@@ -303,20 +304,26 @@ class PostgresDB():
                     cursor.close()
                     return None, 401
                 return {"username": username, "role": role, "is_admin": True}, 200
+            
             # Controlla tra gli utenti normali
-            user_query = "SELECT password, role, id_personale, team_id FROM team_member WHERE name = %s"
+            user_query = "SELECT password, role, id_personale, team_id, socket_id FROM team_member WHERE name = %s"
             cursor.execute(user_query, (username,))
             result = cursor.fetchone()
             if not result:
                 cursor.close()
                 return None, 404
 
-            stored_password, role, id_personale, team_id = result
+            stored_password, role, id_personale, team_id, socket_id = result
             if stored_password != password:
                 cursor.close()
                 return None, 401
 
-            return {"username": username, "role": role, "personal_id": id_personale, "team_id": team_id, "is_admin": False}, 200
+            return {"username": username, 
+                    "role": role, 
+                    "personal_id": id_personale, 
+                    "team_id": team_id, 
+                    "socket_id": socket_id, 
+                    "is_admin": False}, 200
 
         except Exception as e:
             cursor.close()
@@ -332,7 +339,7 @@ class PostgresDB():
             # Aggiorna il socket_id
             cursor.execute("UPDATE team_member SET socket_id = %s WHERE id_personale = %s", (socket_id, user_id))
             self.connection.commit()
-            return {"msg": f"Socket ID aggiornato per l'utente con ID {user_id}"}, 200
+            return {"msg": f"Socket ID aggiornato per l'utente con ID {user_id}"}, 201
 
         except Exception as e:
             # Gestione degli errori

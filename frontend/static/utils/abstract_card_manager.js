@@ -201,8 +201,9 @@ export class AbstractCardManager{
         // Aggiungiamo il catenaccio se `isProtected` è true
         if (isProtected) {
             let lockIcon = document.createElement('span');
-            lockIcon.innerText = ''; // Icona catenaccio (Unicode)
-            lockIcon.style.marginLeft = 'auto'; // Spinge l'icona verso destra
+            lockIcon.innerHTML = 'H';
+            // Spinge l'icona verso destra
+            lockIcon.style.marginLeft = 'auto'; 
             lockIcon.style.fontSize = '16px';
             innerElement.appendChild(lockIcon);
         }

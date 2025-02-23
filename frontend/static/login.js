@@ -1,6 +1,7 @@
 // Import della variabile API_URL settata in automatico nel file di config
 import {API_URL} from './config.js';
 const URL = `${API_URL}/login`;
+import { socket } from './utils/socket.js';
 
 // Selezione del form
 const loginForm = document.getElementById("login_form");
@@ -26,7 +27,7 @@ loginForm.addEventListener("submit", async function(event) {
         });
 
         const data = await response.json();
-        console.log(data)
+        console.log(data);
 
         // In caso di risposta positiva si memorizza nel local storage l'access token
         if (response.ok) {
@@ -35,11 +36,11 @@ loginForm.addEventListener("submit", async function(event) {
             
             // Conserviamo nel local storage l'access token ed il ruolo
             // Il ruolo viene conservato come formattato e non formattato
+            localStorage.setItem('personal_id', data.personal_id);
             localStorage.setItem('access_token', data.access_token);
-            localStorage.setItem('team_id', data.team_id);
+            localStorage.setItem('team_id', data.team_id);personal_id
             localStorage.setItem('unformatted_role', data.role);
             localStorage.setItem('role', role);
-            localStorage.setItem('personal_id', data.personal_id);
             
             // Reindirizzamento in caso di successo
             window.location.replace(`../templates/${role}/${role}_homepage.html`);

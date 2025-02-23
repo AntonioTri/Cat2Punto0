@@ -10,7 +10,7 @@ class ControllerPersonalFunctions:
         message, status_code = database.update_socket_id(user_id=user_id, socket_id=socket_id)
         
         # Logging del risultato
-        if status_code == 200:
+        if status_code == 201:
             print(f"Socket aggiornata per l'utente con ID {user_id}.")
         else:
             print(f"Errore durante l'aggiornamento della socket per l'utente {user_id}: {message}")

@@ -5,27 +5,35 @@ const socket = io(SOCKET_URL, {
     transports: ["websocket"]  
 });
 
-// Registrazione nel sistema dell'utente
+
+// Quando la connessione alla socket è stabilita
 socket.on('connect', () => {
-
+    console.log('Connessione riuscita al server via WebSocket!');
+    // Conserviamo la socket e la aggiorniamo nel back end
     localStorage.setItem('socket', socket.id);
-    console.log("Connessione alla socket avvenuta con successo. Id: ", socket.id);
+    // Aggiornamento
+    const data_to_send = {
+        socket_id : socket.id,
+        personal_id : localStorage.getItem('personal_id')
+    };
 
-    // Emetti l'evento per aggiornare la socket dell'utente
-    socket.emit('update_personal_socket', { id: localStorage.getItem("personal_id") }, (response) => {
-        // Gestisci la risposta del server
-        if (response && response.msg) {
-            console.log('Risposta dal server:', response.msg);
-        } else {
-            console.log('Socket personale aggiornato correttamente');
-        }
-    });
+    socket.emit('update_socket', data_to_send);
 
 });
 
-socket.on('test_signal_recieved', (response) => {
-    console.log('Segnale di risposta ricevuto!', response);
-});
 
+// Questo segnale viene attivato quando un nuovo client viene registrato
+// La sua controparte si trova nel login, se un utente era gia' registrato
+socket.on('socket_updated', (response) => {
+    // Aggiornamento con esito positivo
+    if (response.status_code === 201) {
+        console.log('Socket registrata con successo sul server');
+        console.log(response);
+    
+    // Aggiornamento con esito negativo
+    } else {
+        console.log('Errore:', response.message);
+    }
+})
 
 export { socket };

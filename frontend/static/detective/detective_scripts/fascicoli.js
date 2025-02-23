@@ -2,7 +2,6 @@ import { AbstractCardManager } from '../../utils/abstract_card_manager.js';
 import { CheckMark } from '../../check_mark/check_mark.js';
 import { API_URL, SOCKET_URL } from '../../config.js';
 import { socket } from '../../utils/socket.js';
-import { socket } from '../../utils/socket.js';
 
 export class FascicoliManager extends AbstractCardManager{
 
@@ -77,10 +76,23 @@ export class FascicoliManager extends AbstractCardManager{
             const elementAdded = this.addElementToScrollableList(`${fascicolo.id_fascicolo}`, fascicolo.titolo, fascicolo.contenuto, fascicolo.permission_required);
             // Aggiunta dell'event listener
             elementAdded.addEventListener('click', () => {
-                super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);
-                socket.emit('test_signal', 1, ()=>{
-                    console.log('Segnale inviato');
-                });
+
+                // Se il fascicolo e' protetto allora viene inviato un segnale al capitano
+                if(fascicolo.permission_required){
+                    // Dfiniamo i dati da inviare
+                    const data_to_send = {
+                        team_id : localStorage.getItem('team_id'),
+                        id_fascicolo : fascicolo.id_fascicolo,
+                        detective_socket : localStorage.getItem('socket')
+                    };
+                    
+                    // E li inviamo
+                    socket.emit('evidence_permission_required', data_to_send);
+                
+                // Nel caso opposto mostriamo direttamente la card
+                } else {
+                    super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);
+                }
 
             });
         
@@ -97,9 +109,9 @@ export class FascicoliManager extends AbstractCardManager{
         this.URL_ASK_FOR_PERMISSION = `${SOCKET_URL}`;
 
         // URL docker per ottenere i fascicoli sbloccati 
-        this.dockerPathGetEvidence = `http://localhost:6000/api/get_detective_progresses?type=fascicoli&team_id=${localStorage.getItem('team_id')}`;
+        this.dockerPathGetEvidence = `http://localhost:5000/api/get_detective_progresses?type=fascicoli&team_id=${localStorage.getItem('team_id')}`;
         // URL docker per inviare i segnali
-        this.dockerPathSendSignals = 'http://localhost:6000/socket';
+        this.dockerPathSendSignals = 'http://localhost:5000/socket';
 
     }
 

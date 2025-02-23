@@ -14,18 +14,13 @@ from controller.controller_team_pool import ControllerTeamPool
 
 class Socket(Namespace):
 
-    # Questa funzione serve ad aggiungere alla pool di utenze il nuovo socked id
-    def on_update_personal_socket(self, data):
-        # Estraiamo l'id dagli args
-        user_id = data["id"]
-        if not user_id:
-            return {"msg" : f"Errore, id non presente negli headers della richiesta. Headers: {data}"}        
+    # Questo metodo registra la socket id univoca per l'utente quando questo effettua il login
+    def on_update_socket(self, data):
+        # Usiamo direttamente il valore inviato per associare all'id, la socket id
+        result = ControllerPersonalFunctions.update_personal_socket(user_id=data["personal_id"], socket_id=data["socket_id"])
+        # Invio della risposta al client chiamante
+        emit('socket_updated', result, room=data["socket_id"])
 
-        # Estrazione del sid
-        socketID = request.sid
-        # Richiamo al controller per updatare la socket
-        return ControllerPersonalFunctions.update_personal_socket(user_id=user_id, socket_id=socketID)
-        
 
     # Questo metodo permette ai comandanti di inviare un messaggio a tutti gli utenti del team
     @socket_require_role(ROLE.COMANDANTE.value)
@@ -65,8 +60,8 @@ class Socket(Namespace):
         
         #Estrazione dei dati
         team_id = data["team_id"]
-        fascicolo_id = data["fascicolo_id"]
-        emitter_socket = data["personal_socket"]
+        fascicolo_id = data["id_fascicolo"]
+        emitter_socket = data["detective_socket"]
 
         #Estraiamo le socket dei destinatari
         commanders_sockets = ControllerTeamPool.get_all_team_group_socket(team_id=team_id, role="COMANDANTE")
