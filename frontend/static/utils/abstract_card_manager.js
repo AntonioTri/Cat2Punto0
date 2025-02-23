@@ -173,7 +173,7 @@ export class AbstractCardManager{
     
     
     
-    addElementToScrollableList(id = "", textContent = "None", contenuto = "some_content") {
+    addElementToScrollableList(id = "", textContent = "None", contenuto = "some_content", isProtected = false) {
         let innerElement = document.createElement('div');
         innerElement.id = id;
         innerElement.style.width = '94%';
@@ -184,25 +184,34 @@ export class AbstractCardManager{
         innerElement.style.zIndex = '10';
         innerElement.style.display = 'flex';
         innerElement.style.alignItems = 'center';
-        innerElement.style.justifyContent = 'center';
+        innerElement.style.justifyContent = 'space-between'; // Cambiato per spazio tra testo e catenaccio
         innerElement.style.textAlign = 'center';
         innerElement.style.fontSize = '16px';
         innerElement.style.fontWeight = 'bold';
         innerElement.innerText = textContent;
-        // innerElement.setAttribute('evidence_id')
-
+    
         // Aggiungiamo al local storage il contenuto da referenziare al click dell'elemento
-        if(localStorage.getItem(`fascicolo_numero_${id}`) === null){
+        if (localStorage.getItem(`fascicolo_numero_${id}`) === null) {
             localStorage.setItem(`fascicolo_numero_${id}`, contenuto);
         }
-
-        // Mostriamo nella consocle il contenuto del fascicolo
+    
+        // Mostriamo nella console il contenuto del fascicolo
         console.log('Dati salvati nel local storage', localStorage.getItem(`fascicolo_numero_${id}`));
-
+    
+        // Aggiungiamo il catenaccio se `isProtected` è true
+        if (isProtected) {
+            let lockIcon = document.createElement('span');
+            lockIcon.innerText = ''; // Icona catenaccio (Unicode)
+            lockIcon.style.marginLeft = 'auto'; // Spinge l'icona verso destra
+            lockIcon.style.fontSize = '16px';
+            innerElement.appendChild(lockIcon);
+        }
+    
         this.scrollableList.appendChild(innerElement);
         
         return innerElement;
     }
+    
     
 
     // Questo metodo mostra una card che compare e scompare in sovrimpressione al click di uno specifico tasto

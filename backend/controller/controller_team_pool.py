@@ -88,6 +88,30 @@ class ControllerTeamPool:
 
         # Ritorniamo i membri formattati
         return formatted_team_members, 200
+    
+    # Questo metodo restituisce la lista di membri di un team specifico con un ruolo specifico
+    @staticmethod
+    def get_all_team_group_socket(team_id: int = 0, role: str = "COMANDANTE"):
+        """
+        Metodo per ottenere tutti i membri di uno specifico team
+        """
+        # Otteniamo i membri del team dal database
+        team_members = database.get_all_team_members(team_id=team_id)
+
+        # Se il risultato è un messaggio di errore, lo ritorniamo direttamente
+        if isinstance(team_members, dict) and "msg" in team_members:
+            return team_members, 404
+
+        # Formattazione dei membri del team
+        formatted_team_members = [{
+                "name": member[0],
+                "id": member[1],
+                "socket" : member[5]
+            } for member in team_members if member[3] == role]
+        
+
+        # Ritorniamo i membri formattati
+        return formatted_team_members, 200
 
 
 

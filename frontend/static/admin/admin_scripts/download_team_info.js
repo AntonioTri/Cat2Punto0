@@ -140,7 +140,7 @@ export class DownloadCardManager extends AbstractCardManager{
         // URL per ottenere il download in base al team id
         this.URL_DOWNLOAD_TEAM = `${API_URL}/get_team_pdf`;
         // Docker paths
-        this.dockerPathDownloadTeam = 'http://localhost:5000/api/get_team_pdf';
+        this.dockerPathDownloadTeam = 'http://localhost:6000/api/get_team_pdf';
         
     };
 

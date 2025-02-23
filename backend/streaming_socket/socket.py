@@ -5,6 +5,7 @@ from flask_jwt_extended import get_jwt
 from JWT.socket_auth_decorator import socket_require_role
 from entity.role import ROLE
 from controller.controller_personal_functions import ControllerPersonalFunctions
+from controller.controller_team_pool import ControllerTeamPool
 
 
 # La classe socket definisce un namespace sul quale inviare specifici segnali
@@ -14,12 +15,11 @@ from controller.controller_personal_functions import ControllerPersonalFunctions
 class Socket(Namespace):
 
     # Questa funzione serve ad aggiungere alla pool di utenze il nuovo socked id
-    def on_connect(self):
+    def on_update_personal_socket(self, data):
         # Estraiamo l'id dagli args
-        user_id = request.args.get("id")
+        user_id = data["id"]
         if not user_id:
-            return {"msg" : f"Errore, id non presente negli headers della richiesta. Headers: {request.args}"}        
-        user_id = request.args.get("id")
+            return {"msg" : f"Errore, id non presente negli headers della richiesta. Headers: {data}"}        
 
         # Estrazione del sid
         socketID = request.sid
@@ -56,8 +56,29 @@ class Socket(Namespace):
         for sid in team_sockets:
             emit('commander_message_sent', message_to_send, to=sid)
 
-    # Segnale di test
-    def on_test_signal(self, data):
-        print(data)
-        emit('test_signal_recieved', 1)
+    @socket_require_role(ROLE.DETECTIVE.value)
+    def on_require_permission_for_file(self, data):
+
+        #Controllo sui campi
+        if "team_id" not in data or "fascicolo_id" not in data:
+            return {"msg" : "Il campo team_id è obbligatorio."}, 404
+        
+        #Estrazione dei dati
+        team_id = data["team_id"]
+        fascicolo_id = data["fascicolo_id"]
+        emitter_socket = data["personal_socket"]
+
+        #Estraiamo le socket dei destinatari
+        commanders_sockets = ControllerTeamPool.get_all_team_group_socket(team_id=team_id, role="COMANDANTE")
+        
+        # Messaggio
+        message_to_send = {
+            "fascicolo_id" : fascicolo_id,
+            "detective_socket" : emitter_socket, 
+        }
+
+        #Invio del messaggio
+        for sid in commanders_sockets:
+            emit('permission_required_for_file', message_to_send, to=sid)
+
 

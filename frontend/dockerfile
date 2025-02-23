@@ -6,8 +6,8 @@ COPY ./static /usr/share/nginx/html/static
 COPY ./templates /usr/share/nginx/html/templates
 COPY ./config/nginx.conf /etc/nginx/nginx.conf
 
-# Espone la porta 5001
-EXPOSE 5001
+# Espone la porta 6001
+EXPOSE 6001
 
 
 CMD ["nginx", "-g", "daemon off;"]

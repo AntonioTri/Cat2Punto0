@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class PostgresDB():
 
+
     def __init__(self) -> None:
                                 # Parametri di connessione al database
         
@@ -197,7 +198,8 @@ class PostgresDB():
                             tm.id_personale AS member_id, \
                             tm.password AS member_password, \
                             tm.role AS member_role, \
-                            t.team_name AS team_name \
+                            t.team_name AS team_name, \
+                            tm.socket_id as socket \
                             FROM team_member tm JOIN team_group tg ON tm.group_id = tg.group_id \
                             JOIN teams t ON tg.team_id = t.team_id WHERE t.team_id = %s", (team_id,))
             
