@@ -56,4 +56,8 @@ class Socket(Namespace):
         for sid in team_sockets:
             emit('commander_message_sent', message_to_send, to=sid)
 
+    # Segnale di test
+    def on_test_signal(self, data):
+        print(data)
+        emit('test_signal_recieved', 1)
 

@@ -1,7 +1,7 @@
 import { AbstractCardManager } from '../../utils/abstract_card_manager.js';
 import { CheckMark } from '../../check_mark/check_mark.js';
 import { API_URL, SOCKET_URL } from '../../config.js';
-
+import { socket } from '../../utils/socket.js';
 
 export class FascicoliManager extends AbstractCardManager{
 
@@ -77,6 +77,10 @@ export class FascicoliManager extends AbstractCardManager{
             // Aggiunta dell'event listener
             elementAdded.addEventListener('click', () => {
                 super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);
+                socket.emit('test_signal', 1, ()=>{
+                    console.log('Segnale inviato');
+                });
+
             });
         
         });
