@@ -12,10 +12,12 @@ export class FascicoliManager extends AbstractCardManager{
 
     init(){
 
+        this.permissionMap = {};
         this.fascicoli = [];
         this.setURLS();
-        this.sendRequest();
         this.addScrollableList('evidence_list');
+        this.sendRequest();
+        this.defineSocketSignals();
 
     }
 
@@ -37,9 +39,10 @@ export class FascicoliManager extends AbstractCardManager{
 
                 // Converte la risposta in json
                 const data = await response.json();
-                const fascicoli = data.fascicoli;
+                this.fascicoli = data.fascicoli;
                 // Aggiunta dei bottoni sulla base dei fascicoli ottenuti dalla api
-                this.addElementsToList(fascicoli);
+                this.initPermissionMap();
+                this.addElementsToList(this.fascicoli);
 
             // La risposta non è stata OK
             } else {
@@ -77,26 +80,7 @@ export class FascicoliManager extends AbstractCardManager{
             // Aggiunta dell'event listener
             elementAdded.addEventListener('click', () => {
 
-                // Se il fascicolo e' protetto allora viene inviato un segnale al capitano
-                if(fascicolo.permission_required){
-                    
-                    // Dfiniamo i dati da inviare
-                    const data_to_send = {
-                        // Il token deve essere sempre presente
-                        token : localStorage.getItem('access_token'),
-                        team_id : localStorage.getItem('team_id'),
-                        id_fascicolo : fascicolo.id_fascicolo,
-                        detective_socket : localStorage.getItem('socket'),
-                        detective_name : localStorage.getItem('detective_name')
-                    };
-                    
-                    // E li inviamo
-                    socket.emit('evidence_permission_required', data_to_send);
-                
-                // Nel caso opposto mostriamo direttamente la card
-                } else {
-                    super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);
-                }
+                this.addEventsOnElement(fascicolo);
 
             });
         
@@ -104,6 +88,76 @@ export class FascicoliManager extends AbstractCardManager{
 
     };
 
+
+    addEventsOnElement(fascicolo){
+
+        
+        // Se il fascicolo non ha bisogno di permesso lo mostriamo direttamente
+        if(!fascicolo.permission_required) {
+            super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);
+            
+        // Se il fascicolo e' protetto e se non e' mai stato inviato il segnale per esso  
+        // allora viene inviato un segnale ai capitani
+        // TODO: Si potrebbe fare che il segnae viene inviato solo ad un capitano, per incrementare
+        // l'interattivita' tra i giocatori e le cose da fare
+        } else if(fascicolo.permission_required && !this.permissionMap[fascicolo.id_fascicolo]["permission_sent"]){
+            
+            // Come prima cosa indichiamo che c'e' una richiesta pendente per il fascicolo
+            // Così da impedire che vengano spammate richieste con click continui
+            this.permissionMap[fascicolo.id_fascicolo]["permission_sent"] = true;
+
+            // Definiamo i dati da inviare
+            const data_to_send = {
+                // Il token deve essere sempre presente
+                token : localStorage.getItem('access_token'),
+                team_id : localStorage.getItem('team_id'),
+                id_fascicolo : fascicolo.id_fascicolo,
+                detective_socket : localStorage.getItem('socket'),
+                detective_name : localStorage.getItem('detective_name')
+            };
+            
+            // E li inviamo
+            socket.emit('evidence_permission_required', data_to_send);
+        
+        // Altrimenti se la card ha bisogno di permesso ma questo è stato concesso, la mostriamo
+        } else if(fascicolo.permission_required && this.permissionMap[fascicolo.id_fascicolo]["permission_gained"]) {
+            super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);
+        }
+
+    }
+
+
+    // Questo metodo inizializza la mappa dei permessi sui fascicoli
+    initPermissionMap(){
+        
+        // Per ogni fascicolo, se il fascicolo ha bisogno del permesso
+        // viene registrato nella mappa come falso
+        this.fascicoli.forEach(fascicolo => {
+
+            if(fascicolo.permission_required){
+                this.permissionMap[fascicolo.id_fascicolo] = {
+                    "permission_sent" : false,
+                    "permission_gained" : false
+                };
+            }
+        });
+
+    }
+
+    // Questo metodo inizializza tutti i segnali associati ai fascicoli
+    defineSocketSignals(){
+
+        // Definizione del segnale per dare il permesso di accesso ad un fascicolo
+        socket.on('evidence_permission_gained', (response) => {
+            console.log('Permessi ricevuti per i fascicoli:', response);
+            // Estraiamo l'id del fascicolo sul quale abbiamo ora i permessi
+            const id_fascicolo = parseInt(response);
+            // Aggiorniamo la mappa
+            this.permissionMap[id_fascicolo]["permission_gained"] = true;
+
+        });
+
+    }
 
     setURLS(){
 

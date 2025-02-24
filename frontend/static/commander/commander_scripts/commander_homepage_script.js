@@ -12,4 +12,8 @@ socket.on('permission_required_for_file', (data) => {
 
     console.log("Messaggio dalla socket ricevuto: ", data);
 
+    data["token"] = localStorage.getItem('access_token');
+
+    socket.emit('give_evidence_permission', data);
+
 });

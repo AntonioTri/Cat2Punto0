@@ -95,3 +95,16 @@ class Socket(Namespace):
             else:
                 logger.info(f'[!] Errore durante l\'estrazione dei dati dal database. Errore: {commanders_sockets}')
                 emit('error', {"msg" : "Errore durante l'estrazione dei datti dal database!", "error" : commanders_sockets}, to=data["detective_socket"]) 
+
+
+    # Metodo che serve a dare i permessi ad un detective per accedere ad uno specifico fascicolo
+    @socket_require_role(role=ROLE.COMANDANTE.value)
+    def on_give_evidence_permission(self, data):
+        
+        logger.info(f"[-] Permessi da concedere: {data}")
+        logger.info('[?] Provo ad inviare i permessi ...')
+
+        message_to_send = data["id_fascicolo"]
+        emit('evidence_permission_gained', message_to_send, to=data["detective_socket"])
+        
+        logger.info('[+] Permessi inviati con successo!')
