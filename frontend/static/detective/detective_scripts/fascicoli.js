@@ -79,11 +79,15 @@ export class FascicoliManager extends AbstractCardManager{
 
                 // Se il fascicolo e' protetto allora viene inviato un segnale al capitano
                 if(fascicolo.permission_required){
+                    
                     // Dfiniamo i dati da inviare
                     const data_to_send = {
+                        // Il token deve essere sempre presente
+                        token : localStorage.getItem('access_token'),
                         team_id : localStorage.getItem('team_id'),
                         id_fascicolo : fascicolo.id_fascicolo,
-                        detective_socket : localStorage.getItem('socket')
+                        detective_socket : localStorage.getItem('socket'),
+                        detective_name : localStorage.getItem('detective_name')
                     };
                     
                     // E li inviamo

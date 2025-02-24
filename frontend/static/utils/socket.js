@@ -34,6 +34,12 @@ socket.on('socket_updated', (response) => {
     } else {
         console.log('Errore:', response.message);
     }
-})
+});
+
+// Questo segnale gestisce il log degli errori nel back end, daot che non si possono restituire 
+// dizionari come in  una normale api restful
+socket.on('error', (response) => {
+    console.log('Some error occurred in the back end. Response: ', response);
+});
 
 export { socket };

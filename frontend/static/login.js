@@ -38,9 +38,10 @@ loginForm.addEventListener("submit", async function(event) {
             // Il ruolo viene conservato come formattato e non formattato
             localStorage.setItem('personal_id', data.personal_id);
             localStorage.setItem('access_token', data.access_token);
-            localStorage.setItem('team_id', data.team_id);personal_id
+            localStorage.setItem('team_id', data.team_id);
             localStorage.setItem('unformatted_role', data.role);
             localStorage.setItem('role', role);
+            localStorage.setItem('detective_name', username);
             
             // Reindirizzamento in caso di successo
             window.location.replace(`../templates/${role}/${role}_homepage.html`);

@@ -193,11 +193,9 @@ export class AbstractCardManager{
         // Aggiungiamo al local storage il contenuto da referenziare al click dell'elemento
         if (localStorage.getItem(`fascicolo_numero_${id}`) === null) {
             localStorage.setItem(`fascicolo_numero_${id}`, contenuto);
+            console.log('Id fascicolo salvato = ', id);
         }
-    
-        // Mostriamo nella console il contenuto del fascicolo
-        console.log('Dati salvati nel local storage', localStorage.getItem(`fascicolo_numero_${id}`));
-    
+
         // Aggiungiamo il catenaccio se `isProtected` è true
         if (isProtected) {
             let lockIcon = document.createElement('span');
