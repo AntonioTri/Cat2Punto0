@@ -52,7 +52,7 @@ class ControllerManageUsersAUTH():
         # Assieme al token viene restituito anche il ruolo, che serve al fron end per servire le pagine
         return {"access_token" : create_access_token(identity = str(response["username"]),\
                                                      additional_claims = {"role": response["role"]},\
-                                                     expires_delta = timedelta(hours=2)),
+                                                     expires_delta = timedelta(hours=5)),
                 "role" :        response["role"],
                 "personal_id" : personal_id,
                 "team_id" :     team_id,

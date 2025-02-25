@@ -104,7 +104,10 @@ class Socket(Namespace):
         logger.info(f"[-] Permessi da concedere: {data}")
         logger.info('[?] Provo ad inviare i permessi ...')
 
-        message_to_send = data["id_fascicolo"]
-        emit('evidence_permission_gained', message_to_send, to=data["detective_socket"])
+        message_to_send = {
+            "element_id" : data["element_id"],
+            "permission" : data["permission"]
+        }
+        emit('evidence_permission_gained', message_to_send, to=data["client_socket"])
         
         logger.info('[+] Permessi inviati con successo!')

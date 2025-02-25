@@ -1,0 +1,91 @@
+#permission_list {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.permission_card.deleted {
+    transform: translateX(-110%);
+    opacity: 0;
+}
+
+.permission_card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    text-align: center;
+    width: 90%;
+    transition: transform 1.8s, opacity 0.5s;
+}
+
+.permission_card div {
+    font-size: 16px;
+    color: #333;
+}
+
+
+/* Stile pulsanti */
+.agreeButton, .declineButton {
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    width: 40%;
+    height: 110%;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.agreeButton {
+    margin-right: 4%;
+}
+
+.declineButton {
+    margin-left: 4%;
+}
+
+.buttonSpace {
+
+    width: 100%;
+    height: 42%;
+
+}
+
+/* Stile bottone di approvazione */
+.agreeButton {
+    background-color: rgb(79, 202, 66); /* Verde */
+}
+
+.agreeButton:hover {
+    background-color: rgb(38, 192, 21);
+    transform: scale(1.05);
+}
+
+.agreeButton:active {
+    background-color: #009d34;
+    transform: scale(0.9);
+}
+
+/* Stile bottone di rifiuto */
+.declineButton {
+    background-color: rgb(219, 35, 35); /* Rosso */
+}
+
+.declineButton:hover {
+    background-color: rgb(200, 21, 21);
+    transform: scale(1.05);
+}
+
+.declineButton:active {
+    background-color: rgb(174, 0, 0);
+    transform: scale(0.9);
+}
+
+
+

@@ -29,7 +29,10 @@ socket.on('socket_updated', (response) => {
     if (response.status_code === 201) {
         console.log('Socket registrata con successo sul server');
         console.log(response);
-    
+
+        // Viene segnalato globalmente che la socket e' ora utilizzabile
+        document.dispatchEvent(new Event("socketInitialized"));
+
     // Aggiornamento con esito negativo
     } else {
         console.log('Errore:', response.message);

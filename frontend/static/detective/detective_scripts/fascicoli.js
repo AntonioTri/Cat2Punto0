@@ -18,7 +18,7 @@ export class FascicoliManager extends AbstractCardManager{
         this.addScrollableList('evidence_list');
         this.sendRequest();
         this.defineSocketSignals();
-
+        this.addResponseMessage();
     }
 
     async sendRequest(){
@@ -150,10 +150,23 @@ export class FascicoliManager extends AbstractCardManager{
         // Definizione del segnale per dare il permesso di accesso ad un fascicolo
         socket.on('evidence_permission_gained', (response) => {
             console.log('Permessi ricevuti per i fascicoli:', response);
-            // Estraiamo l'id del fascicolo sul quale abbiamo ora i permessi
-            const id_fascicolo = parseInt(response);
-            // Aggiorniamo la mappa
-            this.permissionMap[id_fascicolo]["permission_gained"] = true;
+
+            // Se il permesso e' stato positivo viene concesso di accedere al fascicolo
+            if(response.permission){
+                // Estraiamo l'id del fascicolo sul quale abbiamo ora i permessi
+                const id_fascicolo = parseInt(response.element_id);
+                // Aggiorniamo la mappa
+                this.permissionMap[id_fascicolo]["permission_gained"] = true;
+                // Mostriamo un messaggio di successo
+                this.showResponseMessage(`Permesso concesso per vedere il fascicolo ${id_fascicolo}.`);
+            
+            // Altrimenti se l'esito era negativo viene segnalato con un allert
+            // inoltre viene offerta la possibilita' di richiedere il permesso
+            } else {
+                const id_fascicolo = parseInt(response.element_id);
+                this.permissionMap[id_fascicolo]["permission_sent"] = false;
+                this.showResponseMessage(`Permesso non concesso per il fascicolo ${id_fascicolo}.`);
+            }
 
         });
 
