@@ -183,27 +183,13 @@ export class AbstractCardManager{
         innerElement.style.backgroundColor = 'white';
         innerElement.style.zIndex = '10';
         innerElement.style.display = 'flex';
-        innerElement.style.alignItems = 'center';
+        innerElement.style.flexDirection = 'column';
+        innerElement.style.textAlign = 'left';
         innerElement.style.justifyContent = 'space-between'; // Cambiato per spazio tra testo e catenaccio
-        innerElement.style.textAlign = 'center';
         innerElement.style.fontSize = '16px';
         innerElement.style.fontWeight = 'bold';
         innerElement.innerText = textContent;
     
-        // Aggiungiamo al local storage il contenuto da referenziare al click dell'elemento
-        if (localStorage.getItem(`fascicolo_numero_${id}`) === null) {
-            localStorage.setItem(`fascicolo_numero_${id}`, contenuto);
-        }
-
-        // Aggiungiamo il catenaccio se `isProtected` è true
-        if (isProtected) {
-            let lockIcon = document.createElement('span');
-            lockIcon.innerHTML = 'H';
-            // Spinge l'icona verso destra
-            lockIcon.style.marginLeft = 'auto'; 
-            lockIcon.style.fontSize = '16px';
-            innerElement.appendChild(lockIcon);
-        }
     
         this.scrollableList.appendChild(innerElement);
         

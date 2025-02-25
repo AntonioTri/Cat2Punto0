@@ -77,6 +77,15 @@ export class FascicoliManager extends AbstractCardManager{
         fascicoli.forEach(fascicolo => {
             // Aggiunta dell'elemento
             const elementAdded = this.addElementToScrollableList(`${fascicolo.id_fascicolo}`, fascicolo.titolo, fascicolo.contenuto, fascicolo.permission_required);
+            
+            // Aggiungiamo al local storage il contenuto da referenziare al click dell'elemento
+            if (localStorage.getItem(`fascicolo_numero_${fascicolo.id_fascicolo}`) === null) {
+                localStorage.setItem(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.contenuto);
+            }
+
+            // Aggiunta dei dettagli interni
+            this.addStatusToEvidence(elementAdded, fascicolo);
+
             // Aggiunta dell'event listener
             elementAdded.addEventListener('click', () => {
 
@@ -118,6 +127,11 @@ export class FascicoliManager extends AbstractCardManager{
             
             // E li inviamo
             socket.emit('evidence_permission_required', data_to_send);
+
+            // Aggiorniamo la scritta dello status
+            const status = document.getElementById(`fascicolo_numero_${fascicolo.id_fascicolo}_status`);
+            status.style.color = 'rgb(219, 130, 35)';
+            status.innerHTML = 'Richiesta inviata.';
         
         // Altrimenti se la card ha bisogno di permesso ma questo è stato concesso, la mostriamo
         } else if(fascicolo.permission_required && this.permissionMap[fascicolo.id_fascicolo]["permission_gained"]) {
@@ -157,18 +171,65 @@ export class FascicoliManager extends AbstractCardManager{
                 const id_fascicolo = parseInt(response.element_id);
                 // Aggiorniamo la mappa
                 this.permissionMap[id_fascicolo]["permission_gained"] = true;
+                
+                // Aggiorniamo la scritta dello status
+                const status = document.getElementById(`fascicolo_numero_${id_fascicolo}_status`);
+                status.style.color = 'rgb(79, 202, 66)';
+                status.innerHTML = 'Permesso ottenuto.';
+                
                 // Mostriamo un messaggio di successo
                 this.showResponseMessage(`Permesso concesso per vedere il fascicolo ${id_fascicolo}.`);
             
             // Altrimenti se l'esito era negativo viene segnalato con un allert
             // inoltre viene offerta la possibilita' di richiedere il permesso
             } else {
+
                 const id_fascicolo = parseInt(response.element_id);
                 this.permissionMap[id_fascicolo]["permission_sent"] = false;
+
+                // Aggiorniamo la scritta dello status
+                const status = document.getElementById(`fascicolo_numero_${id_fascicolo}_status`);
+                status.style.color = 'rgb(219, 35, 35)';
+                status.innerHTML = 'Permesso rifiutato.';
+
                 this.showResponseMessage(`Permesso non concesso per il fascicolo ${id_fascicolo}.`);
+
             }
 
         });
+
+    }
+
+
+    addStatusToEvidence(elementAdded, fascicolo){
+
+        const permissionStatus = document.createElement('div');
+            permissionStatus.classList.add('permission_status');
+            const permissionText = document.createElement('div');
+            permissionText.innerText = 'Stato: ';
+            const status = document.createElement('div');
+            status.id = `fascicolo_numero_${fascicolo.id_fascicolo}_status`;
+
+            permissionStatus.appendChild(permissionText);
+            permissionStatus.appendChild(status);
+
+            permissionStatus.style.marginTop = '1%';
+            permissionStatus.style.display = 'flex';
+            permissionStatus.style.alignItems = 'center';
+            permissionStatus.style.gap = '5px';
+
+            // Aggiungiamo una scritta negativa se `permission required` è true
+            if (fascicolo.permission_required) {
+                status.style.color = 'rgb(219, 35, 35)';
+                status.innerHTML = 'Permesso richiesto.';
+            } else {
+                status.style.color = 'rgb(79, 202, 66)';
+                status.innerHTML = 'Permesso concesso.';
+            }
+
+            // Aggiungiamo all'elemento il suo stato
+            elementAdded.appendChild(permissionStatus);
+
 
     }
 
