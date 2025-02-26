@@ -1,0 +1,8 @@
+FASCICOLO_1 = ["Primo fascicolo", "Questo è il contenuto del primo fascicolo"]
+FASCICOLO_2 = ["Secondo fascicolo", "Questo è il contenuto del secondo fascicolo"]
+FASCICOLO_3 = ["Terzo fascicolo", "Questo è il contenuto del terzo fascicolo"]
+FASCICOLO_4 = ["Quarto fascicolo", "Questo è il contenuto del quarto fascicolo"]
+FASCICOLO_5 = ["Quinto fascicolo", "Questo è il contenuto del quinto fascicolo"]
+FASCICOLO_6 = ["Sesto fascicolo", "Questo è il contenuto del sesto fascicolo"]
+FASCICOLO_7 = ["Settimo fascicolo", "Questo è il contenuto del settimo fascicolo"]
+FASCICOLO_8 = ["Ottavo fascicolo", "Questo è il contenuto del ottavo fascicolo"]

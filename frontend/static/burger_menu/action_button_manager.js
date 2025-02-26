@@ -1,5 +1,5 @@
 import {CardManager} from '../admin/card_manager.js';
-
+import {commanderActions, admin, detectiveActions, decritterAction} from '../utils/constants.js';
 
 // Questa classe permette di gestire i bottoni presenti nell'action menu
 export class ActionButtonManager{
@@ -18,12 +18,6 @@ export class ActionButtonManager{
     // Questo metodo estrae il ruolo dal local storage e crea gli action button
     // Personalizzati per ogni utente, sulla base del ruolo
     addPersonalActionbuttons(){
-
-        // Definiamo le azioni
-        const commanderActions = ['Messaggio', 'Nota', 'Permessi'];
-        const decritterAction = ['ALPHA', 'BETA', 'OMEGA', 'Chiave'];
-        const detectiveActions = ['Deduzione', 'Database', 'Fascicoli'];
-        const admin = ['create_team', 'add_team_member', 'reset_passwords'];
         
         // Estraiamo il ruolo
         const role = localStorage.getItem('unformatted_role');
