@@ -1,12 +1,20 @@
 from Nodes.node import Node, Status, Signals
 from Edges.edge import PurpleEdge, GreenEdge, EdgeStatus
 from Riddles.riddles import Riddle
-
+import pickle
 
 class ProgressionGraph:
     def __init__(self):
-        self.nodes = []
+        self.nodes =[]
+        self.active_riddles = [] 
         self.create_test_graph()
+
+    def initialize_game(self):
+        """
+        Inizializza il gioco, impostando lo stato iniziale.
+        """
+        self.active_riddles = [self.nodes[0]]  # Inizia con il nodo radice
+        print("Gioco inizializzato! Pronto per iniziare.")
     
     def create_test_graph(self):
 
@@ -87,7 +95,7 @@ class ProgressionGraph:
         n.addPurpleChildren(six)
         d.addPurpleChildren(one_entrypoint)
         a_2.addPurpleChildren(three_entrypoint)
-        f.addPurpleChildren(five_entrypoint)
+        f.addPurpleChildren(five)
 
 
         
@@ -108,90 +116,53 @@ class ProgressionGraph:
 
         root.setNewStatus(Status.DISCOVERED)
 
-    
-    def run_test(self):
-        # Inizializziamo gli enigmi da risolvere. Questa lista contiene tutti gli enigmi attivi
-        # Sotto forma di nodi o segreti dei nodi (archi verdi)
-        active_riddles : list[Node | GreenEdge ] = [self.nodes[0]]
-        
-        while True:
 
-            # Stampa delle informazioni
-            for element in active_riddles:
-                if isinstance(element, Node):
-                    self.print_node_info(element)
-                elif isinstance(element, GreenEdge):
-                    self.print_edge_info(edge)
-            
-            # Se non ci sono enigmi attivi viene segnalato
-            # TODO: Da aggiungere che bisognoerebbe segnalare la fine
-            # se si e' raggiunto un finale
-            if not active_riddles:
-                print("\nNessun altro enigma da risolvere!")
-                break
-            
-            # Un try catch gestisce gli input dell'utente
-            try:
-                answer = input("\nInserisci la soluzione (o 'exit' per uscire): ").strip().lower()
-                if answer == 'exit':
-                    break
-                
-                # Questa variabile serve a capire se qualcosa e' stato risolto
-                # Piu' avanti nel codice, la variabile serve a segnalare l'utente di una risposta
-                # sbagliata
-                solved = False
+    def process_answer(self, answer):
+        """
+        Processa la risposta dell'utente e aggiorna lo stato del gioco.
+        :param answer: La risposta inserita dall'utente.
+        :return: True se il gioco è ancora attivo, False se è terminato.
+        """
+        # Stampa delle informazioni sugli enigmi attivi
+        for element in self.active_riddles:
+            if isinstance(element, Node):
+                self.print_node_info(element)
+            elif isinstance(element, GreenEdge):
+                self.print_edge_info(element)
 
-                # Per ogni elemento presente nella lista di enigmi da risolvere
-                # viene eseguito un controllo per vedere se la risposta inserita e' corretta
-                for element in active_riddles:
+        # Se non ci sono enigmi attivi, il gioco è finito
+        if not self.active_riddles:
+            print("\nNessun altro enigma da risolvere!")
+            return False  # Fine del gioco
 
-                    # Controllo per l'istanza di nodo
-                    if isinstance(element, Node):
-                        # Se la risposta appartiene al nodo questo viene risolto
-                        # i figli viola scoperti e gli archi verdi scoperti
-                        if element.isSolution(answer):
-                            print(f"\n✅ Enigma risolto! Nodo {element.getKey()} sbloccato")
-                            # L'enigma risolto viene eliminato dagli enigmi da risolvere
-                            active_riddles.remove(element)
-                            
-                            # Vengono aggiunti anche gli archi verdi uscenti se sono presenti
-                            if element.greenChildrens:
-                                for edge in element.childrenGreenEdges:
-                                    active_riddles.append(edge)
-                            
-                            # La variabile booleana segnala che un enigma e' stato risolto
-                            solved = True
+        # Controlla se la risposta è corretta
+        solved = False
+        for element in self.active_riddles:
+            if isinstance(element, Node):
+                if element.isSolution(answer):
+                    print(f"\n✅ Enigma risolto! Nodo {element.getKey()} sbloccato")
+                    self.active_riddles.remove(element)
+                    if element.greenChildrens:
+                        for edge in element.childrenGreenEdges:
+                            self.active_riddles.append(edge)
+                    solved = True
 
+            elif isinstance(element, GreenEdge):
+                if element.checkRiddle(answer):
+                    print(f"\n✅ Enigma risolto! Arco verde da {element.getStartingNode().getKey()} a {element.getEndingNode().getKey()} sbloccato!")
+                    self.active_riddles.remove(element)
+                    solved = True
 
-                    # Caso di istanza di arco
-                    elif isinstance(element, GreenEdge):
-                        # Se la risposta era corretta, al nodo puntato viene inviato un segnale
-                        # Al segnale il nodo controlla che tutti gli archi in entrata verdi 
-                        # siano risolti, se si' il nodo viene scoperto
-                        #
-                        # Infine l'arco viene segnato come risolto
-                        if element.checkRiddle(answer):
-                            print(f"\n✅ Enigma risolto! Arco verde da {element.getStartingNode().getKey()} a {element.getEndingNode().getKey()} sbloccato!")
-                            # L'arco viene eliminato dalla lista di enigmi
-                            # e la flag viene alzata
-                            active_riddles.remove(element)
-                            solved = True
+        # Aggiungi nuovi nodi scoperti alla lista degli enigmi attivi
+        for node in self.nodes:
+            if node.getStatus() == Status.DISCOVERED and node not in self.active_riddles:
+                self.active_riddles.append(node)
 
-                # Alla fine dei check delle risposte tutti i nodi che possibilmente sono stati
-                # scoperti, vengono inseriti alla lista di enigmi da risolvere
-                for node in self.nodes:
-                    if node.getStatus() == Status.DISCOVERED and node not in active_riddles:
-                        active_riddles.append(node)        
+        # Se la risposta non era corretta, segnala l'errore
+        if not solved:
+            print("\n❌ Soluzione errata o enigma non trovato")
 
-                # Se nessun enigma avviato aveva la risposta corretta
-                # viene segnalato
-                if not solved:
-                    print("\n❌ Soluzione errata o enigma non trovato")
-            
-            except KeyboardInterrupt:
-                print("\nTest interrotto")
-                break
-
+        return True  # Il gioco continua
 
     def print_node_info(self, node: Node):
         print(f"\n*** NODO {node.getKey()} ***")
@@ -223,9 +194,55 @@ class ProgressionGraph:
         print(f"\n*** ARCO VERDE ({edge.getStatus().name}) ***\nNodo di partenza: {edge.getStartingNode().getKey()}.\nNodo di arrivo: {edge.getEndingNode().getKey()}.")
 
 
+    def save_to_file(self, filename):
+        """
+        Salva l'istanza del grafo in un file binario usando pickle.
+        """
+        with open(filename, 'wb') as file:  # 'wb' = write binary
+            pickle.dump(self, file)
+
+
+    @staticmethod
+    def load_from_file(filename):
+        """
+        Carica un'istanza del grafo da un file binario usando pickle.
+        """
+        with open(filename, 'rb') as file:  # 'rb' = read binary
+            return pickle.load(file)
+
 
 
 if __name__ == "__main__":
-    tester = ProgressionGraph()
-    tester.run_test()
-    print("\nTest completato!")
+    # Creazione del grafo
+    graph = ProgressionGraph()
+    graph.initialize_game()
+
+    # Loop esterno per gestire l'input dell'utente
+    while True:
+        try:
+            # Prendi l'input dall'utente
+            answer = input("\nInserisci la soluzione (o 'exit' per uscire): ").strip().lower()
+            
+            # Se l'utente vuole uscire, interrompi il loop
+            if answer == 'exit':
+                print("\nGioco interrotto.")
+                break
+            elif answer == "save_file":
+                print("\nSalvo il grafo attuale ... ")
+                graph.save_to_file("graph_test")
+                continue
+            elif answer == "load_graph":
+                graph = ProgressionGraph.load_from_file("graph_test")
+                print("\nCarico il grafo dai salvataggi ...")
+                continue
+            
+            # Processa la risposta
+            game_active = graph.process_answer(answer)
+            
+            # Se il gioco è terminato, interrompi il loop
+            if not game_active:
+                break
+        
+        except KeyboardInterrupt:
+            print("\nGioco interrotto.")
+            break
