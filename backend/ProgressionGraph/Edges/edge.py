@@ -28,25 +28,22 @@ class PurpleEdge:
 
     def __init__(self, startingNode = None, endingNode = None):
 
-        self.__color : EdgeColor = EdgeColor.PURPLE
-        self.__status : EdgeStatus = EdgeStatus.NOT_DISCOVERED
+        self.color : EdgeColor = EdgeColor.PURPLE
+        self.status : EdgeStatus = EdgeStatus.NOT_DISCOVERED
         
         self.__startingNode = startingNode
         self.__endingNode = endingNode
 
 
     def getStatus(self) -> EdgeStatus:
-        return self.__status
+        return self.status
     
 
     def setStatus(self, newStatus : EdgeStatus = EdgeStatus.NOT_DISCOVERED):
         """ 
-            Il metodo set status segnala il nodo uscente se lo stato era resolved.
-            Mecanismo che serve a segnalare al nodo un possibile sblocco
+            Il metodo set status imposta un nuovo stato all'arco viola
         """
-        self.__status = newStatus
-        if newStatus == EdgeStatus.RESOLVED:
-            self.signalEndingNode(Signals.GREEN_EDGE_RESOLVED)
+        self.status = newStatus
 
 
     def signalEndingNode(self, signal = None):
@@ -55,7 +52,7 @@ class PurpleEdge:
 
     def getColor(self) -> EdgeColor:
         """ Metodo per ritornare il colore dell'arco """
-        return self.__color
+        return self.color
     
     # Setter e getter per i nodi
     def setStartingNode(self, startingNode = None):
@@ -83,9 +80,10 @@ class GreenEdge(PurpleEdge):
     def __init__(self, startingNode=None, endingNode=None, riddle : Riddle = None):
         super().__init__(startingNode, endingNode)
         self.__riddle = riddle
+        self.color = EdgeColor.GREEN
 
 
-    def checkRiddle(self, solution : str = ""):
+    def checkRiddle(self, solution : str = "") -> bool:
         """
             Questo metodo controlla se la soluzione all'enigma memorizzato sia corretta.
             In tal caso viene impostato lo stato come RESOLVED e di conseguenza il nodo
@@ -93,7 +91,19 @@ class GreenEdge(PurpleEdge):
         """
         if self.__riddle.isSolution(solution):
             self.setStatus(EdgeStatus.RESOLVED)
+            return True
+        
+        return False
 
 
-
+    def setStatus(self, newStatus : EdgeStatus = EdgeStatus.NOT_DISCOVERED):
+        """ 
+            Il metodo set status segnala il nodo uscente se lo stato era resolved.
+            Mecanismo che serve a segnalare al nodo un possibile sblocco
+        """
+        self.status = newStatus
+        if newStatus == EdgeStatus.RESOLVED:
+            self.signalEndingNode(Signals.GREEN_EDGE_RESOLVED)
+        elif newStatus == EdgeStatus.DISCOVERED:
+            print(f"\n🔓 Arco verde da {self.getStartingNode().getKey()} a {self.getEndingNode().getKey()} scoperto.")
 

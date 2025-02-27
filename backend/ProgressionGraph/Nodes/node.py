@@ -44,7 +44,21 @@ class Node():
         # Numero di archi verdi in ingresso risolti
         self.solvedGreenEdges : int = 0
 
-
+    def print_info(self):
+        print("\n\n")
+        print(f"Node Key: {self.key}")
+        print(f"Status: {self.status}")
+        print(f"Riddle: {self.riddle}")
+        print(f"Purple Father: {self.purpleFather.key if self.purpleFather else None}")
+        print(f"Purple Father Edge: {self.purpleFatherEdge}")
+        print(f"Green Fathers: {[node.key for node in self.greenFathers]}")
+        print(f"Green Fathers Edges: {self.greenFathersEdges}")
+        print(f"Purple Children: {[node.key for node in self.purpleChildrens]}")
+        print(f"Green Children keys: {[node.key for node in self.greenChildrens]}")
+        print(f"Children Purple Edges: {[x.getEndingNode().getKey() for x in self.childrenPurpleEdges]}")
+        print(f"Children Green Edges: {[x.getEndingNode().getKey() for x in self.childrenGreenEdges]}")
+        print(f"Green Edges Number: {self.greenEdgesNumber}")
+        print(f"Solved Green Edges: {self.solvedGreenEdges}")
 
 
     def setPurpleFather(self,  father: "Node" = None):
@@ -84,7 +98,7 @@ class Node():
             # Viene aggiunto il figlio se non sono stati lanciati errori
             self.purpleChildrens.append(children)
             self.childrenPurpleEdges.append(PurpleEdge(self, children))
-        
+
         # Cattura dell'eccezione
         except Exception as e:
             #logger.info(e)
@@ -118,14 +132,19 @@ class Node():
         # Quando lo stato del nodo viene settato come RESOLVED
         # tutti i figli viola vengono scoperti e mostrati all'utente 
         # i puzzle ed informaizoni nuove associate al nodo
+        self.status = status
+
         if status == Status.RESOLVED:
             for purpleChildren in self.purpleChildrens:
                 purpleChildren.setNewStatus(Status.DISCOVERED)
             for greenEdge in self.childrenGreenEdges:
                 greenEdge.setStatus(EdgeStatus.DISCOVERED)
+            for purpleEdge in self.childrenPurpleEdges:
+                purpleEdge.setStatus(EdgeStatus.RESOLVED)
         
         # Caso in cui vengono mostrate le informaizoni nuove
         elif status == Status.DISCOVERED:
+            print(f"🔓 Nodo {self.getKey()} scoperto.")
             self.riddle.sendNewDiscovery()
 
 
@@ -141,8 +160,10 @@ class Node():
         # gli archi verdi in ingresso sono stati risolti. In caso positivo il nodo viene scoperto
         if signal == Signals.GREEN_EDGE_RESOLVED:
             self.solvedGreenEdges += 1
+            print(f"- Nodo {self.getKey()} segnale ricevuto. Incremento il contatore: {self.solvedGreenEdges}")
 
             if self.areAllGreenEdgesResolved():
+                print(f"- Nodo {self.getKey()}. Archi verdi in ingresso risolti -> mi sblocco.")
                 self.setNewStatus(Status.DISCOVERED)
 
 
