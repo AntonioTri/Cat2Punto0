@@ -2,11 +2,15 @@ from Nodes.node import Node, Status, Signals
 from Edges.edge import PurpleEdge, GreenEdge, EdgeStatus
 from Riddles.riddles import Riddle
 import pickle
+from pathlib import Path
+from collections import deque
+
 
 class ProgressionGraph:
     def __init__(self):
-        self.nodes =[]
-        self.active_riddles = [] 
+        self.root : Node = None
+        self.nodes : list[Node] =[]
+        self.active_riddles : list[Node | GreenEdge]= []
         self.create_test_graph()
 
     def initialize_game(self):
@@ -115,6 +119,7 @@ class ProgressionGraph:
         ]
 
         root.setNewStatus(Status.DISCOVERED)
+        self.root = root
 
 
     def process_answer(self, answer):
@@ -123,12 +128,6 @@ class ProgressionGraph:
         :param answer: La risposta inserita dall'utente.
         :return: True se il gioco è ancora attivo, False se è terminato.
         """
-        # Stampa delle informazioni sugli enigmi attivi
-        for element in self.active_riddles:
-            if isinstance(element, Node):
-                self.print_node_info(element)
-            elif isinstance(element, GreenEdge):
-                self.print_edge_info(element)
 
         # Se non ci sono enigmi attivi, il gioco è finito
         if not self.active_riddles:
@@ -162,6 +161,15 @@ class ProgressionGraph:
         if not solved:
             print("\n❌ Soluzione errata o enigma non trovato")
 
+
+        # Stampa delle informazioni sugli enigmi attivi
+        for element in self.active_riddles:
+            if isinstance(element, Node):
+                self.print_node_info(element)
+            elif isinstance(element, GreenEdge):
+                self.print_edge_info(element)
+
+
         return True  # Il gioco continua
 
     def print_node_info(self, node: Node):
@@ -194,20 +202,83 @@ class ProgressionGraph:
         print(f"\n*** ARCO VERDE ({edge.getStatus().name}) ***\nNodo di partenza: {edge.getStartingNode().getKey()}.\nNodo di arrivo: {edge.getEndingNode().getKey()}.")
 
 
+    def bfs_visit_discovered_and_resolved(self, start_node: Node = None):
+        """
+        Esegue una visita BFS a partire da un nodo, visitando solo nodi con stato DISCOVERED o RESOLVED
+        e archi verdi con stato DISCOVERED o RESOLVED.
+        """
+
+        start_node = self.root
+
+        # Controllo iniziale: se il nodo di partenza non è DISCOVERED o RESOLVED, non fare nulla
+        if start_node.getStatus() not in {Status.DISCOVERED, Status.RESOLVED}:
+            print(f"Il nodo {start_node.getKey()} non è DISCOVERED o RESOLVED. Visita interrotta.")
+            return
+
+        # Inizializzazione della coda e del set dei nodi visitati
+        queue = deque()  # Coda per la BFS
+        visited_nodes = set()  # Set per tenere traccia dei nodi già visitati
+        visited_edges = set()  # Set per tenere traccia degli archi già visitati
+
+        # Aggiungi il nodo di partenza alla coda e segnalo come visitato
+        queue.append(start_node)
+        visited_nodes.add(start_node.getKey())
+
+        while queue:
+            # Estrai il nodo corrente dalla coda
+            current_node : Node = queue.popleft()
+            print(f"Visiting Node {current_node.getKey()} with status {current_node.getStatus()}")
+
+            # Visita gli archi verdi in uscita (solo se sono DISCOVERED o RESOLVED)
+            for green_edge in current_node.childrenGreenEdges:
+                if green_edge.getStatus() in {EdgeStatus.DISCOVERED, EdgeStatus.RESOLVED}:
+                    edge_key = (current_node.getKey(), green_edge.getEndingNode().getKey())
+                    if edge_key not in visited_edges:
+                        print(f"  Visiting Green Edge from {current_node.getKey()} to {green_edge.getEndingNode().getKey()} with status {green_edge.getStatus()}")
+                        visited_edges.add(edge_key)
+
+                        # Aggiungi il nodo figlio alla coda se non è già stato visitato
+                        child_node : Node = green_edge.getEndingNode()
+                        if child_node.getKey() not in visited_nodes and child_node.getStatus() in {Status.DISCOVERED, Status.RESOLVED}:
+                            queue.append(child_node)
+                            visited_nodes.add(child_node.getKey())
+
+            # Visita gli archi viola in uscita (solo se il nodo figlio è DISCOVERED o RESOLVED)
+            for purple_edge in current_node.childrenPurpleEdges:
+                child_node = purple_edge.getEndingNode()
+                if child_node.getStatus() in {Status.DISCOVERED, Status.RESOLVED}:
+                    # Aggiungi il nodo figlio alla coda se non è già stato visitato
+                    if child_node.getKey() not in visited_nodes:
+                        queue.append(child_node)
+                        visited_nodes.add(child_node.getKey())
+
+
+    @property
+    def _save_dir(self):
+        """Restituisce il percorso della cartella di salvataggio."""
+        return Path(__file__).parent / "saved_graphs"
+
     def save_to_file(self, filename):
         """
-        Salva l'istanza del grafo in un file binario usando pickle.
+        Salva l'istanza del grafo nella cartella specificata.
         """
-        with open(filename, 'wb') as file:  # 'wb' = write binary
+        # Crea la cartella se non esiste
+        self._save_dir.mkdir(parents=True, exist_ok=True)
+        
+        save_path = self._save_dir / filename
+        with open(save_path, 'wb') as file:
             pickle.dump(self, file)
 
-
-    @staticmethod
-    def load_from_file(filename):
+    @classmethod
+    def load_from_file(cls, filename):
         """
-        Carica un'istanza del grafo da un file binario usando pickle.
+        Carica un'istanza del grafo da un file.
         """
-        with open(filename, 'rb') as file:  # 'rb' = read binary
+        save_path = cls()._save_dir / filename
+        if not save_path.exists():
+            raise FileNotFoundError(f"Nessun file trovato al percorso: {save_path}")
+        
+        with open(save_path, 'rb') as file:
             return pickle.load(file)
 
 
@@ -227,13 +298,16 @@ if __name__ == "__main__":
             if answer == 'exit':
                 print("\nGioco interrotto.")
                 break
-            elif answer == "save_file":
+            elif answer == "save_graph":
                 print("\nSalvo il grafo attuale ... ")
                 graph.save_to_file("graph_test")
                 continue
             elif answer == "load_graph":
                 graph = ProgressionGraph.load_from_file("graph_test")
                 print("\nCarico il grafo dai salvataggi ...")
+                continue
+            elif answer == "bfs":
+                graph.bfs_visit_discovered_and_resolved()
                 continue
             
             # Processa la risposta

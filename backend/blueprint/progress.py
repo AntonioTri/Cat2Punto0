@@ -112,3 +112,19 @@ def det_detective_progresses():
     
     # Richiamo al metodo del controller
     return ControllerManageProgress.get_detective_progress_by_type(team_id=selected_team, selected_type=selected_type)
+
+
+@progress_blueprint.route('/answer_riddle', methods=['PUT'])
+@jwt_required()
+def answer_graph_riddle():
+
+    # Estraiamo la risposta dalla richiesta ed il team_id
+    data: dict = request.get_json()
+    answer: str = data.get('answer', None)
+    team_id : int = data.get('team_id', None)
+
+    # Check per la presenza dei dati
+    if answer is None or team_id is None:
+        return {"msg" : f"Dei dati mancano nella richiesta. Dati inviati {data}"}, 404
+    
+    # Richiamo al metodo del controller
