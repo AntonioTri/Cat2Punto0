@@ -1,5 +1,5 @@
 from enum import Enum
-from Riddles.riddles import Riddle
+from ProgressionGraph.Riddles.riddles import Riddle
 
 class EdgeColor(Enum):
     PURPLE = 4
@@ -106,4 +106,3 @@ class GreenEdge(PurpleEdge):
             self.signalEndingNode(Signals.GREEN_EDGE_RESOLVED)
         elif newStatus == EdgeStatus.DISCOVERED:
             print(f"\n🔓 Arco verde da {self.getStartingNode().getKey()} a {self.getEndingNode().getKey()} scoperto.")
-

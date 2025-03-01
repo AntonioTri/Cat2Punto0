@@ -128,3 +128,4 @@ def answer_graph_riddle():
         return {"msg" : f"Dei dati mancano nella richiesta. Dati inviati {data}"}, 404
     
     # Richiamo al metodo del controller
+    return ControllerManageProgress.check_if_answer_is_correct(answer=answer, team_id=team_id)

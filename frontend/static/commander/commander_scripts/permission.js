@@ -2,11 +2,10 @@ import {API_URL, SOCKET_URL} from '../../config.js';
 import { CheckMark } from '../../check_mark/check_mark.js';
 import { roles } from '../../utils/constants.js';
 import { AbstractCardManager } from '../../utils/abstract_card_manager.js';
-import { socket } from '../../utils/socket.js';
 
 export class PermissionManager extends AbstractCardManager {
 
-    constructor(containerSelector = 'Permessi', checkMark = new CheckMark()){
+    constructor(containerSelector = 'Permessi', checkMark = new CheckMark(), socket = null){
 
         super(containerSelector, checkMark);
         this.socket = socket;

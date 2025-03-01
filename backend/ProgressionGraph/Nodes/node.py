@@ -1,4 +1,4 @@
-from Edges.edge import PurpleEdge, GreenEdge, EdgeStatus, Signals, Riddle
+from ProgressionGraph.Edges.edge import PurpleEdge, GreenEdge, EdgeStatus, Signals, Riddle
 #from backend.utils.info_logger import getFileLogger
 from enum import Enum
 #logger = getFileLogger(__name__)
@@ -183,6 +183,10 @@ class Node():
 
         # Altrimenti viene ritornato semplicemente False
         return False
+
+    def signalTeam(self, team_to_signal : int = 0):
+        """Metodo che segnala al team scelto il contenuto del puzzle risolto o scoperto."""
+        self.riddle.sendNewDiscovery(team_to_signal)
 
 
     def areAllGreenEdgesResolved(self) -> bool:

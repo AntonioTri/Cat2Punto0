@@ -8,5 +8,5 @@ const checkMark = new CheckMark();
 
 const burgerMenuManager = new BurgerMenuManager('body', checkMark);
 
-const permissionManager = new PermissionManager(commanderActions[2], checkMark);
+const permissionManager = new PermissionManager(commanderActions[2], checkMark, socket);
 

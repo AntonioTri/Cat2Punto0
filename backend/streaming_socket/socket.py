@@ -7,23 +7,83 @@ from entity.role import ROLE
 from controller.controller_personal_functions import ControllerPersonalFunctions
 from controller.controller_team_pool import ControllerTeamPool
 from utils.info_logger import getFileLogger
+from ProgressionGraph.cache import cached_teams_graphs
 
 logger = getFileLogger(__name__)
 logger.info('[-] Sono il logger dentro la socket, funziono!')
+
+# La cache degli utenti connessi
+connected_users : dict[str, list[str]] = {} 
 
 # La classe socket definisce un namespace sul quale inviare specifici segnali
 # Per ogni segnale viene definita una funzione ed il nome del sengale è esattamente
 # il nome della funzione
 
 class Socket(Namespace):
-
+    
     # Questo metodo registra la socket id univoca per l'utente quando questo effettua il login
     def on_update_socket(self, data):
+        
+        logger.info(f"- Eseguo una update della socket: socket_id={request.sid}")
         # Usiamo direttamente il valore inviato per associare all'id, la socket id
-        result = ControllerPersonalFunctions.update_personal_socket(user_id=data["personal_id"], socket_id=data["socket_id"])
+        personal_id = data["personal_id"]
+        socket = data["socket_id"]
+        result = ControllerPersonalFunctions.update_personal_socket(user_id=personal_id, socket_id=socket)
         # Invio della risposta al client chiamante
-        emit('socket_updated', result, room=data["socket_id"])
+        logger.info(f"✅ Socket aggiornata: socket_id={socket}")
+        emit('socket_updated', result, room=socket)
 
+        team_id, status_code = ControllerPersonalFunctions.get_team_id_from_user_id(user_id=personal_id)
+        
+        if status_code == 200:
+            team_id = str(team_id)
+            # Inizializza la lista se la chiave non esiste
+            if team_id not in connected_users:
+                connected_users[team_id] = []
+            connected_users[team_id].append(socket)
+
+            # Qui avviene una cosa importante, alla update socket e' associato un evento di connessione
+            # stabile con l'utente, coincidente a qando le risorse della pagina sono state caricate
+            # possiamo qui definire l'invio delle informazioni ed eventi gia' sbloccate del team
+            # tramite il progression graph eseguendone la BFS esplorante i nodi ed archi scoperti e
+            # rislti. I riddle associati ai nodi inviano da soli i segnali di sblocco delle informazioni
+            # e gestiscono tutte le situazioni associate
+            team_graph = cached_teams_graphs.get(team_id)
+            if team_graph:
+                logger.info("✅ Eseguo una visita del grafo associato al team ...")
+                team_graph.bfs_visit_discovered_and_resolved(team_to_signal=int(team_id))
+            logger.info("❌ Non ho eseguito la visita del grafo associato al team")
+        else:
+            emit('error', {"msg": "Some error occurred on retrieving saved progresses."}, to=socket)
+
+    # Questo metodo si occupa di gestire la disconnessione degli utenti
+    # salvando definitivamente lo stato del grafo nella memoria permanente
+    def on_disconnect(self, *args, **kwargs):
+        # Estraiamo la socket disconnessa
+        socket = request.sid
+        # Estraiamo il team id dalla socket
+        team_id, status_code = ControllerPersonalFunctions.get_user_team_id_by_socket_id(socket_id=socket)
+        # Eliminiamo dalla cache di utenti connessi l'utente      
+        
+        # Assicurati che team_id sia un valore hashable
+        if isinstance(team_id, dict):
+            team_id = team_id.get("team_id")
+        team_id = str(team_id)
+
+        if status_code != 200:
+            emit('error', {"msg": f"Some error occurred on disconnecting from the socket. Error: {team_id}"}, to=socket)
+
+        if team_id in connected_users:
+            connected_users[team_id].remove(socket)
+            # E controlliamo se ci sono ancora utenti attivi per quel team
+            if len(connected_users[team_id]) <= 0:
+                # In tal caso eliminiamo dalla cache dei progression graph il grafo salvato
+                # NON prima di averne salvato lo stato
+                file_name = "team_" + team_id + "_graph"
+                team_graph = cached_teams_graphs.get(team_id)
+                if team_graph:
+                    team_graph.save_to_file(filename=file_name)
+                    cached_teams_graphs.pop(team_id)
 
     # Questo metodo permette ai comandanti di inviare un messaggio a tutti gli utenti del team
     @socket_require_role(ROLE.COMANDANTE.value)

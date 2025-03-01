@@ -39,6 +39,13 @@ socket.on('socket_updated', (response) => {
     }
 });
 
+
+// Metodo di test per vedere se arriva il segnale dalla socket quando il grafo del team
+// viene esplorato
+socket.on('signal_from_node', (data) => {
+    console.log('Messaggio dal Progression Graph. Messaggio:', data)
+})
+
 // Questo segnale gestisce il log degli errori nel back end, daot che non si possono restituire 
 // dizionari come in  una normale api restful
 socket.on('error', (response) => {

@@ -1,5 +1,7 @@
 from db.db import database
 from content.evidences import get_detective_files, get_selected_detective_progresses
+from ProgressionGraph.cache import cached_teams_graphs
+
 class ControllerManageProgress:
 
     @staticmethod
@@ -107,3 +109,17 @@ class ControllerManageProgress:
 
         # Ritorniamo la risposta
         return {selected_type : selected_progresses}, status_code
+    
+    @staticmethod
+    def check_if_answer_is_correct(answer : str = "", team_id : int = 0):
+        """Metodo che controlla se nell'attuale grafo di progressione vi sia la risposta inviata."""
+        
+        # Estrazione della reference del grafo dalla cache
+        team_graph = cached_teams_graphs[str(team_id)]
+        result : bool = team_graph.process_answer(answer=answer)
+
+        # Se la risposta era positiva allora viene segnalato
+        if result:
+            return {"msg" : "Risposta corretta!"}, 201
+        else:
+            return {"mgs" : "Risposta errata!"}, 400

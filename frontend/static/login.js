@@ -1,7 +1,6 @@
 // Import della variabile API_URL settata in automatico nel file di config
 import {API_URL} from './config.js';
 const URL = `${API_URL}/login`;
-import { socket } from './utils/socket.js';
 
 // Selezione del form
 const loginForm = document.getElementById("login_form");
