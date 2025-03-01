@@ -52,4 +52,40 @@ socket.on('error', (response) => {
     console.log('Some error occurred in the back end. Response: ', response);
 });
 
+
+
+// Intercetta l'evento di ricarica o chiusura della pagina
+window.addEventListener('beforeunload', function() {
+    // Imposta un flag per indicare che la pagina sta per essere ricaricata o chiusa
+    sessionStorage.setItem('is_reloading', 'true');
+    // Invia un segnale al server
+    const data_to_send = {
+        socket_id : localStorage.getItem('socket'),
+        personal_id : localStorage.getItem('personal_id')
+    };
+    socket.emit('page_reload', data_to_send);
+});
+
+window.addEventListener('load', () => {
+    console.log('La pagina è stata completamente caricata!');
+    // Esegui azioni specifiche dopo il caricamento
+    const are_graph_data_saved = localStorage.getItem('are_graph_data_saved')
+
+    // Nel caso in cui non ci siano dati salvati, allora richiediamo alla API di mandarli
+    if (!are_graph_data_saved) {
+        // Definiamo i dati da mandare
+        const data_to_send = {
+            personal_id : localStorage.getItem('personal_id'),
+            team_id : localStorage.getItem('team_id'),
+            socket : localStorage.getItem('socket')
+        }
+
+        socket.emit('get_save_data', data_to_send)
+        
+        // Impostiamo la flag dei dati salvati a true
+        localStorage.setItem('are_graph_data_saved', true)
+    }
+
+});
+
 export { socket };

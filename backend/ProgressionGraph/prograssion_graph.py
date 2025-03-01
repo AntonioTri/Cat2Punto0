@@ -208,7 +208,7 @@ class ProgressionGraph:
         logger.info(f"\n*** ARCO VERDE ({edge.getStatus().name}) ***\nNodo di partenza: {edge.getStartingNode().getKey()}.\nNodo di arrivo: {edge.getEndingNode().getKey()}.")
 
 
-    def bfs_visit_discovered_and_resolved(self, start_node: Node = None, team_to_signal : int = 0):
+    def bfs_visit_discovered_and_resolved(self, start_node: Node = None, team_to_signal : int = None, socket_to_signal : str = None):
         """
         Esegue una visita BFS a partire da un nodo, visitando solo nodi con stato DISCOVERED o RESOLVED
         e archi verdi con stato DISCOVERED o RESOLVED.
@@ -229,6 +229,9 @@ class ProgressionGraph:
         # Aggiungi il nodo di partenza alla coda e segnalo come visitato
         queue.append(start_node)
         visited_nodes.add(start_node.getKey())
+
+        # Inviamo i dati all'utente del nodo 0
+        self.root.signalTeam(socket_to_signal=socket_to_signal)
 
         while queue:
             # Estrai il nodo corrente dalla coda
@@ -252,12 +255,13 @@ class ProgressionGraph:
             # Visita gli archi viola in uscita (solo se il nodo figlio è DISCOVERED o RESOLVED)
             for purple_edge in current_node.childrenPurpleEdges:
                 child_node = purple_edge.getEndingNode()
-                if child_node.getStatus() in {Status.DISCOVERED, Status.RESOLVED}:
-                    # Aggiungi il nodo figlio alla coda se non è già stato visitato
-                    if child_node.getKey() not in visited_nodes:
-                        child_node.signalTeam(team_to_signal=team_to_signal)
-                        queue.append(child_node)
-                        visited_nodes.add(child_node.getKey())
+                if child_node.getStatus() not in {Status.DISCOVERED, Status.RESOLVED}:
+                    continue
+                # Aggiungi il nodo figlio alla coda se non è già stato visitato
+                if child_node.getKey() not in visited_nodes:
+                    child_node.signalTeam(team_to_signal=team_to_signal, socket_to_signal=socket_to_signal)
+                    queue.append(child_node)
+                    visited_nodes.add(child_node.getKey())
 
 
     @property

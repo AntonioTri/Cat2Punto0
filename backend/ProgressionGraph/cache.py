@@ -4,4 +4,4 @@
 
 from ProgressionGraph.prograssion_graph import ProgressionGraph
 
-cached_teams_graphs : dict[str, ProgressionGraph] = {}
+cached_teams_graphs : dict[int, ProgressionGraph] = {}

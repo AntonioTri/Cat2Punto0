@@ -184,9 +184,9 @@ class Node():
         # Altrimenti viene ritornato semplicemente False
         return False
 
-    def signalTeam(self, team_to_signal : int = 0):
+    def signalTeam(self, team_to_signal : int = None, socket_to_signal : str = None):
         """Metodo che segnala al team scelto il contenuto del puzzle risolto o scoperto."""
-        self.riddle.sendNewDiscovery(team_to_signal)
+        self.riddle.sendNewDiscovery(team_to_signal, socket_to_signal)
 
 
     def areAllGreenEdgesResolved(self) -> bool:

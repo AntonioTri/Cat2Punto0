@@ -3,6 +3,7 @@ from flask_jwt_extended import create_access_token
 from datetime import timedelta
 from ProgressionGraph.prograssion_graph import ProgressionGraph
 from ProgressionGraph.cache import cached_teams_graphs
+from utils.user_cache import connected_users
 import os
 from utils.info_logger import getFileLogger
 
@@ -55,7 +56,7 @@ class ControllerManageUsersAUTH():
 
             # Aggiungiamo al dizionario di utenti attivi l'utente ed il suo team
             # al team associamo l'istanza del progression graph
-            set_team_graph(str(team_id))
+            set_team_graph(int(team_id), int(personal_id))
 
         
         # Se tutti i controlli sono passati, l'utente esiste e pertanto viene generato un token di accesso
@@ -71,7 +72,7 @@ class ControllerManageUsersAUTH():
     
 
 
-def set_team_graph(team_id: str = ""):
+def set_team_graph(team_id: int = None, personal_id : int = 0):
     # Ottieni la directory dello script corrente
     script_dir = os.path.dirname(os.path.abspath(__file__))
     # Percorso della cartella sorella
@@ -85,22 +86,31 @@ def set_team_graph(team_id: str = ""):
     file_name = f"team_{team_id}_graph"
     # Percorso completo
     file_path = os.path.join(sibling_folder, file_name)
+
+    # Si inizializza la lista di utenti connessi al team segnato se non esiste
+    if not connected_users[int(team_id)]:
+        connected_users[int(team_id)] = []
     
-    # Si controlla se esista un file di salvataggio
-    if os.path.exists(file_path):
-        try:
-            logger.info(f"✅ Un file di salvataggio è stato trovato per il team {team_id} ...")
-            graph = ProgressionGraph.load_from_file(file_path)
-            cached_teams_graphs[team_id] = graph
-            logger.info(f"✅ Salvataggi caricati ed istanza associata per il team {team_id}.")
-        except Exception as e:
-            logger.error(f"❌ Errore durante il caricamento del file per il team {team_id}: {e}")
-            # Crea una nuova istanza in caso di errore
-            graph = ProgressionGraph(team_id)
-            cached_teams_graphs[team_id] = graph
-            logger.info(f"✅ Istanza creata ed associata per il team {team_id}.")
+    # Si controlla se esista un file di salvataggio e se sia il primo utente a connettersi
+    # se non ci sono file allora non ci sono nemmeno utenti connessi, vengono incrementati dopo
+    # e si creano pure le istanze dei salvataggi
+    if not os.path.exists(file_path):
+
+        # Se non ci sono utenti connessi viene caricata nella cache il grafo del team
+        
+        if len(connected_users[team_id]) == 0:
+            try:
+                logger.info(f"✅ Un file di salvataggio è stato trovato per il team {team_id} ...")
+                graph = ProgressionGraph.load_from_file(file_path)
+                cached_teams_graphs[team_id] = graph
+                connected_users[team_id].append(personal_id)
+                logger.info(f"✅ Salvataggi caricati ed istanza associata per il team {team_id}.")
+            except Exception as e:
+                logger.error(f"❌ Errore durante il caricamento del file per il team {team_id}: {e}")
+            
     else:
         logger.info(f"❌ Non è stato trovato alcun file di salvataggio. Creazione di una nuova istanza ...")
         graph = ProgressionGraph(team_id)
         cached_teams_graphs[team_id] = graph
+        connected_users[team_id].append(personal_id)
         logger.info(f"✅ Istanza creata ed associata per il team {team_id}.")
