@@ -121,7 +121,7 @@ class Node():
             print(e)
 
 
-    def setNewStatus(self, status: "Status"):
+    def setNewStatus(self, status: "Status", team_to_signal : int = None, socket_to_signal : str = None):
         """ 
             Il metodo set status e' particolare, esegue operazioni di scoperte sui nodi viola collegati.\n
             Se ci sono archi viola in uscita e lo stato in ingresso e' RESOLVED i nodi viola in uscita vengono
@@ -145,7 +145,7 @@ class Node():
         # Caso in cui vengono mostrate le informaizoni nuove
         elif status == Status.DISCOVERED:
             print(f"🔓 Nodo {self.getKey()} scoperto.")
-            self.riddle.sendNewDiscovery()
+            self.riddle.sendNewDiscovery(team_to_signal=team_to_signal, socket_to_signal=socket_to_signal)
 
 
 
@@ -167,7 +167,7 @@ class Node():
                 self.setNewStatus(Status.DISCOVERED)
 
 
-    def isSolution(self, solution : str = "") -> bool:
+    def isSolution(self, solution : str = "", team_to_signal : int = None, socket_to_signal : str = None) -> bool:
         """ 
             Questo metodo controlla che la soluzione all'enigma sia quella inviata\n
             in tal caso il nodo viene risoto ed i vicini scoperti.\n
@@ -178,7 +178,7 @@ class Node():
         # Se la soluzione del nodo e' quela inviata allora il nodo viene segnato come RESOLVED
         # E viene ritornato true
         if self.riddle.isSolution(solution):
-            self.setNewStatus(Status.RESOLVED)
+            self.setNewStatus(Status.RESOLVED, team_to_signal, socket_to_signal)
             return True
 
         # Altrimenti viene ritornato semplicemente False

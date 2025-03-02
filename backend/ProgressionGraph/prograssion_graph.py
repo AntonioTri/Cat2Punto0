@@ -128,7 +128,7 @@ class ProgressionGraph:
         self.root = root
 
 
-    def process_answer(self, answer):
+    def process_answer(self, answer :str = "", team_to_signal : int = None, socket_to_signal : str = None):
         """
         Processa la risposta dell'utente e aggiorna lo stato del gioco.
         :param answer: La risposta inserita dall'utente.
@@ -144,7 +144,7 @@ class ProgressionGraph:
         solved = False
         for element in self.active_riddles:
             if isinstance(element, Node):
-                if element.isSolution(answer):
+                if element.isSolution(solution=answer, team_to_signal=team_to_signal, socket_to_signal=socket_to_signal):
                     logger.info(f"\n✅ Enigma risolto! Nodo {element.getKey()} sbloccato")
                     self.active_riddles.remove(element)
                     if element.greenChildrens:
@@ -176,10 +176,10 @@ class ProgressionGraph:
                 self.print_edge_info(element)
 
 
-        return True  # Il gioco continua
+        return True  # Il gioco continua 🟢
 
     def print_node_info(self, node: Node):
-        logger.info(f"\n*** NODO {node.getKey()} ***")
+        logger.info(f"\n*** NODO {node.getKey()} 🟢 ***")
         logger.info(f"Stato: {node.getStatus().name}")
         
         if node.purpleFather:
@@ -205,7 +205,7 @@ class ProgressionGraph:
 
     def print_edge_info(self, edge : GreenEdge):
         # logger.info delle informazioni dell'arco se e' in stato discovered
-        logger.info(f"\n*** ARCO VERDE ({edge.getStatus().name}) ***\nNodo di partenza: {edge.getStartingNode().getKey()}.\nNodo di arrivo: {edge.getEndingNode().getKey()}.")
+        logger.info(f"\n*** ARCO VERDE ({edge.getStatus().name}) 🔗🟢***\nNodo di partenza: {edge.getStartingNode().getKey()}.\nNodo di arrivo: {edge.getEndingNode().getKey()}.")
 
 
     def bfs_visit_discovered_and_resolved(self, start_node: Node = None, team_to_signal : int = None, socket_to_signal : str = None):

@@ -122,10 +122,11 @@ def answer_graph_riddle():
     data: dict = request.get_json()
     answer: str = data.get('answer', None)
     team_id : int = data.get('team_id', None)
+    socket : str = data.get('socket', None)
 
     # Check per la presenza dei dati
-    if answer is None or team_id is None:
+    if answer is None or team_id is None or socket is None:
         return {"msg" : f"Dei dati mancano nella richiesta. Dati inviati {data}"}, 404
     
     # Richiamo al metodo del controller
-    return ControllerManageProgress.check_if_answer_is_correct(answer=answer, team_id=team_id)
+    return ControllerManageProgress.check_if_answer_is_correct(answer=answer, team_id=team_id, socket_to_signal=socket)

@@ -70,3 +70,14 @@ class ControllerPersonalFunctions:
             logger.info(f"Errore durante la ricerca del team ID per la socket {socket_id}: {message['error']}")
             return {"error": message["error"]}, status_code
 
+    @staticmethod
+    def get_user_id_from_socket(socket_id : str = ""):
+        """Metodo per ottenere l'id personal dalla socket."""
+        message, status_code = database.get_user_id_from_socket_id(socket_id=socket_id)
+
+        if status_code == 200:
+            logger.info(f"Personal ID trovato per la socket {socket_id}: {message['personal_id']}")
+            return message['personal_id'], status_code
+        else:
+            logger.info(f"Errore durante la ricerca del personal ID per la socket {socket_id}: {message['error']}")
+            return {"error": message["error"]}, status_code

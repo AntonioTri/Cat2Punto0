@@ -111,12 +111,12 @@ class ControllerManageProgress:
         return {selected_type : selected_progresses}, status_code
     
     @staticmethod
-    def check_if_answer_is_correct(answer : str = "", team_id : int = 0):
+    def check_if_answer_is_correct(answer : str = "", team_id : int = None, socket_to_signal : str = None):
         """Metodo che controlla se nell'attuale grafo di progressione vi sia la risposta inviata."""
         
         # Estrazione della reference del grafo dalla cache
-        team_graph = cached_teams_graphs[str(team_id)]
-        result : bool = team_graph.process_answer(answer=answer)
+        team_graph = cached_teams_graphs[team_id]
+        result : bool = team_graph.process_answer(answer=answer,team_to_signal=team_id, socket_to_signal=socket_to_signal)
 
         # Se la risposta era positiva allora viene segnalato
         if result:

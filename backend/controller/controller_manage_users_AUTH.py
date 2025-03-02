@@ -3,7 +3,7 @@ from flask_jwt_extended import create_access_token
 from datetime import timedelta
 from ProgressionGraph.prograssion_graph import ProgressionGraph
 from ProgressionGraph.cache import cached_teams_graphs
-from utils.user_cache import connected_users
+from utils.user_cache import connected_users, connected_users_status
 import os
 from utils.info_logger import getFileLogger
 
@@ -88,13 +88,13 @@ def set_team_graph(team_id: int = None, personal_id : int = 0):
     file_path = os.path.join(sibling_folder, file_name)
 
     # Si inizializza la lista di utenti connessi al team segnato se non esiste
-    if not connected_users[int(team_id)]:
-        connected_users[int(team_id)] = []
+    if team_id not in connected_users:
+        connected_users[team_id] = []
     
     # Si controlla se esista un file di salvataggio e se sia il primo utente a connettersi
     # se non ci sono file allora non ci sono nemmeno utenti connessi, vengono incrementati dopo
     # e si creano pure le istanze dei salvataggi
-    if not os.path.exists(file_path):
+    if os.path.exists(file_path):
 
         # Se non ci sono utenti connessi viene caricata nella cache il grafo del team
         
@@ -107,10 +107,24 @@ def set_team_graph(team_id: int = None, personal_id : int = 0):
                 logger.info(f"✅ Salvataggi caricati ed istanza associata per il team {team_id}.")
             except Exception as e:
                 logger.error(f"❌ Errore durante il caricamento del file per il team {team_id}: {e}")
-            
+        
+        # Se invece vi erano già utenti connessi allora vengono solo inseriti nella lista di utenti attivi
+        # Non viene caricata nessuna istanza del grafo nella cache
+        else:
+            logger.info(f"✅ I salvataggi erano già nella cache per il team {team_id}.")
+            connected_users[team_id].append(personal_id)
+
+
     else:
         logger.info(f"❌ Non è stato trovato alcun file di salvataggio. Creazione di una nuova istanza ...")
-        graph = ProgressionGraph(team_id)
+        graph = ProgressionGraph(str(team_id))
         cached_teams_graphs[team_id] = graph
         connected_users[team_id].append(personal_id)
         logger.info(f"✅ Istanza creata ed associata per il team {team_id}.")
+
+    # Alla fine delle operazioni se tutto e' andato bene viene inizializzato lo status dell'utente come attivo
+    if personal_id not in connected_users_status:
+        connected_users_status[personal_id] = True
+    
+    # Stampa degli utenti connessi
+    logger.info(f"Connected users: {connected_users}")

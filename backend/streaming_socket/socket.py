@@ -8,6 +8,7 @@ from controller.controller_personal_functions import ControllerPersonalFunctions
 from controller.controller_team_pool import ControllerTeamPool
 from utils.info_logger import getFileLogger
 from ProgressionGraph.cache import cached_teams_graphs
+from utils.user_cache import connected_users, connected_users_status
 import threading
 
 logger = getFileLogger(__name__)
@@ -36,24 +37,81 @@ class Socket(Namespace):
         # Invio della risposta al client chiamante
         logger.info(f"✅ Socket aggiornata: socket_id={socket}")
         emit('socket_updated', result, room=socket)
+        
+        # Aggiornamento dello status utente su Attivo.
+        # La disconnect sottostante capirà che l'utente si è riconnesso e che non dovrà apportare modifiche
+        connected_users_status[int(personal_id)] = True
 
 
     # Questo metodo si occupa di gestire la disconnessione degli utenti
     # salvando definitivamente lo stato del grafo nella memoria permanente
     def on_disconnect(self, *args, **kwargs):
-        logger.info(f"Disconnect args: {args}\nDisconnect kwargs: {kwargs}")
-        manage_disconnect = threading.Timer(5.0, self.manage_disconnect)
-        logger.info(f"⏳ Attivo un timer prima di eseguire operazioni di controllo sulla disconnect ...")
-        manage_disconnect.start()
-
-
-    def manage_disconnect(self):
-
         # Estraiamo la socket disconnessa
         socket = request.sid
         # Estraiamo il team id dalla socket
-        team_id, status_code = ControllerPersonalFunctions.get_user_team_id_by_socket_id(socket_id=socket)
-        # Eliminiamo dalla cache di utenti connessi l'utente      
+        team_id, status_code_tid = ControllerPersonalFunctions.get_user_team_id_by_socket_id(socket_id=socket)
+        # Estraiamo l'id personale tramite la socket
+        personal_id, status_code_pid = ControllerPersonalFunctions.get_user_id_from_socket(socket_id=socket)
+        
+        # Gestione degli errori
+        if status_code_tid != 200 or status_code_pid != 200:
+            logger.info(f"❌ Errore per la ricerca dei dati relativi all'utente da disconnettere. Errori: \n1 - {team_id}.\n2-{personal_id}")
+            return
+        
+        # Casting forzato per la conversione dei dati
+        else:
+            personal_id = int(personal_id)
+            team_id = int(team_id)
+
+        
+        # Settiamo nella mappa degli utenti connessi la flag a false ed inizializziamo un timer
+        connected_users_status[personal_id] = False
+        
+        # Inizializziamo ora un timer di 10 secondi per controllare che l'utente si sia riconnesso
+        # In caso negativo eliminiamo dalla cache l'utente. L'istanza del grafo viene eliminata anch'essa
+        # se era l'ultimo utente connesso
+        logger.info(f"🛑 Disconnessione dalla socket: {socket}.")
+        logger.info(f"⏳Inizializzo un timer per controllare l'effettiva disconnessione ...")
+        timer = threading.Timer(10.0, self.handle_disconnect, args=(personal_id, team_id))
+        timer.start()
+
+
+
+
+    def handle_disconnect(self, personal_id : int = None, team_id : int = None):
+        """
+            Metodo che dopo 10 seocnid dalla chiamata controlla se l'utente sia ancora disconnesso.\n
+            In tal caso l'istanza del grafo viene salvata e l'utente viene eliminato dall cache.
+        
+        """ 
+
+        # Check degli errori
+        if personal_id is None or team_id is None:
+            logger.info(f"📛 Dei dati non sono arrivati! Dati: team id = {team_id}, personal id = {personal_id}")
+            return
+
+        logger.info(f"⏳ Handling della disconnessione ...")
+
+        # Se l'utente e' ancora disconnesso allora non si tratta di ricarica della pagina
+        # pertanto eliminiamo dalla cache l'utente da quelli connessi al team
+        if not connected_users_status[personal_id]:
+            connected_users[team_id].remove(personal_id)
+            logger.info(f"✅ L'utente si è disconnesso totalmente, rimozione dalla cache degli utenti attivi avvenuta.")
+        
+            # Se l'utente era l'ultimo del suo team allora l'istanza del grafo viene salvata in memoria e la cache liberata
+            if len(connected_users[team_id]) <= 0:
+                team_graph = cached_teams_graphs[team_id]
+                save_file : str = "team_" + str(team_id) + "_graph"
+                team_graph.save_to_file(filename=save_file)
+                cached_teams_graphs[team_id] = None
+                logger.info(f"✅ L'utente era l'ultimo attivo del team, salvataggio dei dati avvenuto con successo.")
+
+        # Nel caso opposto l'utente aveva solo ricaricato la pagina, nulla accade
+        else:
+            logger.info(f"✅ L'utente si è riconnesso. Cache invariata.")
+        
+
+           
         
         
 
@@ -76,8 +134,10 @@ class Socket(Namespace):
         team_id : int = int(data["team_id"])
         socket : str = data["socket"]
 
+        logger.info(f"🔄 Provo ad inviare i dati del grafo a {personal_id}.")
         team_graph = cached_teams_graphs[team_id]
         team_graph.bfs_visit_discovered_and_resolved(socket_to_signal=socket)
+        logger.info(f"✅ Dati del grafo inviati a utente {personal_id} con successo.")
 
 
     # Questo metodo permette ai comandanti di inviare un messaggio a tutti gli utenti del team

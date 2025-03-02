@@ -482,6 +482,37 @@ class PostgresDB():
             cursor.close()
 
 
+    def get_user_id_from_socket_id(self, socket_id : str = ""):
+        """
+        Metodo per ottenere il personal id di un utente a partire dalla sua socket_id.
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Esecuzione della query per trovare il team_id dato un socket_id
+            cursor.execute("""
+                SELECT tm.id_personale
+                FROM team_member tm
+                WHERE tm.socket_id = %s
+            """, (socket_id,))
+
+            # Recupera il risultato della query
+            result = cursor.fetchone()
+
+            # Se nessun risultato viene trovato, restituisci un errore o None
+            if not result:
+                return {"error": f"Nessun ID trovato per socket_id {socket_id}"}, 404
+
+            # Restituisci il team_id trovato
+            return {"personal_id": result[0]}, 200
+
+        except Exception as e:
+            print(f"Errore durante la ricerca del personal id per la socket_id {socket_id}: {e}")
+            return {"error": f"Errore durante la ricerca dell peersonal id: {e}"}, 500
+
+        finally:
+            cursor.close()
+
 
     def add_signal_to_team(self, team_id: int, signal: str):
         """

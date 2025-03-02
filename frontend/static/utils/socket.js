@@ -66,13 +66,14 @@ window.addEventListener('beforeunload', function() {
     socket.emit('page_reload', data_to_send);
 });
 
-window.addEventListener('load', () => {
-    console.log('La pagina è stata completamente caricata!');
+
+document.addEventListener('socketInitialized', () => {
     // Esegui azioni specifiche dopo il caricamento
     const are_graph_data_saved = localStorage.getItem('are_graph_data_saved')
-
+    
     // Nel caso in cui non ci siano dati salvati, allora richiediamo alla API di mandarli
     if (!are_graph_data_saved) {
+        console.log('Socket inizializzata: Richiedo i dati di salvataggio ...');
         // Definiamo i dati da mandare
         const data_to_send = {
             personal_id : localStorage.getItem('personal_id'),
