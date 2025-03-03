@@ -3,6 +3,9 @@ from controller.controller_manage_progress import ControllerManageProgress
 from JWT.auth_decorator import require_role
 from entity.role import ROLE
 from flask_jwt_extended import jwt_required
+from utils.info_logger import getFileLogger
+
+logger = getFileLogger(__name__)
 
 progress_blueprint = Blueprint('progress_api', __name__)
 
@@ -123,10 +126,13 @@ def answer_graph_riddle():
     answer: str = data.get('answer', None)
     team_id : int = data.get('team_id', None)
     socket : str = data.get('socket', None)
+    team_id = int(team_id)
 
     # Check per la presenza dei dati
     if answer is None or team_id is None or socket is None:
         return {"msg" : f"Dei dati mancano nella richiesta. Dati inviati {data}"}, 404
-    
+
+    logger.info(f"Dati inviati alla ANSWER RIDDLE: {data}")
+
     # Richiamo al metodo del controller
     return ControllerManageProgress.check_if_answer_is_correct(answer=answer, team_id=team_id, socket_to_signal=socket)

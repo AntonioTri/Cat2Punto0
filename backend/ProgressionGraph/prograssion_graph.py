@@ -15,6 +15,7 @@ class ProgressionGraph:
         self.root : Node = None
         self.nodes : list[Node] =[]
         self.active_riddles : list[Node | GreenEdge]= []
+        self.solved_riddles : list[Node | GreenEdge]= []
         self.save_file : str = "team_" + team_id + "_graph"
         self.create_bouquet()
         self.initialize_game()
@@ -142,11 +143,13 @@ class ProgressionGraph:
 
         # Controlla se la risposta è corretta
         solved = False
+
         for element in self.active_riddles:
             if isinstance(element, Node):
                 if element.isSolution(solution=answer, team_to_signal=team_to_signal, socket_to_signal=socket_to_signal):
                     logger.info(f"\n✅ Enigma risolto! Nodo {element.getKey()} sbloccato")
                     self.active_riddles.remove(element)
+                    self.solved_riddles.append(element)
                     if element.greenChildrens:
                         for edge in element.childrenGreenEdges:
                             self.active_riddles.append(edge)
@@ -156,6 +159,7 @@ class ProgressionGraph:
                 if element.checkRiddle(answer):
                     logger.info(f"\n✅ Enigma risolto! Arco verde da {element.getStartingNode().getKey()} a {element.getEndingNode().getKey()} sbloccato!")
                     self.active_riddles.remove(element)
+                    self.solved_riddles.append(element)
                     solved = True
 
         # Aggiungi nuovi nodi scoperti alla lista degli enigmi attivi
@@ -163,9 +167,21 @@ class ProgressionGraph:
             if node.getStatus() == Status.DISCOVERED and node not in self.active_riddles:
                 self.active_riddles.append(node)
 
+        # Controlliamo che la risposta non sia nemmeno tra le risposte degli enigmi risolti
+        yetSolved = False
+        for element in self.solved_riddles:
+            if isinstance(element, Node):
+                element.riddle.isSolution(solution=answer)
+                yetSolved = True
+            elif isinstance(element, GreenEdge):
+                element.riddle.isSolution(solution=answer)
+                yetSolved = True
+
+        
+
         # Se la risposta non era corretta, segnala l'errore
-        if not solved:
-            logger.info("\n❌ Soluzione errata o enigma non trovato")
+        if not solved and not yetSolved:
+            logger.info("\n❌ Soluzione errata.")
 
 
         # Stampa delle informazioni sugli enigmi attivi
@@ -176,7 +192,7 @@ class ProgressionGraph:
                 self.print_edge_info(element)
 
 
-        return True  # Il gioco continua 🟢
+        return (solved, yetSolved)  # Il gioco continua 🟢
 
     def print_node_info(self, node: Node):
         logger.info(f"\n*** NODO {node.getKey()} 🟢 ***")

@@ -33,13 +33,13 @@ export class AbstractCardManager{
 
 
     // Metodo che aggiunge un input tag
-    addInputTag(id = ""){
+    addInputTag(id = "", placeholder = ""){
 
         // Dichiarmiamo un input tag, aggiungiamo id e dimensioni, poi lo aggiungiamo al DOM
         let nameInputTag = document.createElement('input');
         this.addGeneralStyleProperties(nameInputTag, id);
         nameInputTag.type = 'text';
-        nameInputTag.placeholder = 'Username';
+        nameInputTag.placeholder = placeholder;
         nameInputTag.style.width = '47%';
         this.container.appendChild(nameInputTag);
         this.nameInputTag = nameInputTag;

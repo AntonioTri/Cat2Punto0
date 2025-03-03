@@ -14,7 +14,7 @@ export class CreateTeamManager extends AbstractCardManager{
 
         this.setURLS();
         super.setCardProperty();
-        super.addInputTag(`${this.cardName}_input_form`);
+        super.addInputTag(`${this.cardName}_input_form`, 'Username');
         super.addSubmitButton();
         super.addResponseMessage();
 

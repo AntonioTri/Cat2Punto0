@@ -136,7 +136,7 @@ class Node():
 
         if status == Status.RESOLVED:
             for purpleChildren in self.purpleChildrens:
-                purpleChildren.setNewStatus(Status.DISCOVERED)
+                purpleChildren.setNewStatus(Status.DISCOVERED, team_to_signal=team_to_signal, socket_to_signal=socket_to_signal)
             for greenEdge in self.childrenGreenEdges:
                 greenEdge.setStatus(EdgeStatus.DISCOVERED)
             for purpleEdge in self.childrenPurpleEdges:

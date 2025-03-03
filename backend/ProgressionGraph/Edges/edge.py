@@ -79,7 +79,7 @@ class GreenEdge(PurpleEdge):
 
     def __init__(self, startingNode=None, endingNode=None, riddle : Riddle = None):
         super().__init__(startingNode, endingNode)
-        self.__riddle = riddle
+        self.riddle = riddle
         self.color = EdgeColor.GREEN
 
 
@@ -89,7 +89,7 @@ class GreenEdge(PurpleEdge):
             In tal caso viene impostato lo stato come RESOLVED e di conseguenza il nodo
             puntato viene segnalato 
         """
-        if self.__riddle.isSolution(solution):
+        if self.riddle.isSolution(solution):
             self.setStatus(EdgeStatus.RESOLVED)
             return True
         
