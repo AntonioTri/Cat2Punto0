@@ -149,7 +149,7 @@ class Node():
 
 
 
-    def recieveSignal(self, signal : Signals = None):
+    def recieveSignal(self, signal : Signals = None, team_to_signal : int = None, socket_to_signal : str = None):
         """
             La funzione recieveSignal puo' prendere un segnale in ingresso ed elaborarlo sulla base\n
             del suo tipo, eseguendo operazioni variogate
@@ -164,7 +164,7 @@ class Node():
 
             if self.areAllGreenEdgesResolved():
                 print(f"- Nodo {self.getKey()}. Archi verdi in ingresso risolti -> mi sblocco.")
-                self.setNewStatus(Status.DISCOVERED)
+                self.setNewStatus(Status.DISCOVERED, team_to_signal=team_to_signal, socket_to_signal=socket_to_signal)
 
 
     def isSolution(self, solution : str = "", team_to_signal : int = None, socket_to_signal : str = None) -> bool:

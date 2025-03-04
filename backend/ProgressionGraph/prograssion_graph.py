@@ -156,7 +156,7 @@ class ProgressionGraph:
                     solved = True
 
             elif isinstance(element, GreenEdge):
-                if element.checkRiddle(answer):
+                if element.checkRiddle(answer, team_to_signal=team_to_signal, socket_to_signal=socket_to_signal):
                     logger.info(f"\n✅ Enigma risolto! Arco verde da {element.getStartingNode().getKey()} a {element.getEndingNode().getKey()} sbloccato!")
                     self.active_riddles.remove(element)
                     self.solved_riddles.append(element)
@@ -171,11 +171,11 @@ class ProgressionGraph:
         yetSolved = False
         for element in self.solved_riddles:
             if isinstance(element, Node):
-                element.riddle.isSolution(solution=answer)
-                yetSolved = True
+                if element.riddle.isSolution(solution=answer):
+                    yetSolved = True
             elif isinstance(element, GreenEdge):
-                element.riddle.isSolution(solution=answer)
-                yetSolved = True
+                if element.riddle.isSolution(solution=answer):
+                    yetSolved = True
 
         
 
@@ -183,15 +183,15 @@ class ProgressionGraph:
         if not solved and not yetSolved:
             logger.info("\n❌ Soluzione errata.")
 
+        if __name__ == '__mani__':
+            # Stampa delle informazioni sugli enigmi attivi
+            for element in self.active_riddles:
+                if isinstance(element, Node):
+                    self.print_node_info(element)
+                elif isinstance(element, GreenEdge):
+                    self.print_edge_info(element)
 
-        # Stampa delle informazioni sugli enigmi attivi
-        for element in self.active_riddles:
-            if isinstance(element, Node):
-                self.print_node_info(element)
-            elif isinstance(element, GreenEdge):
-                self.print_edge_info(element)
-
-
+        logger.info(f"Ritorno della coppia di chiavi {(solved, yetSolved)}")
         return (solved, yetSolved)  # Il gioco continua 🟢
 
     def print_node_info(self, node: Node):

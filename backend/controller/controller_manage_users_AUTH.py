@@ -54,11 +54,22 @@ class ControllerManageUsersAUTH():
             team_id = response["team_id"]
             socket_id =  response["socket_id"]
 
-            # Aggiungiamo al dizionario di utenti attivi l'utente ed il suo team
-            # al team associamo l'istanza del progression graph
-            set_team_graph(int(team_id), int(personal_id))
+            # Controlliamo che l'utente non sia gia' connesso, in tal caso rifiutiamo la connessione
+            if int(personal_id) in connected_users_status:
+                # Caso in cui sia connesso
+                if connected_users_status[int(personal_id)]:
+                    return {"mgs": f"Errore! L'utente è già connesso ..."}, 400
+                # Caso in cui si sia connesso precedentemente ma ora e' disconnesso
+                else:
+                    # Al team associamo l'istanza del progression graph
+                    set_team_graph(int(team_id), int(personal_id))
+            
+            # Nel caso in cui sia il primo accesso assoluto allora eseguiamo comunque la set team graph
+            else:
+                # Al team associamo l'istanza del progression graph
+                    set_team_graph(int(team_id), int(personal_id))
 
-        
+
         # Se tutti i controlli sono passati, l'utente esiste e pertanto viene generato un token di accesso
         # Il token dura solo due ore poi scade e bisogna rifare il login
         # Assieme al token viene restituito anche il ruolo, che serve al fron end per servire le pagine
@@ -123,8 +134,8 @@ def set_team_graph(team_id: int = None, personal_id : int = 0):
         logger.info(f"✅ Istanza creata ed associata per il team {team_id}.")
 
     # Alla fine delle operazioni se tutto e' andato bene viene inizializzato lo status dell'utente come attivo
-    if personal_id not in connected_users_status:
-        connected_users_status[personal_id] = True
+    # viene creata anche la coppia chiave valore se non esisteva
+    connected_users_status[personal_id] = True
     
     # Stampa degli utenti connessi
     logger.info(f"Connected users: {connected_users}")

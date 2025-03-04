@@ -46,8 +46,8 @@ class PurpleEdge:
         self.status = newStatus
 
 
-    def signalEndingNode(self, signal = None):
-        self.__endingNode.recieveSignal(signal)
+    def signalEndingNode(self, signal = None, team_to_signal : int = None, socket_to_signal : str = None):
+        self.__endingNode.recieveSignal(signal, team_to_signal=team_to_signal, socket_to_signal=socket_to_signal)
 
 
     def getColor(self) -> EdgeColor:
@@ -83,26 +83,26 @@ class GreenEdge(PurpleEdge):
         self.color = EdgeColor.GREEN
 
 
-    def checkRiddle(self, solution : str = "") -> bool:
+    def checkRiddle(self, solution : str = "", team_to_signal : int = None, socket_to_signal : str = None) -> bool:
         """
             Questo metodo controlla se la soluzione all'enigma memorizzato sia corretta.
             In tal caso viene impostato lo stato come RESOLVED e di conseguenza il nodo
             puntato viene segnalato 
         """
         if self.riddle.isSolution(solution):
-            self.setStatus(EdgeStatus.RESOLVED)
+            self.setStatus(EdgeStatus.RESOLVED, team_to_signal=team_to_signal, socket_to_signal=socket_to_signal)
             return True
         
         return False
 
 
-    def setStatus(self, newStatus : EdgeStatus = EdgeStatus.NOT_DISCOVERED):
+    def setStatus(self, newStatus : EdgeStatus = EdgeStatus.NOT_DISCOVERED, team_to_signal : int = None, socket_to_signal : str = None):
         """ 
             Il metodo set status segnala il nodo uscente se lo stato era resolved.
             Mecanismo che serve a segnalare al nodo un possibile sblocco
         """
         self.status = newStatus
         if newStatus == EdgeStatus.RESOLVED:
-            self.signalEndingNode(Signals.GREEN_EDGE_RESOLVED)
+            self.signalEndingNode(Signals.GREEN_EDGE_RESOLVED, team_to_signal=team_to_signal, socket_to_signal=socket_to_signal)
         elif newStatus == EdgeStatus.DISCOVERED:
             print(f"\n🔓 Arco verde da {self.getStartingNode().getKey()} a {self.getEndingNode().getKey()} scoperto.")

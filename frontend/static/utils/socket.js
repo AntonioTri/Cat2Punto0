@@ -43,8 +43,38 @@ socket.on('socket_updated', (response) => {
 // Metodo di test per vedere se arriva il segnale dalla socket quando il grafo del team
 // viene esplorato
 socket.on('signal_from_node', (data) => {
-    console.log('Messaggio dal Progression Graph. Messaggio:', data)
-})
+    
+
+    // Con questo segnale andiamo a conservare in local storage tutte le informazioni del grafo che ci vengono inviate
+
+    // Se la variabile non esiste allora la creiamo
+    let graph_data = localStorage.getItem('graph_data')
+    // Se i dati esistono vi aggiungiamo i nuovi dati ricevuti
+    if (graph_data) {
+        // Eseguiamo un parse sulla stringa per trasformarla in oggetto
+        graph_data = JSON.parse(graph_data);
+        //Settiamo la nuova chiave
+        graph_data[data.key] = data.link_to_source;
+        // Riconvertiamo in stranga i dati
+        graph_data = JSON.stringify(graph_data);
+        // E li reinseriamo al local storage
+        localStorage.setItem('graph_data', graph_data);
+    
+    // Nel caso contrario, graph_data non esiste, pertanto la creiamo prima, poi
+    // Eseguiamo il parse die dati e li inseriamo a localstorage
+    } else {
+        
+        // Estraiamo i dati
+        const key = data.key;
+        const link = data.link_to_source;
+        // Creiamo l'istanza
+        let savings_first_instance = {key : link };
+        // Parse e memorizzazione
+        savings_first_instance = JSON.stringify(savings_first_instance);
+        localStorage.setItem('graph_data', savings_first_instance);
+    }
+
+});
 
 // Questo segnale gestisce il log degli errori nel back end, daot che non si possono restituire 
 // dizionari come in  una normale api restful

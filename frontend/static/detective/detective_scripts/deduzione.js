@@ -66,6 +66,7 @@ export class DeductionManager extends AbstractCardManager{
 
             // Verifica se la risposta è OK
             if (response.ok) {
+                console.log("Risposat della deduzione: ", response)
                 // La risposta era corretta o era già stata risolta
                 switch (response.status) {
 
