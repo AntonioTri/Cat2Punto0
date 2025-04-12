@@ -9,7 +9,7 @@ from controller.controller_team_pool import ControllerTeamPool
 from utils.info_logger import getFileLogger
 from ProgressionGraph.cache import cached_teams_graphs
 from utils.user_cache import connected_users, connected_users_status
-from utils.perk_cache import update_perk_cache, remove_team_perks, active_perks
+from utils.perk_cache import update_perk_cache, remove_team_perks, current_energy_used
 import threading
 
 logger = getFileLogger(__name__)
@@ -107,8 +107,9 @@ class Socket(Namespace):
                 cached_teams_graphs[team_id] = None
                 logger.info(f"✅ L'utente era l'ultimo attivo del team, salvataggio dei dati avvenuto con successo.")
                 
-                # Viene inoltre rimossa dalla cache la lista di perk associata al team
+                # Viene inoltre rimossa dalla cache la lista di perk associata al team ed il costo
                 remove_team_perks(team_id=team_id)
+                current_energy_used[team_id] = 0
                 logger.info(f"✅ Rimozione dei perk attivi avvenuta con successo.")
 
         # Nel caso opposto l'utente aveva solo ricaricato la pagina, nulla accade
@@ -245,7 +246,7 @@ class Socket(Namespace):
 
         # Controllo del risultato
         if status_code == 200:
-            # Per ogni membro trovato inviamo unmessaggio tramite socket
+            # Per ogni membro trovato inviamo un messaggio tramite socket
             message_to_send = {
                 "totalCost"     :   data["totalCost"],
                 "anchorIndex"   :   data["anchorIndex"],
@@ -261,9 +262,10 @@ class Socket(Namespace):
 
             logger.info('✅ Aggiornamenti inviati con successo!')
 
-            # Viene anche aggiornata la cache dei perk attivi
+            # Viene anche aggiornata la cache dei perk attivi e la cache per l'attuale costo usato
             update_perk_cache(team_id=int(data["team_id"]), data=data)
-            logger.info(f"✅ Aggiornamento dei perk attivi avvenuto con successo. Perk attivi: {active_perks[int(data["team_id"])]}")
+            current_energy_used[int(data["team_id"])] = data["totalCost"]
+            logger.info("✅ Aggiornamento dei perk attivi avvenuto con successo.")
         
         
         elif status_code == 404:

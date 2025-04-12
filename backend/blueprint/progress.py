@@ -4,6 +4,7 @@ from JWT.auth_decorator import require_role
 from entity.role import ROLE
 from flask_jwt_extended import jwt_required
 from utils.info_logger import getFileLogger
+from utils.perk_cache import active_perks, current_energy_used
 
 logger = getFileLogger(__name__)
 
@@ -136,3 +137,18 @@ def answer_graph_riddle():
 
     # Richiamo al metodo del controller
     return ControllerManageProgress.check_if_answer_is_correct(answer=answer, team_id=team_id, socket_to_signal=socket)
+
+
+@progress_blueprint.route('/get_active_statuses', methods=['GET'])
+@require_role(ROLE.COMANDANTE.value)
+def rerieve_active_perks():
+
+    selected_team = request.args.get('team_id', None)
+
+    team_id = int(selected_team)
+
+    if team_id in active_perks and team_id in current_energy_used:
+        return { "perks" : active_perks[team_id],
+                 "totalCost" : current_energy_used[team_id]}, 200
+    else:
+        return [], 200

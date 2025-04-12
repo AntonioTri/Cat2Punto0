@@ -11,6 +11,10 @@ logger = getFileLogger(__name__)
 
 #Dizionario di interi, i team id a cui è associata una lista di oggetti string ->any ovvero i perk
 active_perks : dict[int, list[dict[str, any]]]  = {}
+# La cache dell costo energetico usato attualmente
+current_energy_used : dict[int, int] = {}
+# La cache dei perk disponibili attualmente
+avaiable_perks : dict[int, list[dict[str, str]]] = {}
 
 
 
@@ -28,10 +32,12 @@ def add_perk(team_id : int = -1, perk : dict[str, any] = {}):
     for element in active_perks[team_id]:
         if element["perkIndex"] == perk["perkIndex"] and element["anchorIndex"] != perk["anchorIndex"]:
             element["anchorIndex"] = perk["anchorIndex"]
+            logger.info(f"✅ Posizione del Perk {perk["perkIndex"]} aggiornata nella cache.")
             return
 
     # Se dopo il controllo il perk non è stato trovato allora viene aggiunto alla lista di quelli attivi
     active_perks[team_id].append(perk)
+    logger.info(f"✅ Perk {perk["perkIndex"]} AGIUNTO dalla cache.")
 
 
 def retrieve_perks(team_id : int = -1) -> list:
@@ -54,12 +60,10 @@ def remove_perk(team_id: int = -1, perk: dict[str, any] = {}) -> None:
     
     # Controlla se il team_id è presente nella cache
     if team_id in active_perks:
-        try:
-            active_perks[team_id].remove(perk)
-
-        except ValueError:
-            # Se il perk non è presente nella lista, non fare nulla
-            pass
+        for _perk in active_perks[team_id]:
+            if _perk["perkIndex"] == perk["perkIndex"]:
+                active_perks[team_id].remove(_perk)
+                logger.info(f"✅ Perk numero {perk["perkIndex"]} rimosso dalla cache.")
 
 
 def remove_team_perks(team_id : int = -1) -> None:
@@ -83,11 +87,12 @@ def update_perk_cache(team_id: int = -1, data : dict[str, any] = {}) -> None:
         "perkIndex"     :   data["perkIndex"]
     }
 
+    logger.info(data)
+
     if data["anchorIndex"] is None:
         remove_perk(team_id=team_id, perk=current_perk)
-        logger.info("✅ Perk RIMOSSO dalla cache.")
     else :
         add_perk(team_id=team_id, perk=current_perk)
-        logger.info("✅ Perk AGIUNTO dalla cache.")
+        
 
     
