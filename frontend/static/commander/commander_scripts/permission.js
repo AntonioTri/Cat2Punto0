@@ -17,9 +17,6 @@ export class PermissionManager extends AbstractCardManager {
         this.setURLS();
         this.addElements();
         this.setSocketListeners();
-        this.addPermissionListelement('Fascicolo', 1, 'A', 'B');
-        this.addPermissionListelement('Fascicolo', 1, 'A', 'B');
-        this.addPermissionListelement('Fascicolo', 1, 'A', 'B');
     };
 
 

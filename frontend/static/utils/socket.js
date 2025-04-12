@@ -101,6 +101,12 @@ document.addEventListener('socketInitialized', () => {
     // Esegui azioni specifiche dopo il caricamento
     const are_graph_data_saved = localStorage.getItem('are_graph_data_saved')
     
+    // TODO:
+    // Bisognerebbe fare un controllo per definire se richiedere nuovi dati in quanto puo'
+    // esserci stato un cambiamento durante il ricaricamento della pagina, nuove scoperte
+    // In sostanza se qualcuno esce e poi rientra oppure ricarica e nel frattempo nuove scoperte vengono fatte
+    // queste devono essere inviate
+
     // Nel caso in cui non ci siano dati salvati, allora richiediamo alla API di mandarli
     if (!are_graph_data_saved) {
         console.log('Socket inizializzata: Richiedo i dati di salvataggio ...');

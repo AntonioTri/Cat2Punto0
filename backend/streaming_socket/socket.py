@@ -226,3 +226,34 @@ class Socket(Namespace):
         emit('evidence_permission_gained', message_to_send, to=data["client_socket"])
         
         logger.info('[+] Permessi inviati con successo!')
+
+    # Metodo che serve a far arrivare il cambiamento di un perk di un comandante
+    # agli altri comandanti 
+    @socket_require_role(role=ROLE.COMANDANTE.value)
+    def on_perk_updated(self, data):
+        
+        logger.info(f"[-] Perk modificato. Dati: {data}")
+        logger.info('[?] Provo ad estrarre le socket degli altri comandanti')
+
+        # Estrazione dei dati degli altri comandanti sulla base del team id
+        members, status_code = ControllerTeamPool.get_all_team_group_socket(team_id=int(data["team_id"]), role="COMANDANTE")
+
+        # Controllo del risultato
+        if status_code == 200:
+            # Per ogni membro trovato inviamo unmessaggio tramite socket
+            message_to_send = {
+                "totalCost"     :   data["totalCost"],
+                "anchorIndex"   :   data["anchorIndex"],
+                "perkIndex"     :   data["perkIndex"],
+                "maxCost"       :   data["maxCost"]
+            }
+
+            # inviamo il messaggio ad ogni membro comandante del team
+            for member in members:
+                if int(member["id"]) != int(data["personal_id"]):
+                    emit('perk_got_updated', message_to_send, to=member["socket"])
+
+            logger.info('[+] Aggiornamenti inviati con successo!')
+
+        elif status_code == 404:
+            logger.info(f"[!] Qualche errore è avvenuto durante la ricerca delle socket per l'id {data["team_id"]}.\nErrore: {members}")
