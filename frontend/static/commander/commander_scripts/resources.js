@@ -197,22 +197,33 @@ export class ResourcesManager extends AbstractCardManager {
 
         // Crea i punti di ancoraggio disposti in cerchio
         for (let i = 0; i < this.numAnchors; i++) {
-
             const angle = (2 * Math.PI / this.numAnchors) * i;
             const x = this.centerX + this.anchorRadius * Math.cos(angle) - 20;
             const y = this.centerY + this.anchorRadius * Math.sin(angle) - 20;
-
+        
             const anchor = document.createElement('div');
             anchor.className = 'anchor';
-            anchor.dataset.used = 'false';
+            anchor.dataset.used = 'false'; // oppure 'true' se già usata
             anchor.id = `${i}`;
             anchor.style.left = `${x}px`;
             anchor.style.top = `${y}px`;
-            anchor.style.width = `${this.anchorSize}px`; // Imposta la larghezza
+            anchor.style.width = `${this.anchorSize}px`;
             anchor.style.height = `${this.anchorSize}px`;
+        
+            // Aggiunta degli elementi visuali interni per gli effetti
+            const core = document.createElement('div');
+            core.className = 'anchor-core';
+        
+            const pulse = document.createElement('div');
+            pulse.className = 'anchor-pulse';
+        
+            anchor.appendChild(pulse);
+            anchor.appendChild(core);
+        
             this.container.appendChild(anchor);
             this.anchors.push(anchor);
         }
+        
 
 
     };

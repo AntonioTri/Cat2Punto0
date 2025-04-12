@@ -31,3 +31,93 @@
     touch-action: none;
     transition: left 0.6s ease-in-out, top 0.6s ease-in-out;
 }
+
+.anchor {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: transform 0.6s ease-in-out;
+}
+
+.anchor-core {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, #2c003e, #000000);
+    box-shadow: 0 0 6px #300748 inset;
+    transition: all 1s ease-in-out;
+    animation: slowGlow 6s ease-in-out infinite, rotateAether 20s linear infinite;
+}
+
+.anchor-pulse {
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(98, 0, 153, 0.2) 0%, transparent 80%);
+    opacity: 0.4;
+    pointer-events: none;
+    transition: all 1s ease-in-out;
+    animation: fadePulse 6s ease-in-out infinite;
+}
+
+/* Stato ATTIVO (usato) */
+.anchor[data-used="true"] {
+    transform: scale(1.1);
+}
+
+.anchor[data-used="true"] .anchor-core {
+    background: radial-gradient(circle at center, #7b1fa2, #1a0033);
+    box-shadow: 0 0 15px #a020f0, 0 0 30px #6a0dad;
+    animation: pulseGlow 2s infinite alternate, rotateAether 10s linear infinite;
+}
+
+.anchor[data-used="true"] .anchor-pulse {
+    background: radial-gradient(circle, rgba(156, 39, 176, 0.35) 0%, transparent 80%);
+    opacity: 0.7;
+    animation: pulseHalo 2s infinite ease-in-out;
+}
+
+/* Animazioni */
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 10px #a020f0, 0 0 30px #6a0dad;
+    }
+    100% {
+        box-shadow: 0 0 20px #d580ff, 0 0 40px #9c27b0;
+    }
+}
+
+@keyframes fadePulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.4;
+    }
+}
+
+@keyframes pulseHalo {
+    0%, 100% {
+        transform: scale(1.2);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.4);
+        opacity: 0.9;
+    }
+}
+
+@keyframes rotateAether {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
