@@ -1,6 +1,9 @@
 from flask_socketio import disconnect
 from flask_jwt_extended import decode_token
 from functools import wraps
+from utils.info_logger import getFileLogger
+
+logger = getFileLogger(__name__)
 
 def socket_require_role(role: str):
     def decorator(f):
@@ -8,7 +11,7 @@ def socket_require_role(role: str):
         def wrapped_function(self, data, *args, **kwargs):
             token = data.get('token')
             if not token:
-                print("Richiesta rifiutata: JWT mancante")
+                logger.info("Richiesta rifiutata: JWT mancante")
                 disconnect()
                 return
 
@@ -20,14 +23,14 @@ def socket_require_role(role: str):
                     return f(self, data, *args, **kwargs)
 
                 if decoded["role"] != role:
-                    print("Richiesta rifiutata: ruolo non valido")
+                    logger.info("Richiesta rifiutata: ruolo non valido")
                     disconnect()
                     return
 
                 return f(self, data, *args, **kwargs)
 
-            except Exception:
-                print("JWT non valido.")
+            except Exception as e:
+                logger.info(f"JWT non valido. Exception: {e}")
                 disconnect()
                 return
 

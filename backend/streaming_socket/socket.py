@@ -9,6 +9,7 @@ from controller.controller_team_pool import ControllerTeamPool
 from utils.info_logger import getFileLogger
 from ProgressionGraph.cache import cached_teams_graphs
 from utils.user_cache import connected_users, connected_users_status
+from utils.perk_cache import update_perk_cache, remove_team_perks, active_perks
 import threading
 
 logger = getFileLogger(__name__)
@@ -105,6 +106,10 @@ class Socket(Namespace):
                 team_graph.save_to_file(filename=save_file)
                 cached_teams_graphs[team_id] = None
                 logger.info(f"✅ L'utente era l'ultimo attivo del team, salvataggio dei dati avvenuto con successo.")
+                
+                # Viene inoltre rimossa dalla cache la lista di perk associata al team
+                remove_team_perks(team_id=team_id)
+                logger.info(f"✅ Rimozione dei perk attivi avvenuta con successo.")
 
         # Nel caso opposto l'utente aveva solo ricaricato la pagina, nulla accade
         else:
@@ -228,12 +233,12 @@ class Socket(Namespace):
         logger.info('[+] Permessi inviati con successo!')
 
     # Metodo che serve a far arrivare il cambiamento di un perk di un comandante
-    # agli altri comandanti 
+    # agli altri comandanti
     @socket_require_role(role=ROLE.COMANDANTE.value)
     def on_perk_updated(self, data):
         
         logger.info(f"[-] Perk modificato. Dati: {data}")
-        logger.info('[?] Provo ad estrarre le socket degli altri comandanti')
+        logger.info('🔄 Provo ad estrarre le socket degli altri comandanti')
 
         # Estrazione dei dati degli altri comandanti sulla base del team id
         members, status_code = ControllerTeamPool.get_all_team_group_socket(team_id=int(data["team_id"]), role="COMANDANTE")
@@ -250,10 +255,20 @@ class Socket(Namespace):
 
             # inviamo il messaggio ad ogni membro comandante del team
             for member in members:
-                if int(member["id"]) != int(data["personal_id"]):
+                if member["socket"] != data["socket"]:
                     emit('perk_got_updated', message_to_send, to=member["socket"])
+                    logger.info(f"- Messaggio {message_to_send}. inviato a socket: {member["socket"]}")
 
-            logger.info('[+] Aggiornamenti inviati con successo!')
+            logger.info('✅ Aggiornamenti inviati con successo!')
 
+            # Viene anche aggiornata la cache dei perk attivi
+            update_perk_cache(team_id=int(data["team_id"]), data=data)
+            logger.info(f"✅ Aggiornamento dei perk attivi avvenuto con successo. Perk attivi: {active_perks[int(data["team_id"])]}")
+        
+        
         elif status_code == 404:
             logger.info(f"[!] Qualche errore è avvenuto durante la ricerca delle socket per l'id {data["team_id"]}.\nErrore: {members}")
+        
+
+
+

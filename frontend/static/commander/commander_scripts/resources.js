@@ -51,7 +51,9 @@ export class ResourcesManager extends AbstractCardManager {
                 // Vengono reimpostate le posizioni dei perk ed i valori
                 // Generali della classe per essere in sincronizzazione con tutti
                 // gli altri comandanti
-                this.setStatuses(statuses);
+                statuses.perks.forEach(perk => {
+                    this.setStatuses(perk);
+                });
                 
 
             // La risposta non è stata OK
@@ -88,27 +90,47 @@ export class ResourcesManager extends AbstractCardManager {
         this.totalCost = statuses.totalCost;
         // Perk selezionato
         const perk = this.resources[statuses.perkIndex];
+        // Se vi era presente anche il costo massimo utilizzabile viene impostato anche quello
+        if(statuses.maxCost){ this.maxCost = statuses.maxCost; }
+
         // Se la pallina ha un punto di ancoraggio viene spostata
         if (statuses.anchorIndex) {
 
             const anchorCenterX = this.anchors[statuses.anchorIndex].offsetLeft + this.anchors[statuses.anchorIndex].offsetWidth / 2;
             const anchorCenterY = this.anchors[statuses.anchorIndex].offsetTop + this.anchors[statuses.anchorIndex].offsetHeight / 2;
 
-            // Posiziona la pallina in modo che il suo centro coincida con il centro dell'ancora
+            // Posiziona la pallina in modo che il suo centro coincida con il centro della nuova ancora
             perk.style.left = `${anchorCenterX - perk.offsetWidth / 2}px`;
             perk.style.top = `${anchorCenterY - perk.offsetHeight / 2}px`;
-        
+
+            // Memorizziamo che la pallina è stata ancorata
+            perk.dataset.anchored = "true";
+
+            // Se la pallina era già ancorata viene liberato il vecchio anchor point
+            this.freeAnchor(perk);
+
+            // Mentre quello nuovo deve essere impostato come occupato
+            this.anchors[statuses.anchorIndex].dataset.used = "true";
+
+            // Viene impostato il nuovo id dell'ancora associato alla pallina
+            perk.dataset.anchorId = this.anchors[statuses.anchorIndex].id;
+
+
         // Altrimenti viene riportata al suo punto iniziale
         } else {
+        
+            // Viene liberata la vecchia ancora se c'era
+            this.freeAnchor(perk);
+            
             // Posiziona la pallina in modo che il suo centro coincida con il suo punto di inizio
             perk.style.left = `${100 + statuses.perkIndex * 70}px`;
             perk.style.top = `${100}px`;
 
+            // Memorizziamo che la pallina è stata sganciata
+            perk.dataset.anchored = "false";
+            perk.dataset.anchorId = null;
+
         }
-
-        // Se vi era presente anche il costo massimo utilizzabile viene anche impostato quello
-        if(statuses.maxCost){ this.maxCost = statuses.maxCost; }
-
 
     };
 
@@ -125,9 +147,9 @@ export class ResourcesManager extends AbstractCardManager {
         // Lista di moduli risorsa
         this.resources = [];
         // Raggio del cerchio su cui posizionare le ancore
-        this.anchorRadius = 150;
+        this.anchorRadius = 120;
         // Larghezza dei punti di ancoraggio (diametro)
-        this.anchorSize = 60; 
+        this.anchorSize = 55; 
 
         this.centerX = this.container.clientWidth / 2;
         this.centerY = this.container.clientHeight / 2;
@@ -153,6 +175,7 @@ export class ResourcesManager extends AbstractCardManager {
 
             const anchor = document.createElement('div');
             anchor.className = 'anchor';
+            anchor.dataset.used = 'false';
             anchor.id = `${i}`;
             anchor.style.left = `${x}px`;
             anchor.style.top = `${y}px`;
@@ -179,9 +202,10 @@ export class ResourcesManager extends AbstractCardManager {
             ball.style.left = `${origin.left}px`;
             ball.style.top = `${origin.top}px`;
             ball.innerHTML = `${cost}`;
+            // Variabile dataset che conserva se la palina è ancorata
+            ball.dataset.anchored = "false";
 
             let isDragging = false;
-            let anchoredTo = null; // Memorizza se la pallina è ancorata
             let offset = { x: 0, y: 0 };
 
             // Ottieni le coordinate dell'evento (mouse o touch)
@@ -229,6 +253,7 @@ export class ResourcesManager extends AbstractCardManager {
                 const ballRect = ball.getBoundingClientRect();
                 let closestAnchor = null;
                 let minDist = Infinity;
+                const snapDistance = 40; // Distanza massima per ancorarsi
 
                 // Trova l'ancora più vicina alla pallina
                 for (const anchor of this.anchors) {
@@ -237,23 +262,55 @@ export class ResourcesManager extends AbstractCardManager {
                     const dy = (ballRect.top + ballRect.height / 2) - (anchorRect.top + anchorRect.height / 2);
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    if (dist < minDist) {
+                    if (dist < minDist && dist < snapDistance) {
                         minDist = dist;
                         closestAnchor = anchor;
                     }
                 }
 
-                const snapDistance = 40; // Distanza massima per ancorarsi
 
                 
                 // Se vicino all'ancora
                 if (minDist < snapDistance) {
+
+                    // Un controllo preventivo si assicura che l'attuale punto di ancoraggio non sia già occupato
+                    // Se l'anchor più vicino risulta già occupato...
+                    if (closestAnchor.dataset.used === "true") {
+                        
+                        // Se la pallina era già agganciata, torna al suo anchor precedente
+                        if (ball.dataset.anchored === "true" && ball.dataset.anchorId) {
+                            
+                            const previousAnchor = this.anchors.find(a => a.id === ball.dataset.anchorId);
+                            if (previousAnchor) {
+                                const anchorCenterX = previousAnchor.offsetLeft + previousAnchor.offsetWidth / 2;
+                                const anchorCenterY = previousAnchor.offsetTop + previousAnchor.offsetHeight / 2;
+                                ball.style.transition = 'left 0.3s ease, top 0.3s ease';
+                                ball.style.left = `${anchorCenterX - ball.offsetWidth / 2}px`;
+                                ball.style.top = `${anchorCenterY - ball.offsetHeight / 2}px`;
+                            }
+
+                        } else {
+                            // Se il perk non era ancora agganciato, torna al punto di partenza
+                            ball.style.transition = 'left 0.6s ease-in-out, top 0.6s ease-in-out';
+                            ball.style.left = `${origin.left}px`;
+                            ball.style.top = `${origin.top}px`;
+                        }
+                        
+                        return; // Esci dal controllo, impedendo l'aggancio sull'anchor occupato
                     
-                    // Vengono fatti dei controlli per vedere se la pallina era già ancorata
-                    // al fine di gestire i costi
+                    }
+
+                    // Se la pallina era già agganciata a un anchor diverso dal nuovo, libera il vecchio anchor
+                    if (ball.dataset.anchored === "true" && ball.dataset.anchorId && ball.dataset.anchorId !== closestAnchor.id) {
+                        const previousAnchor = this.anchors.find(a => a.id === ball.dataset.anchorId);
+                        if (previousAnchor) {
+                            previousAnchor.dataset.used = "false";
+                            console.log("Vecchio anchor liberato:", previousAnchor);
+                        }
+                    }
 
                     // Pallina non ancora ancorata
-                    if(!anchoredTo){
+                    if(ball.dataset.anchored === "false"){
                         // Se il costo della pallina è sommabile viene inserita aumentando il costo occupato
                         if(cost + this.totalCost <= this.maxCost){
                             this.totalCost += cost;
@@ -270,78 +327,53 @@ export class ResourcesManager extends AbstractCardManager {
                             ball.style.top = `${origin.top}px`;
                             return;
                         }
+                    
+                    // Se la pallina era già agganciata
                     }
+                    
+                    // Conserviamo lo stato e l'id del punto di ancoraggio
+                    ball.dataset.anchored = "true";
+                    ball.dataset.anchorId = closestAnchor.id;
+                    closestAnchor.dataset.used = "true";
 
-                    anchoredTo = closestAnchor;
+                    // Transizione
                     ball.style.transition = 'left 0.3s ease, top 0.3s ease';
                     // Calcola il centro del punto di ancoraggio
-                    const anchorCenterX = anchoredTo.offsetLeft + anchoredTo.offsetWidth / 2;
-                    const anchorCenterY = anchoredTo.offsetTop + anchoredTo.offsetHeight / 2;
+                    const anchorCenterX = closestAnchor.offsetLeft + closestAnchor.offsetWidth / 2;
+                    const anchorCenterY = closestAnchor.offsetTop + closestAnchor.offsetHeight / 2;
 
                     // Posiziona la pallina in modo che il suo centro coincida con il centro dell'ancora
                     ball.style.left = `${anchorCenterX - ball.offsetWidth / 2}px`;
                     ball.style.top = `${anchorCenterY - ball.offsetHeight / 2}px`;
 
-                    //TODO: bisogna agiungere che quando la posizione viene aggiornata, la socket invia i dati
-                    // di stato correnti al back end che lo smista agli altri partecipanti
-
-                    const data_to_send = {
-                        // Indice del perk spostato
-                        perkIndex : i,
-                        // Indice del punto di ancoraggio a cui si è attaccato il perk
-                        anchorIndex : anchoredTo.id,
-                        // Costo attuale ricoperto
-                        totalCost : this.totalCost,
-                        // Il costo massimo rimane invariato
-                        maxCost : null,
-                        // Il team id del comandante
-                        team_id : localStorage.getItem("team_id"),
-                        // Id personale
-                        personal_id : localStorage.getItem("personal_id"),
-                        // IL FOTTUTO TOKEN DI MERDA PER IL DECORATOR DELLA SOKET
-                        token : localStorage.getItem('access_token')
-                    }
-
-                    // Aggiungiamo il listener che definisce la socket
-                    this.socket.emit('perk_updated', data_to_send);
-                    console.log('Invio dei dati della pallina:', data_to_send);
+                    
+                    // Invio dei dati
+                    this.sendPerkUpdate(i, closestAnchor.id);
 
                     
                 } else {
-                    // Se era ancorata, ora viene rimossa e si invia un segnale
-                    if (anchoredTo) {
+                    // Libera la ancora associata alla pallina
+                    this.freeAnchor(ball);
+
+                    // Se era ancorata, ora viene rimossa
+                    if (ball.dataset.anchored === "true") {
                         // Viene rimosso il costo della pallina dal costo totale
                         this.totalCost -= cost;
-                        // TODO:Deve essere segnalato al back end, agli altri comandanti e ai destinatari della risorsa
-                        // che la risorsa è stata scollegata
+                        // viene rimosso il punto di ancoraggio
+                        ball.dataset.anchorId = null;
+
                         console.log(`Pallina ${i + 1} rimossa dall'ancoraggio. Costo occupato: ${this.totalCost}.`);
     
                     }
                     
-                    // Vengono inviati i dati per indicare lo sganciamento
-                    const data_to_send = {
-                        // Indice del perk spostato
-                        perkIndex : i,
-                        // Indice del punto di ancoraggio a cui si è attaccato il perk
-                        anchorIndex : null,
-                        // Costo attuale ricoperto
-                        totalCost : this.totalCost,
-                        // Il costo massimo rimane invariato
-                        maxCost : null,
-                        // Il team id del comandante
-                        team_id : localStorage.getItem("team_id"),
-                        // Id personale
-                        personal_id : localStorage.getItem("personal_id"),
-                        // IL FOTTUTO TOKEN DI MERDA PER IL DECORATOR DELLA SOKET
-                        token : localStorage.getItem('access_token')
-                    }
+                    // Si inviano i dati dello scollegamento
+                    this.sendPerkUpdate(i, null);
 
-                    // Aggiungiamo il listener che definisce la socket
-                    this.socket.emit('perk_updated', data_to_send);
-                    console.log('Invio dei dati della pallina:', data_to_send);
+                    // Togliamo la memorizazione di ancoraggio
+                    ball.dataset.anchored = "false";
 
                     // A prescindere la pallina viene riportata al punto di partenza
-                    anchoredTo = null;
+                    closestAnchor = null;
                     ball.style.transition = 'left 0.6s ease-in-out, top 0.6s ease-in-out';
                     ball.style.left = `${origin.left}px`;
                     ball.style.top = `${origin.top}px`;
@@ -359,7 +391,7 @@ export class ResourcesManager extends AbstractCardManager {
 
             // Clic per far tornare la pallina alla posizione iniziale se non ancorata
             ball.addEventListener('click', () => {
-                if (!anchoredTo) {
+                if (ball.dataset.anchored == false) {
                     ball.style.transition = 'left 0.6s ease-in-out, top 0.6s ease-in-out';
                     ball.style.left = `${origin.left}px`;
                     ball.style.top = `${origin.top}px`;
@@ -373,6 +405,47 @@ export class ResourcesManager extends AbstractCardManager {
 
 
     };
+
+
+    freeAnchor(perk){
+
+        const usedAnchor = this.anchors.find(a => a.id === perk.dataset.anchorId);
+            if (usedAnchor) {
+                // Il punto di ancoraggio viene di nuovo reso libero
+                usedAnchor.dataset.used = "false";
+                console.log("Ancora liberata: ", usedAnchor);
+            }
+
+    }
+
+
+    sendPerkUpdate(perkId, anchorId){
+
+        const data_to_send = {
+            // IL FOTTUTO TOKEN DI MERDA PER IL DECORATOR DELLA SOKET
+            token : localStorage.getItem("access_token"),
+            // Indice del perk spostato
+            perkIndex : perkId,
+            // Indice del punto di ancoraggio a cui si è attaccato il perk
+            anchorIndex : anchorId,
+            // Costo attuale ricoperto
+            totalCost : this.totalCost,
+            // Il costo massimo rimane invariato
+            maxCost : null,
+            // Il team id del comandante
+            team_id : localStorage.getItem("team_id"),
+            // Id personale
+            personal_id : localStorage.getItem("personal_id"),
+            // L'id della socket che ha emesso il messaggio, al fine di evitare che 
+            // venga fatto un auto-aggiornamento inutile
+            socket : localStorage.getItem("socket")
+        }
+
+        // Aggiungiamo il listener che definisce la socket
+        this.socket.emit('perk_updated', data_to_send);
+        console.log('Invio dei dati della pallina:', data_to_send);
+
+    }
 
 
     setURLS(){
