@@ -51,6 +51,7 @@ export class ResourcesManager extends AbstractCardManager {
                 // Vengono reimpostate le posizioni dei perk ed i valori
                 // Generali della classe per essere in sincronizzazione con tutti
                 // gli altri comandanti
+                console.log(data);
                 data.perks.forEach(perk => {
                     this.setStatuses(perk);
                 });
@@ -146,7 +147,7 @@ export class ResourcesManager extends AbstractCardManager {
     setVariables(){
 
         // Numero di palline (modificabile)
-        this.numBalls = 6; 
+        this.numBalls = 4; 
         // Numero fisso di punti di ancoraggio
         this.numAnchors = 6;
         // Lista di punti di ancoraggio
@@ -234,8 +235,10 @@ export class ResourcesManager extends AbstractCardManager {
         // Crea le palline e ne gestisce l'interazione
         for (let i = 0; i < this.numBalls; i++) {
             this.addSinglePerk(i, i);
-        }      
+        }
 
+        this.addSinglePerk(10, "permissions");
+        this.addSinglePerk(6, "fascicoli");
 
     };
 
@@ -399,7 +402,7 @@ export class ResourcesManager extends AbstractCardManager {
 
                 
                 // Invio dei dati
-                this.sendPerkUpdate(i, closestAnchor.id);
+                this.sendPerkUpdate(i, ball.id, closestAnchor.id);
 
                 
             } else {
@@ -413,13 +416,13 @@ export class ResourcesManager extends AbstractCardManager {
                     // viene rimosso il punto di ancoraggio
                     ball.dataset.anchorId = null;
 
+                    // Si inviano i dati dello scollegamento
+                    this.sendPerkUpdate(i, ball.id, null);
+
                     console.log(`Pallina ${i + 1} rimossa dall'ancoraggio. Costo occupato: ${this.totalCost}.`);
                     
-
                 }
                 
-                // Si inviano i dati dello scollegamento
-                this.sendPerkUpdate(i, null);
 
                 // Togliamo la memorizazione di ancoraggio
                 ball.dataset.anchored = "false";
@@ -468,19 +471,21 @@ export class ResourcesManager extends AbstractCardManager {
             if (usedAnchor) {
                 // Il punto di ancoraggio viene di nuovo reso libero
                 usedAnchor.dataset.used = "false";
-                console.log("Ancora liberata: ", usedAnchor);
+                console.log(`Ancora ${usedAnchor.id}liberata.`);
             }
 
     }
 
 
-    sendPerkUpdate(perkId, anchorId){
+    sendPerkUpdate(perkId, _perkName, anchorId){
 
         const data_to_send = {
             // IL FOTTUTO TOKEN DI MERDA PER IL DECORATOR DELLA SOKET
             token : localStorage.getItem("access_token"),
             // Indice del perk spostato
             perkIndex : perkId,
+            // Nome del perk spostato
+            perkName : _perkName,
             // Indice del punto di ancoraggio a cui si è attaccato il perk
             anchorIndex : anchorId,
             // Costo attuale ricoperto

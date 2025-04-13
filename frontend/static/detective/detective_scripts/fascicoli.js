@@ -19,6 +19,7 @@ export class FascicoliManager extends AbstractCardManager{
         this.sendRequest();
         this.defineSocketSignals();
         this.addResponseMessage();
+        this.addLocker("fascicoli_on", "fascicoli_off");
     }
 
     async sendRequest(){

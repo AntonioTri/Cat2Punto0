@@ -1,5 +1,7 @@
 import { CheckMark } from '../../static/check_mark/check_mark.js';
 import { EvidenceManager } from '../../static/utils/evidence_manager.js';
+import { socket } from '../../static/utils/socket.js';
+import { API_URL } from '../../static/config.js';
 
 export class AbstractCardManager{
 
@@ -23,7 +25,7 @@ export class AbstractCardManager{
 
 
     init(){
-        throw new Error("Il metodo 'area' deve essere implementato nella sottoclasse");
+        throw new Error("Il metodo 'init' deve essere implementato nella sottoclasse");
     };
 
     async sendRequest(){
@@ -31,6 +33,121 @@ export class AbstractCardManager{
         throw new Error("Il metodo 'sendRequest' deve essere implementato nella sottoclasse");
     };
 
+
+    // Metodo che aggiunge alla card il blocco, impedendo di usare le funzioni normalmente
+    addLocker(signalOn = "", signalOff = ""){
+
+        // Viene creato il locker dedicato
+        //this.createLocker();
+        // Viene attivato
+        this.activateLocker();
+        // E vengono impostati i listener alla socket per il segnale di sblocco
+        socket.on(signalOn, (msg) => { console.log(msg.msg); this.deactivateLocker()});
+        // E per il segnale di blocco
+        socket.on(signalOff, (msg) => { console.log(msg.msg); this.activateLocker()});
+        // Viene poi inviata la richiesta per ottenere l'attuale stato della cache
+        this.askForLockerStatus();
+
+    };
+
+    // Metodo che crea lo screen del lock in sovrapposizione alla card attuale
+    createLocker() {
+        // Evita di creare locker multipli
+        if (this.card.querySelector('.locker-overlay')) return;
+    
+        // Crea il div dell'overlay
+        const locker = document.createElement('div');
+        locker.classList.add('locker-overlay');
+    
+        // Contenuto centrale: simbolo o scritta
+        const content = document.createElement('div');
+        content.classList.add('locker-content');
+        content.innerText = '🔒 BLOCCATO';
+        
+        // Aggiunge il contenuto all’overlay
+        locker.appendChild(content);
+    
+        // Aggiunge l’overlay alla card
+        this.card.appendChild(locker);
+    
+        console.log(`🧊 Locker creato sopra la card: ${this.card.id || this.cardName}`);
+    }
+    
+
+    // Metodo per attivare il locker con animazione
+    activateLocker() {
+        console.log(`Locker per la carta ${this.cardName} ATTIVATO! La carta è bloccata!`);
+
+        // Crea il div se non esiste
+        if (this.lockerOverlay) return; // evita duplicati
+
+        const overlay = document.createElement('div');
+        overlay.classList.add('card-locker-overlay');
+        overlay.innerHTML = `<span class="locker-label">☠️ LOCKED</span>`;
+        this.card.appendChild(overlay);
+        this.lockerOverlay = overlay;
+
+        // Forza uno stato iniziale fuori scala e invisibile
+        overlay.style.opacity = '0';
+        overlay.style.transform = 'scale(1.2)';
+        
+        // Trigger reflow for transition to work
+        void overlay.offsetWidth;
+
+        // Anima verso visibile e scala normale
+        overlay.style.opacity = '1';
+        overlay.style.transform = 'scale(1)';
+
+        // Viene impostato il livello z
+        overlay.style.zIndex = '1000';
+    }
+
+    // Metodo per disattivare il locker con animazione inversa
+    deactivateLocker() {
+        if (!this.lockerOverlay) return;
+
+        console.log(`Locker per la carta ${this.cardName} DISATTIVATO! La carta è ora utilizzabile!`);
+
+        const overlay = this.lockerOverlay;
+
+        // Anima verso invisibile e ingrandito
+        overlay.style.opacity = '0';
+        overlay.style.transform = 'scale(1.2)';
+
+        // Dopo l'animazione, rimuovilo
+        overlay.addEventListener('transitionend', () => {
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            this.lockerOverlay = null;
+            // Viene impostato il livello z
+            overlay.style.zIndex = '-1000';
+        }, { once: true });
+    }
+
+
+
+    async askForLockerStatus(){
+
+        // try-catch per gestire gli errori
+        try {
+            // Inviamo la richiesta con 'fetch'
+            const URL = `${API_URL}/get_locker_statuses?team_id=${localStorage.getItem('team_id')}&socket=${localStorage.getItem('socket')}`;
+            const response = await fetch(URL, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem('access_token')}`,  // Aggiungi il token di autorizzazione
+                    "Content-Type": "application/json"  // Specifica che invii JSON
+                }
+            });
+
+            if(!response.ok){
+                console.log(`🌐❌  Errore nel richiedere la cache dei locker attivi. Risposta: ${response}`);
+            }
+
+        } catch (error) {
+            console.log('🌐❌  Errore durante la get per gli status attivi: ', error);
+        }
+
+    };
 
     // Metodo che aggiunge un input tag
     addInputTag(id = "", placeholder = ""){

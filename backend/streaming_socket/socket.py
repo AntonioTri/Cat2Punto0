@@ -9,7 +9,7 @@ from controller.controller_team_pool import ControllerTeamPool
 from utils.info_logger import getFileLogger
 from ProgressionGraph.cache import cached_teams_graphs
 from utils.user_cache import connected_users, connected_users_status
-from utils.perk_cache import update_perk_cache, remove_team_perks, current_energy_used
+from utils.perk_cache import current_energy_used, update_perk_cache, remove_team_perks, remove_team_energy_usage, remove_team_lockers
 import threading
 
 logger = getFileLogger(__name__)
@@ -107,10 +107,11 @@ class Socket(Namespace):
                 cached_teams_graphs[team_id] = None
                 logger.info(f"✅ L'utente era l'ultimo attivo del team, salvataggio dei dati avvenuto con successo.")
                 
-                # Viene inoltre rimossa dalla cache la lista di perk associata al team ed il costo
+                # Viene inoltre rimossa dalla cache la lista di perk associata al team, il costo ed i locker
                 remove_team_perks(team_id=team_id)
-                current_energy_used[team_id] = 0
-                logger.info(f"✅ Rimozione dei perk attivi avvenuta con successo.")
+                remove_team_energy_usage(team_id=team_id)
+                remove_team_lockers(team_id=team_id)
+                logger.info(f"✅ Rimozione dei perk, costi e lockers attivi avvenuta con successo.")
 
         # Nel caso opposto l'utente aveva solo ricaricato la pagina, nulla accade
         else:
@@ -255,10 +256,13 @@ class Socket(Namespace):
             }
 
             # inviamo il messaggio ad ogni membro comandante del team
+            current_sid = request.sid
+
             for member in members:
-                if member["socket"] != data["socket"]:
-                    emit('perk_got_updated', message_to_send, to=member["socket"])
-                    logger.info(f"- Messaggio {message_to_send}. inviato a socket: {member["socket"]}")
+                socket_id = member.get("socket")
+                if socket_id and socket_id != current_sid:
+                    emit('perk_got_updated', message_to_send, to=socket_id)
+
 
             logger.info('✅ Aggiornamenti inviati con successo!')
 

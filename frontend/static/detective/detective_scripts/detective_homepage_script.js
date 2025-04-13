@@ -6,12 +6,14 @@ import { DeductionManager } from "../../detective/detective_scripts/deduzione.js
 
 const checkMark = new CheckMark();
 
-const burgerMenuManager = new BurgerMenuManager('body', checkMark);
+document.addEventListener("socketInitialized", () => {
+    
+    const burgerMenuManager = new BurgerMenuManager('body', checkMark);
 
-const fascicoliManager = new FascicoliManager(detectiveActions[2], checkMark);
+    const fascicoliManager = new FascicoliManager(detectiveActions[2], checkMark);
+    
+    const deductionManager = new DeductionManager(detectiveActions[0], checkMark);
 
-const deductionManager = new DeductionManager(detectiveActions[0], checkMark);
-
-
+})
 
 

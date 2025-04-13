@@ -1,3 +1,4 @@
+from flask_socketio import emit
 from utils.info_logger import getFileLogger
 logger = getFileLogger(__name__)
 
@@ -15,7 +16,8 @@ active_perks : dict[int, list[dict[str, any]]]  = {}
 current_energy_used : dict[int, int] = {}
 # La cache dei perk disponibili attualmente
 avaiable_perks : dict[int, list[dict[str, str]]] = {}
-
+# La cache dei lokers attivi degli utenti
+lockers : dict[int, dict[str, bool]] = {}
 
 
 def add_perk(team_id : int = -1, perk : dict[str, any] = {}):
@@ -75,6 +77,72 @@ def remove_team_perks(team_id : int = -1) -> None:
     if team_id in active_perks:
         active_perks[team_id].clear()
 
+def remove_team_lockers(team_id: int = -1) -> None:
+    """ 
+        Questo metodo quando invocato elimina dalla cache 
+        ogni locker attualmente memorizzato relativo al team scelto
+    """
+    
+    if team_id in lockers:
+        lockers[team_id].clear()
+
+
+def remove_team_energy_usage(team_id: int = -1) -> None:
+    """ 
+        Questo metodo quando invocato elimina dalla cache 
+        il valore dell'energia attualmente usata relativo al team scelto
+    """
+    
+    if team_id in current_energy_used:
+        current_energy_used[team_id] = {}
+
+
+def update_locker(team_id: int = -1, perk_name : str = "", flag : bool = False):
+
+    # Creazione della istanza se non vi è un team associato 
+    if team_id not in lockers:
+        lockers[team_id] = {}
+
+    # Estrazione della istanza
+    team_lokers = lockers[team_id]
+    # Impostazione della coppia chiave valore
+    team_lokers[perk_name] = flag
+
+    # Se la chiave era true allora viene creato il segnale on, altrimenti off
+    signal = perk_name + "_on" if flag else perk_name + "_off"
+
+    # Viene emesso il segnale di blocco o di sblocco a tutti i partecipanti alla connessione
+    # N.B. Quelli che non sono connessi, quando lo fanno richiedono l'attuale stato della cache
+    # aggiornandosi automaticamente
+    emit(signal, {"msg" : f"{perk_name} sbloccato/bloccato"}, broadcast=True, include_self=True, namespace='/socket.io')
+
+    # Logger per il debug
+    logger.info(f"📶✅ Segnale '{signal}' inviato a tutti gl utenti connessi.")
+
+
+def send_lockers_cache(team_id: int = -1, socket: str = ""):
+    """ 
+        Metodo che quando invocato invia alla socket richiedente la cache dei locker attivi
+        tramite segnali
+    """ 
+    # Variabile di appoggio
+    current_lockers = {}
+
+    # Controlli di sicurezza ed inizializzazioni di sicurezza
+    if team_id in lockers:
+        current_lockers = lockers[team_id]
+    else:
+        lockers[team_id] = {}
+
+    # Per ogni coppia chiave valore dal dizionario viene inviato il segnale al richiedente
+    for key, value in current_lockers.items():
+        # Se la chiave è true allora il lock è disattivato, accesso garantito
+        if value:
+            emit(key + "_on", {"msg" : f"{key} sbloccato"}, to=socket, namespace='/socket.io')
+        else:
+            emit(key + "_off", {"msg" : f"{key} bloccato"}, to=socket, namespace='/socket.io')
+
+
 
 def update_perk_cache(team_id: int = -1, data : dict[str, any] = {}) -> None:
     
@@ -90,8 +158,10 @@ def update_perk_cache(team_id: int = -1, data : dict[str, any] = {}) -> None:
     logger.info(data)
 
     if data["anchorIndex"] is None:
+        update_locker(team_id=team_id, perk_name=data["perkName"], flag=False)
         remove_perk(team_id=team_id, perk=current_perk)
     else :
+        update_locker(team_id=team_id, perk_name=data["perkName"], flag=True)
         add_perk(team_id=team_id, perk=current_perk)
         
 
