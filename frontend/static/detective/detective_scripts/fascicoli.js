@@ -108,7 +108,6 @@ export class FascicoliManager extends AbstractCardManager{
             
         // Se il fascicolo e' protetto e se non e' mai stato inviato il segnale per esso  
         // allora viene inviato un segnale ai capitani
-        // TODO: Si potrebbe fare che il segnae viene inviato solo ad un capitano, per incrementare
         // l'interattivita' tra i giocatori e le cose da fare
         } else if(fascicolo.permission_required && !this.permissionMap[fascicolo.id_fascicolo]["permission_sent"]){
             
@@ -242,9 +241,9 @@ export class FascicoliManager extends AbstractCardManager{
         this.URL_ASK_FOR_PERMISSION = `${SOCKET_URL}`;
 
         // URL docker per ottenere i fascicoli sbloccati 
-        this.dockerPathGetEvidence = `http://localhost:5000/api/get_detective_progresses?type=fascicoli&team_id=${localStorage.getItem('team_id')}`;
+        this.dockerPathGetEvidence = `http://localhost:6000/api/get_detective_progresses?type=fascicoli&team_id=${localStorage.getItem('team_id')}`;
         // URL docker per inviare i segnali
-        this.dockerPathSendSignals = 'http://localhost:5000/socket';
+        this.dockerPathSendSignals = 'http://localhost:6000/socket';
 
     }
 

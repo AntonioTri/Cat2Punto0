@@ -40,6 +40,19 @@ socket.on('socket_updated', (response) => {
 });
 
 
+// Evento socket legato al criptaggio della pagina. Quando arriva quel segnale
+// un evento globale viene lanciato e tutte le componenti traducibili vengono tradotte
+// secondo il modello scelto
+socket.on('crypto_system_changed', (system_name) => {
+
+    // Creazione dell'evento con allegati
+    const evento = new CustomEvent("cryptingSystemChanged", { detail: { systemName: system_name } });
+    // Dispatch dell'evento
+    document.dispatchEvent(evento);
+
+});
+  
+
 // Metodo di test per vedere se arriva il segnale dalla socket quando il grafo del team
 // viene esplorato
 socket.on('signal_from_node', (data) => {
@@ -101,8 +114,7 @@ document.addEventListener('socketInitialized', () => {
     // Esegui azioni specifiche dopo il caricamento
     const are_graph_data_saved = localStorage.getItem('are_graph_data_saved')
     
-    // TODO:
-    // Bisognerebbe fare un controllo per definire se richiedere nuovi dati in quanto puo'
+    // TODO: Bisognerebbe fare un controllo per definire se richiedere nuovi dati in quanto puo'
     // esserci stato un cambiamento durante il ricaricamento della pagina, nuove scoperte
     // In sostanza se qualcuno esce e poi rientra oppure ricarica e nel frattempo nuove scoperte vengono fatte
     // queste devono essere inviate

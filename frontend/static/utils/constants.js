@@ -1,6 +1,6 @@
 // Definiamo le azioni
 const commanderActions      =     ['Messaggio', 'Risorse', 'Permessi'];
-const decritterAction       =     ['ALPHA', 'BETA', 'OMEGA', 'Chiave'];
+const decritterAction       =     ['ALPHA', 'BETA', 'OMEGA', 'Sistemi'];
 const detectiveActions      =     ['Deduzione', 'Database', 'Fascicoli'];
 const admin                 =     ['create_team', 'add_team_member', 'download_team', 'reset_passwords'];
 const roles                 =     ['COMANDANTE', 'DECRITTATORE', 'DETECTIVE', 'ESPLORATORE'];

@@ -124,6 +124,35 @@ export class AbstractCardManager{
     }
 
 
+    // Questo metodo se chiamato attiva nella classe un listener di un evento globale
+    // Un evento speciale che si attiva quando un decrittatore attiva uno specifico criptaggio
+    // In sostanza tradue tutti gli elementi criptati della carta sulla base del modello di criptaggio
+    // inviato dal segnale
+    addCryptingEventListener(){
+
+        this.card.addEventListener('cryptingSystemChanged', (event) => {
+            
+            // Estrazione del nome dall'evento
+            const system_name = event.detail.systemName;
+
+            // Uno switch case sceglie la traduzione da applicare
+            switch (system_name) {
+                case 'x':
+                    console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
+                    break;
+                case 'y':
+                    console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
+                    break;
+            
+                default:
+                    console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
+                    break;
+            
+            }
+        });
+    }
+
+
 
     async askForLockerStatus(){
 

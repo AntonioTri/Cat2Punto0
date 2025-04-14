@@ -367,8 +367,6 @@ export class ResourcesManager extends AbstractCardManager {
                     if(cost + this.totalCost <= this.maxCost){
                         this.totalCost += cost;
 
-                        // TODO:Deve essere segnalato al back end, agli altri comandanti e ai destinatari della risorsa
-                        // che la risorsa è stata collegata
                         console.log(`Pallina ${i + 1} ancorata con costo ${cost}. Costo occupato: ${this.totalCost}.`);
                         // Update del tag dell'energia usata
                         this.updateEnergyTag();
@@ -513,7 +511,7 @@ export class ResourcesManager extends AbstractCardManager {
         // URL dedicato per la ricezione degli stati attivi indirizzato all'API
         this.URL_GET_ACTIVE_STATUSES = `${API_URL}/get_active_statuses?team_id=${localStorage.getItem('team_id')}`;
         //URL dedicato al path di docker
-        this.dockerPathGetActiveStatuses = `http://localhost:5000/api/get_active_statuses?team_id=${localStorage.getItem('team_id')}`;
+        this.dockerPathGetActiveStatuses = `http://localhost:6000/api/get_active_statuses?team_id=${localStorage.getItem('team_id')}`;
 
     }
 

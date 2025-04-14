@@ -46,9 +46,8 @@ def get_routes():
     return jsonify(routes=routes), 200
 
 # Questa funzione serve ad ottenere le proprie credenziali
-#TODO: bisognerebbe aggiungere un modo per ritornare anche la password
 @app.route('/api/me', methods=['GET'])
-@jwt_required
+@jwt_required()
 def get_me():
     me = get_jwt()
     return {"username": me["username"], "role": me["role"]}, 200
@@ -56,4 +55,4 @@ def get_me():
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=6000)

@@ -57,7 +57,7 @@ export class CreateTeamManager extends AbstractCardManager{
             if (response.ok) {
                 // La risposta è stata corretta
                 const data = await response.json();  // Converte la risposta in JSON
-                // TODO: aggiungere il messaggio in sovrimpressione
+                
                 console.log(data);
                 // Compare il check mark per il successo
                 this.checkMark.success();
@@ -124,7 +124,7 @@ export class CreateTeamManager extends AbstractCardManager{
         // URL di registrazione team
         this.URL_REGISTER_TEAM = `${API_URL}/add_team`;
         // Docker paths
-        this.dockerPathAddTeam = 'http://localhost:5000/api/add_team';
+        this.dockerPathAddTeam = 'http://localhost:6000/api/add_team';
 
     }
 

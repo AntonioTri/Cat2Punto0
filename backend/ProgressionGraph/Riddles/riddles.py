@@ -5,6 +5,8 @@ import re
 
 logger = getFileLogger(__name__)
 
+#TODO: I riddle devono essere polimorfi e tutti diversi, 
+# inoltre devono conservare i dati nella cache quando serve
 
 class Riddle:
 

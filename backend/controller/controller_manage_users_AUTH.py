@@ -62,12 +62,12 @@ class ControllerManageUsersAUTH():
                 # Caso in cui si sia connesso precedentemente ma ora e' disconnesso
                 else:
                     # Al team associamo l'istanza del progression graph
-                    set_team_graph(int(team_id), int(personal_id))
+                    set_team_cache(int(team_id), int(personal_id))
             
             # Nel caso in cui sia il primo accesso assoluto allora eseguiamo comunque la set team graph
             else:
                 # Al team associamo l'istanza del progression graph
-                    set_team_graph(int(team_id), int(personal_id))
+                    set_team_cache(int(team_id), int(personal_id))
 
 
         # Se tutti i controlli sono passati, l'utente esiste e pertanto viene generato un token di accesso
@@ -83,7 +83,7 @@ class ControllerManageUsersAUTH():
     
 
 
-def set_team_graph(team_id: int = None, personal_id : int = 0):
+def set_team_cache(team_id: int = None, personal_id : int = 0):
     # Ottieni la directory dello script corrente
     script_dir = os.path.dirname(os.path.abspath(__file__))
     # Percorso della cartella sorella
@@ -114,6 +114,8 @@ def set_team_graph(team_id: int = None, personal_id : int = 0):
                 logger.info(f"✅ Un file di salvataggio è stato trovato per il team {team_id} ...")
                 graph = ProgressionGraph.load_from_file(file_path)
                 cached_teams_graphs[team_id] = graph
+                #TODO: Bisogna aggiungere una bfs che aggiunge i dati nella cache per gli utenti
+                # successivi al primo
                 connected_users[team_id].append(personal_id)
                 logger.info(f"✅ Salvataggi caricati ed istanza associata per il team {team_id}.")
             except Exception as e:
