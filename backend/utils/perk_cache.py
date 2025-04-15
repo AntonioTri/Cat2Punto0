@@ -10,17 +10,33 @@ logger = getFileLogger(__name__)
 
 # La cache viene svuotata quando tutti gli utenti sono disconnessi
 
-#Dizionario di interi, i team id a cui è associata una lista di oggetti string ->any ovvero i perk
+# Cache dei perk di un team
+team_perks : dict[int, list[tuple[int, str]]] = {}
+# Cache dei perk attivi
 active_perks : dict[int, list[dict[str, any]]]  = {}
 # La cache dell costo energetico usato attualmente
 current_energy_used : dict[int, int] = {}
-# La cache dei perk disponibili attualmente
-avaiable_perks : dict[int, list[dict[str, str]]] = {}
 # La cache dei lokers attivi degli utenti
 lockers : dict[int, dict[str, bool]] = {}
 
 
-def add_perk(team_id : int = -1, perk : dict[str, any] = {}):
+def add_perk(team_id : int = -1, perk_name : str = "", perk_cost : int = 0):
+    """
+        La funzione add perk aggiunge un perk alla lista del team corrispettivo
+    """
+
+    # Controlli di sicurezza
+    if team_id not in team_perks:
+        team_perks[team_id] = []
+    
+    # Viene aggiunto il perk alla lista
+    team_perks[team_id].append((perk_cost, perk_name))
+    
+    # Log
+    logger.info(f"📶  ✅  Nuovo perk aggiunto alla cache. Perk: ({perk_name}, {perk_cost}).")
+
+
+def activate_perk(team_id : int = -1, perk : dict[str, any] = {}):
     """Metodo che aggiunge un perk alla cache"""
     if team_id == -1 or perk == {}:
         return
@@ -120,20 +136,25 @@ def update_locker(team_id: int = -1, perk_name : str = "", flag : bool = False):
     logger.info(f"📶✅ Segnale '{signal}' inviato a tutti gl utenti connessi.")
 
 
-def send_lockers_cache(team_id: int = -1, socket: str = ""):
+def send_lockers_cache(locker_name : str = "", team_id: int = -1, socket: str = ""):
     """ 
         Metodo che quando invocato invia alla socket richiedente la cache dei locker attivi
         tramite segnali
     """ 
-    # Variabile di appoggio
-    current_lockers = {}
 
     # Controlli di sicurezza ed inizializzazioni di sicurezza
-    if team_id in lockers:
-        current_lockers = lockers[team_id]
-    else:
+    if team_id not in lockers:
         lockers[team_id] = {}
+        
+    # Variabile di appoggio
+    current_lockers = lockers[team_id]
 
+    # Se il nome non si trova nel dizionario viene ritornato automaticamente che il locker è chiuso
+    # e si ritorna la funzione per impedire ulteriori operazioni
+    if locker_name not in current_lockers:
+        emit(locker_name + "_off", {"msg" : f"{locker_name} bloccato"}, to=socket, namespace='/socket.io')
+        return
+    
     # Per ogni coppia chiave valore dal dizionario viene inviato il segnale al richiedente
     for key, value in current_lockers.items():
         # Se la chiave è true allora il lock è disattivato, accesso garantito
@@ -155,14 +176,12 @@ def update_perk_cache(team_id: int = -1, data : dict[str, any] = {}) -> None:
         "perkIndex"     :   data["perkIndex"]
     }
 
-    logger.info(data)
-
     if data["anchorIndex"] is None:
         update_locker(team_id=team_id, perk_name=data["perkName"], flag=False)
         remove_perk(team_id=team_id, perk=current_perk)
     else :
         update_locker(team_id=team_id, perk_name=data["perkName"], flag=True)
-        add_perk(team_id=team_id, perk=current_perk)
+        activate_perk(team_id=team_id, perk=current_perk)
         
 
     

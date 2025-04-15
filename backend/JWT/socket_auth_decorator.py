@@ -12,7 +12,6 @@ def socket_require_role(role: str):
             token = data.get('token')
             if not token:
                 logger.info("Richiesta rifiutata: JWT mancante")
-                disconnect()
                 return
 
             try:
@@ -24,13 +23,36 @@ def socket_require_role(role: str):
 
                 if decoded["role"] != role:
                     logger.info("Richiesta rifiutata: ruolo non valido")
-                    disconnect()
                     return
 
                 return f(self, data, *args, **kwargs)
 
             except Exception as e:
-                logger.info(f"JWT non valido. Exception: {e}")
+                logger.info(f"JWT non valido. token = {token}. Dati = {data}. Exception: {e}")
+                disconnect()
+                return
+
+        return wrapped_function
+
+    return decorator
+
+
+
+def socket_require_token():
+    def decorator(f):
+        @wraps(f)
+        def wrapped_function(self, data, *args, **kwargs):
+            token = data.get('token')
+            if not token:
+                logger.info("🔒 Richiesta rifiutata: JWT mancante")
+                return
+
+            try:
+                decode_token(token)  # Se fallisce, scatena eccezione
+                return f(self, data, *args, **kwargs)
+
+            except Exception as e:
+                logger.info(f"🔒 JWT non valido. token = {token}. Dati = {data}. Exception: {e}")
                 disconnect()
                 return
 

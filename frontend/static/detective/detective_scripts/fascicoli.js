@@ -19,7 +19,7 @@ export class FascicoliManager extends AbstractCardManager{
         this.sendRequest();
         this.defineSocketSignals();
         this.addResponseMessage();
-        this.addLocker("fascicoli_on", "fascicoli_off");
+        this.addLocker("fascicoli", "fascicoli_on", "fascicoli_off");
     }
 
     async sendRequest(){
@@ -241,9 +241,9 @@ export class FascicoliManager extends AbstractCardManager{
         this.URL_ASK_FOR_PERMISSION = `${SOCKET_URL}`;
 
         // URL docker per ottenere i fascicoli sbloccati 
-        this.dockerPathGetEvidence = `http://localhost:6000/api/get_detective_progresses?type=fascicoli&team_id=${localStorage.getItem('team_id')}`;
+        this.dockerPathGetEvidence = `http://localhost:5000/api/get_detective_progresses?type=fascicoli&team_id=${localStorage.getItem('team_id')}`;
         // URL docker per inviare i segnali
-        this.dockerPathSendSignals = 'http://localhost:6000/socket';
+        this.dockerPathSendSignals = 'http://localhost:5000/socket';
 
     }
 

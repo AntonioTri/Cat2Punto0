@@ -4,7 +4,7 @@ from JWT.auth_decorator import require_role
 from entity.role import ROLE
 from flask_jwt_extended import jwt_required
 from utils.info_logger import getFileLogger
-from utils.perk_cache import active_perks, current_energy_used, send_lockers_cache
+from utils.perk_cache import send_lockers_cache
 
 logger = getFileLogger(__name__)
 
@@ -139,22 +139,6 @@ def answer_graph_riddle():
     return ControllerManageProgress.check_if_answer_is_correct(answer=answer, team_id=team_id, socket_to_signal=socket)
 
 
-@progress_blueprint.route('/get_active_statuses', methods=['GET'])
-@require_role(ROLE.COMANDANTE.value)
-def rerieve_active_perks():
-
-    selected_team = request.args.get('team_id', None)
-
-    team_id = int(selected_team)
-
-    if team_id in active_perks and team_id in current_energy_used:
-        return { "perks" : active_perks[team_id],
-                 "totalCost" : int(current_energy_used.get(team_id, 0))}, 200
-    else:
-        return { "perks" : [],
-                 "totalCost" : 0}, 200
-    
-
 @progress_blueprint.route('/get_locker_statuses', methods=['GET'])
 @jwt_required()
 def get_current_lockers():
@@ -162,6 +146,7 @@ def get_current_lockers():
     # Estraiamo i dati dall'header
     requester_socket = request.args.get('socket', None)
     team_id = request.args.get('team_id', None)
+    locker_name = request.args.get('locker_name', None)
 
     # Controllo dei campi inviati
     if requester_socket is None or team_id is None:
@@ -171,7 +156,7 @@ def get_current_lockers():
         team_id = int(team_id)
     
     # Richiamo alla funzione che invia i dati della cache
-    send_lockers_cache(team_id=team_id, socket=requester_socket) 
+    send_lockers_cache(locker_name=locker_name, team_id=team_id, socket=requester_socket) 
     
     # Ritorno dello status
     return {"msg" : "Retrieve della cache dei locker avvenuta consuccesso!"}, 200

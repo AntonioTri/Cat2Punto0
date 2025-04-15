@@ -2,6 +2,7 @@ import { CheckMark } from '../../check_mark/check_mark.js';
 import { AbstractCardManager } from '../../utils/abstract_card_manager.js';
 import { socket } from '../../utils/socket.js';
 
+
 export class CrypterManager extends AbstractCardManager{
     
     constructor(containerSelector = 'Sistemi', checkMark = new CheckMark()){
@@ -20,42 +21,52 @@ export class CrypterManager extends AbstractCardManager{
         this.currentSelectedSystem = null;
         this.currentActiveSystem = null;
         
-        this.creaOverlay();
-        this.creaModulo('Test1', 'test1');
-        this.creaModulo('Test2', 'test2');
-        this.creaModulo('Test3', 'test3');
+        this.createOverlay();
         this.addCacheListener();
         this.addCryptingEventListener();
-
+        this.addLocker("Criptaggio", "Criptaggio_on", "Criptaggio_off");
         // Vengono richiesti i dati dalla cache
-        this.askCacheData();
+        this.askCacheData('retrieve_cryptography_status');
 
     };
     
-    // Questo metodo chiede i dati nella cache del back end
-    askCacheData(){
-
-        const data_to_send = {
-            token : localStorage.getItem('access_token'),
-            socket : localStorage.getItem('socket'),
-            team_id : localStorage.getItem('team_id')
-        }
-
-        socket.emit('retrieve_cryptography_status', data_to_send);
-
-    };
+    
 
     // Questo metodo aggiunge un listener per aggiornare l'attuale stato
     // dei sistemi attivi
     addCacheListener(){
+    
+        socket.on('crypting_system_changed', (data) => {
 
-        socket.on('cryptography_status', (data) => {
-            console.log(data);
-        })
+            if (data.systemName) {
+                // Viene ricercato il modulo corrispettivo
+                const newActiveModule = this.moduli.find(m => m.nome === data.systemName)?.elemento;
+                // Viene impostato come quello attualmente selezionato
+                this.currentSelectedSystem = newActiveModule;
+                // Vengono aggiornati gli stili
+                this.updateStyles();
+                
+                console.log("Nuovo sistema di criptaggio attivato:", data);
+            }
+
+        });
+        
+        socket.on('add_crypting_system', (data) => {
+            
+            // Viene richiamato semplicemente il metodo per aggiungere il modulo con nome e password inviati
+            // Se non viene trovato il modulo corrispettivo del sistema scelto
+            const newActiveModule = this.moduli.find(m => m.nome === data.systemName)?.elemento;
+            if(!newActiveModule){
+                this.createNewSystem(data.systemName, data.password);
+                // Log del sistema
+                console.log("Nuovo sistema di criptaggio aggiunto:", data);
+            }
+            
+        });
 
     };
 
-    creaOverlay() {
+    createOverlay() {
         // Crea struttura overlay
         this.overlay = document.createElement('div');
         this.overlay.classList.add('overlay');
@@ -68,7 +79,7 @@ export class CrypterManager extends AbstractCardManager{
         const closeBtn = document.createElement('span');
         closeBtn.textContent = '×';
         closeBtn.classList.add('close-btn');
-        closeBtn.onclick = () => this.chiudiOverlay();
+        closeBtn.onclick = () => this.closeOverlay();
 
         // Viene creato l'input tag per l'inserimento della password
         this.passwordInput = document.createElement('input');
@@ -90,7 +101,7 @@ export class CrypterManager extends AbstractCardManager{
     }
 
     // Questo metodo quando chiamato crea un nuovo modulo da aggiungere alla card
-    creaModulo(nome, password) {
+    createNewSystem(nome, password) {
 
         const modulo = document.createElement('div');
         modulo.classList.add('modulo');
@@ -111,7 +122,7 @@ export class CrypterManager extends AbstractCardManager{
         // in caso di successo
         modulo.addEventListener('click', () => {
             document.body.appendChild(this.overlay);
-            this.mostraOverlay(nome, password);
+            this.showOverlay(nome, password);
             this.currentSelectedSystem = modulo;
         });
 
@@ -124,7 +135,7 @@ export class CrypterManager extends AbstractCardManager{
     // legata al modulo chiamante, fa lo stesso con il nome
     // e pulisce l'input tag per l'inserimento.
     // Infine applica una classe all'elemento per applicare le proprietà css
-    mostraOverlay(nome, password) {
+    showOverlay(nome, password) {
         this.nomeCorrente = nome;
         this.passwordCorrente = password;
         this.passwordInput.value = '';
@@ -132,7 +143,7 @@ export class CrypterManager extends AbstractCardManager{
     }
 
     // Metodo che rimuove la classe per attivare le proprietà css
-    chiudiOverlay() {
+    closeOverlay() {
 
         this.overlay.classList.remove('active');
         // Dopo 300 millisecondi l'overlay viene rimosso dal dom
@@ -154,13 +165,15 @@ export class CrypterManager extends AbstractCardManager{
             // Vengono creati i dati da inviare
             const data_to_send = {
                 token : localStorage.getItem('access_token'),
-                systemName : this.nomeCorrente
+                team_id : localStorage.getItem('team_id'),
+                systemName : this.nomeCorrente,
+                password : this.passwordCorrente
             };
             // Segnale socket
             socket.emit('crypting_sys_changed', data_to_send);
             
             // Log e feedback per l'utente
-            this.chiudiOverlay();
+            this.closeOverlay();
             this.checkMark.success();
             this.updateStyles();
             console.log('✅ Password corretta! Socket segnalata con dati: ', data_to_send);

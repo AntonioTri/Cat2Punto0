@@ -2,7 +2,8 @@ import { SOCKET_URL } from "../../static/config.js";
 
 const socket = io(SOCKET_URL, {
     // Disabilita polling, usa solo WebSocket
-    transports: ["websocket"]  
+    transports: ["websocket"],
+    auth: { token: localStorage.getItem("access_token") }
 });
 
 
@@ -37,19 +38,6 @@ socket.on('socket_updated', (response) => {
     } else {
         console.log('Errore:', response.message);
     }
-});
-
-
-// Evento socket legato al criptaggio della pagina. Quando arriva quel segnale
-// un evento globale viene lanciato e tutte le componenti traducibili vengono tradotte
-// secondo il modello scelto
-socket.on('crypto_system_changed', (system_name) => {
-
-    // Creazione dell'evento con allegati
-    const evento = new CustomEvent("cryptingSystemChanged", { detail: { systemName: system_name } });
-    // Dispatch dell'evento
-    document.dispatchEvent(evento);
-
 });
   
 
@@ -110,31 +98,31 @@ window.addEventListener('beforeunload', function() {
 });
 
 
-document.addEventListener('socketInitialized', () => {
-    // Esegui azioni specifiche dopo il caricamento
-    const are_graph_data_saved = localStorage.getItem('are_graph_data_saved')
+// document.addEventListener('socketInitialized', () => {
+//     // Esegui azioni specifiche dopo il caricamento
+//     const are_graph_data_saved = localStorage.getItem('are_graph_data_saved')
     
-    // TODO: Bisognerebbe fare un controllo per definire se richiedere nuovi dati in quanto puo'
-    // esserci stato un cambiamento durante il ricaricamento della pagina, nuove scoperte
-    // In sostanza se qualcuno esce e poi rientra oppure ricarica e nel frattempo nuove scoperte vengono fatte
-    // queste devono essere inviate
+//     // TODO: Bisognerebbe fare un controllo per definire se richiedere nuovi dati in quanto puo'
+//     // esserci stato un cambiamento durante il ricaricamento della pagina, nuove scoperte
+//     // In sostanza se qualcuno esce e poi rientra oppure ricarica e nel frattempo nuove scoperte vengono fatte
+//     // queste devono essere inviate
 
-    // Nel caso in cui non ci siano dati salvati, allora richiediamo alla API di mandarli
-    if (!are_graph_data_saved) {
-        console.log('Socket inizializzata: Richiedo i dati di salvataggio ...');
-        // Definiamo i dati da mandare
-        const data_to_send = {
-            personal_id : localStorage.getItem('personal_id'),
-            team_id : localStorage.getItem('team_id'),
-            socket : localStorage.getItem('socket')
-        }
+//     // Nel caso in cui non ci siano dati salvati, allora richiediamo alla API di mandarli
+//     if (!are_graph_data_saved) {
+//         console.log('Socket inizializzata: Richiedo i dati di salvataggio ...');
+//         // Definiamo i dati da mandare
+//         const data_to_send = {
+//             personal_id : localStorage.getItem('personal_id'),
+//             team_id : localStorage.getItem('team_id'),
+//             socket : localStorage.getItem('socket')
+//         }
 
-        socket.emit('get_save_data', data_to_send)
+//         socket.emit('get_save_data', data_to_send)
         
-        // Impostiamo la flag dei dati salvati a true
-        localStorage.setItem('are_graph_data_saved', true)
-    }
+//         // Impostiamo la flag dei dati salvati a true
+//         localStorage.setItem('are_graph_data_saved', true)
+//     }
 
-});
+// });
 
 export { socket };

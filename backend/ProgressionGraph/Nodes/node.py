@@ -138,14 +138,14 @@ class Node():
             for purpleChildren in self.purpleChildrens:
                 purpleChildren.setNewStatus(Status.DISCOVERED, team_to_signal=team_to_signal, socket_to_signal=socket_to_signal)
             for greenEdge in self.childrenGreenEdges:
-                greenEdge.setStatus(EdgeStatus.DISCOVERED)
+                greenEdge.setStatus(EdgeStatus.DISCOVERED, team_to_signal=team_to_signal, socket_to_signal=socket_to_signal)
             for purpleEdge in self.childrenPurpleEdges:
                 purpleEdge.setStatus(EdgeStatus.RESOLVED)
         
         # Caso in cui vengono mostrate le informaizoni nuove
         elif status == Status.DISCOVERED:
             print(f"🔓 Nodo {self.getKey()} scoperto.")
-            self.riddle.sendNewDiscovery(team_to_signal=team_to_signal, socket_to_signal=socket_to_signal)
+            self.riddle.sendNewDiscovery(team_id=team_to_signal)
 
 
 
@@ -186,7 +186,7 @@ class Node():
 
     def signalTeam(self, team_to_signal : int = None, socket_to_signal : str = None):
         """Metodo che segnala al team scelto il contenuto del puzzle risolto o scoperto."""
-        self.riddle.sendNewDiscovery(team_to_signal, socket_to_signal)
+        self.riddle.sendNewDiscovery(team_id=team_to_signal)
 
 
     def areAllGreenEdgesResolved(self) -> bool:

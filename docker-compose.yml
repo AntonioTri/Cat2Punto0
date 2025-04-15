@@ -14,7 +14,7 @@ services:
       - cat_database_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "6002:5432"
+      - "5002:5432"
     networks:
       - app-network
 
@@ -30,7 +30,7 @@ services:
     build:
       context: ./backend
     ports:
-      - "6000:6000"
+      - "5000:5000"
     networks:
       - app-network
     depends_on:
@@ -44,7 +44,7 @@ services:
       - ./frontend/config/nginx.conf:/etc/nginx/nginx.conf  # Monta il file nginx.conf principale
       - ./frontend:/usr/share/nginx/html  # I file statici del frontend
     ports:
-      - "6003:6003"  # Espone la porta 6003 del reverse proxy
+      - "5003:5003"  # Espone la porta 5003 del reverse proxy
     depends_on:
       - frontend
       - backend

@@ -112,11 +112,10 @@ def set_team_cache(team_id: int = None, personal_id : int = 0):
         if len(connected_users[team_id]) == 0:
             try:
                 logger.info(f"✅ Un file di salvataggio è stato trovato per il team {team_id} ...")
-                graph = ProgressionGraph.load_from_file(file_path)
+                graph : ProgressionGraph = ProgressionGraph.load_from_file(file_path)
                 cached_teams_graphs[team_id] = graph
-                #TODO: Bisogna aggiungere una bfs che aggiunge i dati nella cache per gli utenti
-                # successivi al primo
                 connected_users[team_id].append(personal_id)
+                graph.bfs_visit_discovered_and_resolved(team_to_signal=int(team_id))
                 logger.info(f"✅ Salvataggi caricati ed istanza associata per il team {team_id}.")
             except Exception as e:
                 logger.error(f"❌ Errore durante il caricamento del file per il team {team_id}: {e}")
@@ -130,7 +129,7 @@ def set_team_cache(team_id: int = None, personal_id : int = 0):
 
     else:
         logger.info(f"❌ Non è stato trovato alcun file di salvataggio. Creazione di una nuova istanza ...")
-        graph = ProgressionGraph(str(team_id))
+        graph = ProgressionGraph(team_id)
         cached_teams_graphs[team_id] = graph
         connected_users[team_id].append(personal_id)
         logger.info(f"✅ Istanza creata ed associata per il team {team_id}.")

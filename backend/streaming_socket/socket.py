@@ -1,19 +1,21 @@
 from flask_socketio.namespace import Namespace
 from flask_socketio import emit
 from flask import request
-from flask_jwt_extended import get_jwt
-from JWT.socket_auth_decorator import socket_require_role
+from flask_jwt_extended import jwt_required
+from JWT.socket_auth_decorator import socket_require_role, socket_require_token
 from entity.role import ROLE
 from controller.controller_personal_functions import ControllerPersonalFunctions
 from controller.controller_team_pool import ControllerTeamPool
 from utils.info_logger import getFileLogger
 from ProgressionGraph.cache import cached_teams_graphs
 from utils.user_cache import connected_users, connected_users_status
-from utils.perk_cache import current_energy_used, update_perk_cache, remove_team_perks, remove_team_energy_usage, remove_team_lockers
+from utils.perk_cache import team_perks, active_perks, current_energy_used, update_perk_cache, remove_team_perks, remove_team_energy_usage, remove_team_lockers
+from utils.crypto_sys_cache import CryptingSystemManager
 import threading
 
 logger = getFileLogger(__name__)
 logger.info('[-] Sono il logger dentro la socket, funziono!')
+
 
 
 
@@ -24,7 +26,9 @@ class Socket(Namespace):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Insieme per tenere traccia degli utenti che ricaricano la pagina
-        self.reloading_teams = set()  
+        self.reloading_teams = set()
+        # Istanza della cache dei sistemi di criptaggio
+        self.cryptingCache : CryptingSystemManager = CryptingSystemManager()
 
     # Questo metodo registra la socket id univoca per l'utente quando questo effettua il login
     def on_update_socket(self, data):
@@ -111,6 +115,7 @@ class Socket(Namespace):
                 remove_team_perks(team_id=team_id)
                 remove_team_energy_usage(team_id=team_id)
                 remove_team_lockers(team_id=team_id)
+                self.cryptingCache.clear_cache()
                 logger.info(f"✅ Rimozione dei perk, costi e lockers attivi avvenuta con successo.")
 
         # Nel caso opposto l'utente aveva solo ricaricato la pagina, nulla accade
@@ -135,16 +140,16 @@ class Socket(Namespace):
             logger.info(f"❌ Errore. Non ci sono istanze di grafi per il team {team_id}. Grafi cashati: {cached_teams_graphs}")
 
 
-    def on_get_save_data(self, data):
-        """Metodo che serve a intercettare la richiesta di un client ed assecondare la sua richiesta di ricevere i dati"""
-        personal_id : int = int(data["personal_id"])
-        team_id : int = int(data["team_id"])
-        socket : str = data["socket"]
+    # def on_get_save_data(self, data):
+    #     """Metodo che serve a intercettare la richiesta di un client ed assecondare la sua richiesta di ricevere i dati"""
+    #     personal_id : int = int(data["personal_id"])
+    #     team_id : int = int(data["team_id"])
+    #     socket : str = data["socket"]
 
-        logger.info(f"🔄 Provo ad inviare i dati del grafo a {personal_id}.")
-        team_graph = cached_teams_graphs[team_id]
-        team_graph.bfs_visit_discovered_and_resolved(socket_to_signal=socket)
-        logger.info(f"✅ Dati del grafo inviati a utente {personal_id} con successo.")
+    #     logger.info(f"🔄 Provo ad inviare i dati del grafo a {personal_id}.")
+    #     team_graph = cached_teams_graphs[team_id]
+    #     team_graph.bfs_visit_discovered_and_resolved(socket_to_signal=socket)
+    #     logger.info(f"✅ Dati del grafo inviati a utente {personal_id} con successo.")
 
 
     # Questo metodo permette ai comandanti di inviare un messaggio a tutti gli utenti del team
@@ -274,7 +279,63 @@ class Socket(Namespace):
         
         elif status_code == 404:
             logger.info(f"[!] Qualche errore è avvenuto durante la ricerca delle socket per l'id {data["team_id"]}.\nErrore: {members}")
-        
+    
+    # Segnale che risponde all'invio delle attuali risorse attive
+    @socket_require_role(role=ROLE.COMANDANTE.value)
+    def on_retrieve_perks(self, data):
 
+        team_id = data.get('team_id', -1)
+        socket = data.get('socket', request.sid)
+
+        if isinstance(team_id, str):
+            team_id = int(team_id)
+
+        # Inviamo gli attuali perk presenti
+        for perk_cost, perk_name in team_perks[team_id]:
+            emit('add_new_perk', {"perkName" : perk_name, "perkCost" : perk_cost}, to=socket)
+
+        # Inviamo il loro attuale stato
+        if team_id in active_perks and team_id in current_energy_used:
+            emit('perk_got_updated', { "perks" : active_perks[team_id], "totalCost" : int(current_energy_used.get(team_id, 0))}, to=socket)
+            
+        else:
+            emit('perk_got_updated', { "perks" : [], "totalCost" : 0}, to=socket)
+
+
+    # Segnale che aggiorna l'attuale sistema di criptaggio
+    @socket_require_role(role=ROLE.DECRITTATORE.value)
+    def on_crypting_sys_changed(self, data):
+
+        logger.info(f"📶  🔄  Sistema di criptaggio cambiato, aggiorno ...")
+
+        # Estrazione dei dati
+        team_id = data.get('team_id', -1)
+        system_name = data.get('systemName', None)
+        password = data.get('password', None)
+        
+        if isinstance(team_id, str):
+            team_id = int(team_id)
+
+        # Aggiornamento della cache e segnalazione
+        self.cryptingCache.activate_crypting_system(team_id=team_id, name=system_name, password=password)
+
+
+
+    # Segnaleche alla ricezione invia i dati presenti nella cache alla socket chiamante
+    @socket_require_token()
+    def on_retrieve_cryptography_status(self, data):
+
+        logger.info(f"📶  🔄  Invio dati sistemi criptaggio alla socket {request.sid}")
+
+        # Estrazione dei dati
+        socket = data.get('socket', request.sid)
+        team_id = data.get('team_id', -1)
+        team_id = int(team_id)
+
+        # Richiamo dei metodi cache per inviare i dati
+        self.cryptingCache.send_team_systems(team_id=team_id, socket=socket)
+        self.cryptingCache.send_current_system(team_id=team_id, socket=socket)
+
+        logger.info(f"📶  ✅  Invio dati sistemi criptaggio alla socket {request.sid} avvenuto con succeso!")
 
 

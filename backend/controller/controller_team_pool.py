@@ -114,6 +114,25 @@ class ControllerTeamPool:
         return formatted_team_members, 200
 
 
+    # Questo metodo restituisce la lista di socket dei membri di un team specifico con un ruolo specifico
+    @staticmethod
+    def get_group_sockets(team_id: int = -1, role: str = "COMANDANTE"):
+        """
+        Metodo per ottenere tutti i membri di un ruolo di uno specifico team
+        """
+        # Otteniamo i membri del team dal database
+        team_members = database.get_all_team_members(team_id=team_id)
+
+        # Se il risultato è un messaggio di errore, lo ritorniamo direttamente
+        if isinstance(team_members, dict) and "msg" in team_members:
+            return [], 404
+
+        # Formattazione delle socket
+        formatted_team_members = [member[5] for member in team_members if member[3] == role]
+        
+        # Ritorniamo la lista id socket
+        return formatted_team_members, 200
+
 
     @staticmethod
     def generate_team_pdf(team_id: int = 0):

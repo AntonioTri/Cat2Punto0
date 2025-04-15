@@ -35,7 +35,7 @@ export class AbstractCardManager{
 
 
     // Metodo che aggiunge alla card il blocco, impedendo di usare le funzioni normalmente
-    addLocker(signalOn = "", signalOff = ""){
+    addLocker(signal = "", signalOn = "", signalOff = ""){
 
         // Viene creato il locker dedicato
         //this.createLocker();
@@ -46,7 +46,7 @@ export class AbstractCardManager{
         // E per il segnale di blocco
         socket.on(signalOff, (msg) => { console.log(msg.msg); this.activateLocker()});
         // Viene poi inviata la richiesta per ottenere l'attuale stato della cache
-        this.askForLockerStatus();
+        this.askForLockerStatus(signal);
 
     };
 
@@ -124,23 +124,44 @@ export class AbstractCardManager{
     }
 
 
+
+    // Questo metodo chiede i dati nella cache del back end
+    askCacheData(signal_root){
+
+        const data_to_send = {
+            token : localStorage.getItem('access_token'),
+            socket : localStorage.getItem('socket'),
+            team_id : localStorage.getItem('team_id')
+        }
+
+        socket.emit(signal_root, data_to_send);
+        console.log('Richiesta Dati cache per la carta: ', this.cardName);
+
+    };
+
+
     // Questo metodo se chiamato attiva nella classe un listener di un evento globale
-    // Un evento speciale che si attiva quando un decrittatore attiva uno specifico criptaggio
-    // In sostanza tradue tutti gli elementi criptati della carta sulla base del modello di criptaggio
+    // Vengono tradotti tutti gli elementi criptati della carta sulla base del modello di criptaggio
     // inviato dal segnale
     addCryptingEventListener(){
 
-        this.card.addEventListener('cryptingSystemChanged', (event) => {
+        socket.on('crypting_system_changed', (data) => {
             
             // Estrazione del nome dall'evento
-            const system_name = event.detail.systemName;
+            const system_name = data.systemName;
 
             // Uno switch case sceglie la traduzione da applicare
             switch (system_name) {
-                case 'x':
+                
+                case 'Test1':
                     console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
                     break;
-                case 'y':
+                
+                case 'Test2':
+                    console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
+                    break;
+
+                case 'Test3':
                     console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
                     break;
             
@@ -154,12 +175,12 @@ export class AbstractCardManager{
 
 
 
-    async askForLockerStatus(){
+    async askForLockerStatus(lockerName = ""){
 
         // try-catch per gestire gli errori
         try {
             // Inviamo la richiesta con 'fetch'
-            const URL = `${API_URL}/get_locker_statuses?team_id=${localStorage.getItem('team_id')}&socket=${localStorage.getItem('socket')}`;
+            const URL = `${API_URL}/get_locker_statuses?team_id=${localStorage.getItem('team_id')}&socket=${localStorage.getItem('socket')}&locker_name=${lockerName}`;
             const response = await fetch(URL, {
                 method: "GET",
                 headers: {

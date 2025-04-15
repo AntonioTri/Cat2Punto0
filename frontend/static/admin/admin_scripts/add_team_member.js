@@ -235,8 +235,8 @@ export class AddTeamMemberManager extends AbstractCardManager{
 
         this.URL_ADD_TEAM_MEMBER = `${API_URL}/register_user`;
         this.URL_GET_ALL_TEAMS = `${API_URL}/get_all_teams`;
-        this.dockerPathTeams = 'http://localhost:6000/api/get_all_teams';
-        this.dockerPathAddMember = 'http://localhost:6000/api/register_user';
+        this.dockerPathTeams = 'http://localhost:5000/api/get_all_teams';
+        this.dockerPathAddMember = 'http://localhost:5000/api/register_user';
 
     }
 

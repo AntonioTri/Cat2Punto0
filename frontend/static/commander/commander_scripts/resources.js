@@ -1,14 +1,13 @@
-import {API_URL, SOCKET_URL} from '../../config.js';
+import {API_URL} from '../../config.js';
 import { CheckMark } from '../../check_mark/check_mark.js';
-import { roles } from '../../utils/constants.js';
+import { socket } from '../../utils/socket.js';
 import { AbstractCardManager } from '../../utils/abstract_card_manager.js';
 
 export class ResourcesManager extends AbstractCardManager {
 
-    constructor(containerSelector = 'Risorse', checkMark = new CheckMark(), socket = null){
+    constructor(containerSelector = 'Risorse', checkMark = new CheckMark()){
 
         super(containerSelector, checkMark);
-        this.socket = socket;
 
     };
 
@@ -18,78 +17,52 @@ export class ResourcesManager extends AbstractCardManager {
         this.setVariables();
         this.addEnergyCounter();
         this.addEnergySpaces();
-        this.addResources();
-        // Questo metodo aggiorna lo status delle risorse 
-        // sulla base delle informazioni nel back end
-        this.updateStatus();
         // Metodo che aggiunge la listen della socket per l'update da altri utenti
         this.addSocketListener();
+        // Viene aggiunto il sistema di criptaggio
+        this.addCryptingEventListener();
+        // Viene scaricato l'attuale stato della cache
+        this.askCacheData('retrieve_perks');
 
 
     };
 
 
-    async updateStatus(){
-
-        // try-catch per gestire gli errori
-        try {
-            // Inviamo la richiesta con 'fetch'
-            const response = await fetch(this.URL_GET_ACTIVE_STATUSES, {  // Usa 'await' per aspettare la risposta
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem('access_token')}`,  // Aggiungi il token di autorizzazione
-                    "Content-Type": "application/json"  // Specifica che invii JSON
-                }
-            });
-
-            // Verifica se la risposta è OK
-            if (response.ok) {
-
-                // Converte la risposta in json
-                const data = await response.json();
-                
-                // Vengono reimpostate le posizioni dei perk ed i valori
-                // Generali della classe per essere in sincronizzazione con tutti
-                // gli altri comandanti
-                console.log(data);
-                data.perks.forEach(perk => {
-                    this.setStatuses(perk);
-                });
-
-                // Aggiornamento del costo totale
-                this.totalCost = parseInt(data.totalCost);
-                this.updateEnergyTag();
-                
-
-            // La risposta non è stata OK
-            } else {
-                console.log("Errore nella ricezione degli stati attivi:", response);
-                // Compare il check mark per l'errore
-                this.checkMark.error();
-            }
-
-        } catch (error) {
-            console.log('Errore durante la get per gli status attivi: ', error);
-        }
-
-
-    };
 
     // Questo metodo aggiunge un listener alla socket che permette di aggiornare lo stato
     // dei perk sulla base degli aggiornamenti che fa un altro comandante
+    // Viene anche aggiunto il listener per aggiungere nuovi perk
     addSocketListener(){
-        setTimeout(() => {
-            this.socket.on('perk_got_updated', (statuses) => {
-                this.setStatuses(statuses);
-                console.log('Update avvenuto sui di un perk:', statuses);
-            });
-       }, 1500);
+        
+        socket.on('perk_got_updated', (data) => {
+
+            if(data.perks){
+                data.perks.forEach(perk => { 
+                    this.setStatuses(perk); 
+                    console.log('Update avvenuto sui di un perk:', perk);
+                });
+                this.totalCost = parseInt(data.totalCost);
+
+            } else {
+                this.setStatuses(data);
+                this.totalCost = parseInt(data.totalCost);
+            }
+
+            this.updateEnergyTag();
+        });
+
+        socket.on('add_new_perk', (perk) => {
+            this.addSinglePerk(perk.perkCost, perk.perkName);
+            console.log('Nuovo perk aggiunto:', perk);
+        });
+       
     };
 
     // Questo metodo quando invocato reimposta gli status dei perk sulla base di quelli inviati
     setStatuses(statuses){
 
         // Estrazione dei dati
+        console.log('test0', statuses);
 
         // Costo attuale utilizzato
         if(statuses.totalCost){ this.totalCost = statuses.totalCost; }
@@ -112,6 +85,7 @@ export class ResourcesManager extends AbstractCardManager {
             perk.dataset.anchored = "true";
 
             // Se la pallina era già ancorata viene liberato il vecchio anchor point
+            console.log("test1", perk);
             this.freeAnchor(perk);
 
             // Mentre quello nuovo deve essere impostato come occupato
@@ -125,6 +99,7 @@ export class ResourcesManager extends AbstractCardManager {
         } else {
         
             // Viene liberata la vecchia ancora se c'era
+            console.log("test2", perk);
             this.freeAnchor(perk);
             
             // Posiziona la pallina in modo che il suo centro coincida con il suo punto di inizio
@@ -229,18 +204,6 @@ export class ResourcesManager extends AbstractCardManager {
 
     };
 
-
-    addResources(){
-
-        // Crea le palline e ne gestisce l'interazione
-        for (let i = 0; i < this.numBalls; i++) {
-            this.addSinglePerk(i, i);
-        }
-
-        this.addSinglePerk(10, "permissions");
-        this.addSinglePerk(6, "fascicoli");
-
-    };
 
     addSinglePerk(_cost, _name){
 
@@ -405,6 +368,7 @@ export class ResourcesManager extends AbstractCardManager {
                 
             } else {
                 // Libera la ancora associata alla pallina
+                console.log("test1", ball);
                 this.freeAnchor(ball);
 
                 // Se era ancorata, ora viene rimossa
@@ -500,7 +464,7 @@ export class ResourcesManager extends AbstractCardManager {
         }
 
         // Aggiungiamo il listener che definisce la socket
-        this.socket.emit('perk_updated', data_to_send);
+        socket.emit('perk_updated', data_to_send);
         console.log('Invio dei dati della pallina:', data_to_send);
 
     }
@@ -511,7 +475,7 @@ export class ResourcesManager extends AbstractCardManager {
         // URL dedicato per la ricezione degli stati attivi indirizzato all'API
         this.URL_GET_ACTIVE_STATUSES = `${API_URL}/get_active_statuses?team_id=${localStorage.getItem('team_id')}`;
         //URL dedicato al path di docker
-        this.dockerPathGetActiveStatuses = `http://localhost:6000/api/get_active_statuses?team_id=${localStorage.getItem('team_id')}`;
+        this.dockerPathGetActiveStatuses = `http://localhost:5000/api/get_active_statuses?team_id=${localStorage.getItem('team_id')}`;
 
     }
 

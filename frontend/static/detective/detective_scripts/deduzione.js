@@ -111,7 +111,7 @@ export class DeductionManager extends AbstractCardManager{
 
         this.URL_SEND_DEDUCTION = `${API_URL}/answer_riddle`;
         
-        this.dockerPathAnswerRiddle = 'http://localhost:6000/api/answer_riddle';
+        this.dockerPathAnswerRiddle = 'http://localhost:5000/api/answer_riddle';
 
 
     }

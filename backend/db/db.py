@@ -190,7 +190,7 @@ class PostgresDB():
 
         try:
             # Check per controllare che il team esista
-            if not self.team_exists(team_id):
+            if not self.team_exists(team_id) or team_id == "NOT_A_TEAM":
                 return {"msg": f"Il team con id {team_id} NON esiste"}, 404
             
             # Esecuzione della query

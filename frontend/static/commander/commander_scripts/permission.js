@@ -18,7 +18,7 @@ export class PermissionManager extends AbstractCardManager {
         this.addElements();
         this.setSocketListeners();
         // Questa pagina è bloccata dal segnale 'permissions'
-        this.addLocker('permissions_on', 'permissions_off');
+        this.addLocker("Permessi", "Permessi_on", "Permessi_off");
     };
 
 

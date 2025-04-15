@@ -1,6 +1,7 @@
 from ProgressionGraph.Nodes.node import Node, Status
 from ProgressionGraph.Edges.edge import GreenEdge, EdgeStatus
 from ProgressionGraph.Riddles.riddles import Riddle
+from ProgressionGraph.Riddles.central_area.central_area import *
 import pickle
 from pathlib import Path
 from collections import deque
@@ -10,14 +11,14 @@ logger = getFileLogger(__name__)
 
 class ProgressionGraph:
 
-    def __init__(self, team_id : str):
-        self.team_id : str = team_id
+    def __init__(self, team_id : int):
+        self.team_id : int = team_id
         self.root : Node = None
         self.nodes : list[Node] =[]
         self.active_riddles : list[Node | GreenEdge]= []
         self.solved_riddles : list[Node | GreenEdge]= []
-        self.save_file : str = "team_" + team_id + "_graph"
-        self.create_bouquet()
+        self.save_file : str = "team_" + str(team_id) + "_graph"
+        self.create_bouquet(team_id)
         self.initialize_game()
         self.save_to_file(self.save_file)
 
@@ -25,81 +26,86 @@ class ProgressionGraph:
         """
         Inizializza il gioco, impostando lo stato iniziale.
         """
+        if self.team_id == 'NOT_A_TEAM':
+            return
         self.active_riddles = [self.nodes[0]]  # Inizia con il nodo radice
     
-    def create_bouquet(self):
+    def create_bouquet(self, team_id : int = -1):
+
+        if team_id == 'NOT_A_TEAM':
+            return
 
         # Definizione del fiore centrale del boouquet 
-        root = Node(0, Riddle("Enigma 0", "sol0"))
-        firstPuzzle_a = Node(1, Riddle("Enigma 1", "sol1"))
-        secondPuzzle_b = Node(2, Riddle("Enigma 2", "sol2"))
-        thirdPuzzle_c = Node(3, Riddle("Enigma 3", "sol3"))
+        root = Node(0, SourceNode("sol0"))
+        firstPuzzle_a = Node(1, A("sol1"))
+        secondPuzzle_b = Node(2, Riddle("sol2"))
+        thirdPuzzle_c = Node(3, Riddle("sol3"))
         root.addPurpleChildren(firstPuzzle_a)
         root.addPurpleChildren(secondPuzzle_b)
         root.addPurpleChildren(thirdPuzzle_c)
 
         # Figli di A
-        a_1 = Node(4, Riddle("Enigma 4", "sol4"))
-        a_2 = Node(5, Riddle("Enigma 5", "sol5"))
-        a_3 = Node(6, Riddle("Enigma 6", "sol6"))
+        a_1 = Node(4, Riddle("sol4"))
+        a_2 = Node(5, Riddle("sol5"))
+        a_3 = Node(6, Riddle("sol6"))
         firstPuzzle_a.addPurpleChildren(a_1)
         firstPuzzle_a.addPurpleChildren(a_2)
         firstPuzzle_a.addPurpleChildren(a_3)
 
         # Figli di B
-        b_1 = Node(7, Riddle("Enigma 7", "sol7"))
-        b_2 = Node(8, Riddle("Enigma 8", "sol8"))
-        b_3 = Node(9, Riddle("Enigma 9", "sol9"))
+        b_1 = Node(7, Riddle("sol7"))
+        b_2 = Node(8, Riddle("sol8"))
+        b_3 = Node(9, Riddle("sol9"))
         secondPuzzle_b.addPurpleChildren(b_1)
         secondPuzzle_b.addPurpleChildren(b_2)
         secondPuzzle_b.addPurpleChildren(b_3)
 
         # Figli di C
-        c_1 = Node(10, Riddle("Enigma 10", "sol10"))
-        c_2 = Node(11, Riddle("Enigma 11", "sol11"))
+        c_1 = Node(10, Riddle("sol10"))
+        c_2 = Node(11, Riddle("sol11"))
         thirdPuzzle_c.addPurpleChildren(c_1)
         thirdPuzzle_c.addPurpleChildren(c_2)
 
         # Primo livello di nodi
-        l = Node(12, Riddle("Enigma 12", "sol12"))
+        l = Node(12, Riddle("sol12"))
         a_1.addPurpleChildren(l)
-        h = Node(13, Riddle("Enigma 13", "sol13"))
+        h = Node(13, Riddle("sol13"))
         a_2.addPurpleChildren(h)
-        g = Node(14, Riddle("Enigma 14", "sol14"))
+        g = Node(14, Riddle("sol14"))
         b_1.addPurpleChildren(g)
-        f = Node(16, Riddle("Enigma 16", "sol16"))
+        f = Node(16, Riddle("sol16"))
         b_2.addPurpleChildren(f)
         
         # Nodi complessi, atti alla scoperta di pezzi di storia piu' importanti
-        n = Node(17, Riddle("Enigma 17", "sol17"))
-        m = Node(18, Riddle("Enigma 18", "sol18"))
-        o = Node(19, Riddle("Enigma 19", "sol19"))
-        b_2.addGreenChildren(m, Riddle("Enigma 20", "sol20"))
-        c_2.addGreenChildren(m, Riddle("Enigma 21", "sol21"))
-        a_2.addGreenChildren(n, Riddle("Enigma 22", "sol22"))
-        b_3.addGreenChildren(n, Riddle("Enigma 23", "sol23"))
-        g.addGreenChildren(o, Riddle("Enigma 24", "sol24"))
-        l.addGreenChildren(o, Riddle("Enigma 25", "sol25"))
-        thirdPuzzle_c.addGreenChildren(n, Riddle("Enigma 26", "sol26"))
+        n = Node(17, Riddle("sol17"))
+        m = Node(18, Riddle("sol18"))
+        o = Node(19, Riddle("sol19"))
+        b_2.addGreenChildren(m, Riddle("sol20"))
+        c_2.addGreenChildren(m, Riddle("sol21"))
+        a_2.addGreenChildren(n, Riddle("sol22"))
+        b_3.addGreenChildren(n, Riddle("sol23"))
+        g.addGreenChildren(o, Riddle("sol24"))
+        l.addGreenChildren(o, Riddle("sol25"))
+        thirdPuzzle_c.addGreenChildren(n, Riddle("sol26"))
         
-        e = Node(15, Riddle("Enigma 15", "sol15"))
+        e = Node(15, Riddle("sol15"))
         f.addPurpleChildren(e)
-        d = Node(36, Riddle("Enigma 36", "sol36"))
+        d = Node(36, Riddle("sol36"))
         c_1.addPurpleChildren(d)
 
         # Questi sono invece i nodi al bordo della rosa centrale.
         # Definiscono i punti di ingresso ai fiori esterni
-        one = Node(27, Riddle("Enigma 27", "sol27"))
-        two = Node(28, Riddle("Enigma 28", "sol28"))
-        three = Node(29, Riddle("Enigma 29", "sol29"))
-        four = Node(30, Riddle("Enigma 30", "sol30"))
-        five = Node(31, Riddle("Enigma 31", "sol31"))
-        six = Node(32, Riddle("Enigma 32", "sol32"))
-        one_entrypoint = Node(33, Riddle("Enigma 33", "sol33"))
+        one = Node(27, Riddle("sol27"))
+        two = Node(28, Riddle("sol28"))
+        three = Node(29, Riddle("sol29"))
+        four = Node(30, Riddle("sol30"))
+        five = Node(31, Riddle("sol31"))
+        six = Node(32, Riddle("sol32"))
+        one_entrypoint = Node(33, Riddle("sol33"))
         one_entrypoint.addPurpleChildren(one)
-        three_entrypoint = Node(34, Riddle("Enigma 34", "sol34"))
+        three_entrypoint = Node(34, Riddle("sol34"))
         three_entrypoint.addPurpleChildren(three)
-        five_entrypoint = Node(35, Riddle("Enigma 35", "sol35"))
+        five_entrypoint = Node(35, Riddle("sol35"))
         five_entrypoint.addPurpleChildren(five)
         m.addPurpleChildren(two)
         o.addPurpleChildren(four)
@@ -125,7 +131,7 @@ class ProgressionGraph:
             one_entrypoint, three_entrypoint, five_entrypoint  # Punti di ingresso ai fiori esterni
         ]
 
-        root.setNewStatus(Status.DISCOVERED)
+        root.setNewStatus(Status.DISCOVERED, team_to_signal=team_id)
         self.root = root
 
 
@@ -183,7 +189,7 @@ class ProgressionGraph:
         if not solved and not yetSolved:
             logger.info("\n❌ Soluzione errata.")
 
-        if __name__ == '__mani__':
+        if __name__ == '__main__':
             # Stampa delle informazioni sugli enigmi attivi
             for element in self.active_riddles:
                 if isinstance(element, Node):
@@ -231,6 +237,8 @@ class ProgressionGraph:
         """
         if start_node is None:
             start_node = self.root
+        if team_to_signal is None:
+            team_to_signal = self.team_id
 
         # Controllo iniziale: se il nodo di partenza non è DISCOVERED o RESOLVED, non fare nulla
         if start_node.getStatus() not in {Status.DISCOVERED, Status.RESOLVED}:
@@ -245,9 +253,6 @@ class ProgressionGraph:
         # Aggiungi il nodo di partenza alla coda e segnalo come visitato
         queue.append(start_node)
         visited_nodes.add(start_node.getKey())
-
-        # Inviamo i dati all'utente del nodo 0
-        self.root.signalTeam(socket_to_signal=socket_to_signal)
 
         while queue:
             # Estrai il nodo corrente dalla coda
@@ -289,6 +294,8 @@ class ProgressionGraph:
         """
         Salva l'istanza del grafo nella cartella specificata.
         """
+        if self.team_id == 'NOT_A_TEAM':
+            return
         # Crea la cartella se non esiste
         self._save_dir.mkdir(parents=True, exist_ok=True)
         
