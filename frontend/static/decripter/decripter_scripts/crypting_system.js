@@ -38,7 +38,7 @@ export class CrypterManager extends AbstractCardManager{
     
         socket.on('crypting_system_changed', (data) => {
 
-            if (data.systemName) {
+            if (data.systemName && data.systemName != "") {
                 // Viene ricercato il modulo corrispettivo
                 const newActiveModule = this.moduli.find(m => m.nome === data.systemName)?.elemento;
                 // Viene impostato come quello attualmente selezionato

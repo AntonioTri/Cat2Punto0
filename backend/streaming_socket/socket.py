@@ -75,7 +75,7 @@ class Socket(Namespace):
         # Inizializziamo ora un timer di 10 secondi per controllare che l'utente si sia riconnesso
         # In caso negativo eliminiamo dalla cache l'utente. L'istanza del grafo viene eliminata anch'essa
         # se era l'ultimo utente connesso
-        logger.info(f"🛑 Disconnessione dalla socket: {socket}.")
+        logger.info(f"🛑 Disconnessione dalla socket: {socket}. Id Disconnesso: {personal_id}. Team di appartenenza: {team_id}")
         logger.info(f"⏳Inizializzo un timer per controllare l'effettiva disconnessione ...")
         timer = threading.Timer(10.0, self.handle_disconnect, args=(personal_id, team_id))
         timer.start()
@@ -227,6 +227,9 @@ class Socket(Namespace):
     # Metodo che serve a dare i permessi ad un detective per accedere ad uno specifico fascicolo
     @socket_require_role(role=ROLE.COMANDANTE.value)
     def on_give_evidence_permission(self, data):
+
+        logger.info(f"Give-Evidence-Permission: Tipo team_id: {type(data.get('team_id'))} - Valore: {data.get('team_id')}")
+
         
         logger.info(f"[-] Permessi da concedere: {data}")
         logger.info('[?] Provo ad inviare i permessi ...')
@@ -280,6 +283,8 @@ class Socket(Namespace):
         elif status_code == 404:
             logger.info(f"[!] Qualche errore è avvenuto durante la ricerca delle socket per l'id {data["team_id"]}.\nErrore: {members}")
     
+
+
     # Segnale che risponde all'invio delle attuali risorse attive
     @socket_require_role(role=ROLE.COMANDANTE.value)
     def on_retrieve_perks(self, data):
@@ -297,9 +302,10 @@ class Socket(Namespace):
         # Inviamo il loro attuale stato
         if team_id in active_perks and team_id in current_energy_used:
             emit('perk_got_updated', { "perks" : active_perks[team_id], "totalCost" : int(current_energy_used.get(team_id, 0))}, to=socket)
-            
         else:
             emit('perk_got_updated', { "perks" : [], "totalCost" : 0}, to=socket)
+        
+        logger.info(f"📶  ✅  Retrieve-Perks avvenuto da {socket}con successo")
 
 
     # Segnale che aggiorna l'attuale sistema di criptaggio
@@ -324,6 +330,8 @@ class Socket(Namespace):
     # Segnaleche alla ricezione invia i dati presenti nella cache alla socket chiamante
     @socket_require_token()
     def on_retrieve_cryptography_status(self, data):
+
+        logger.info(f"Retrieve - Crypt :Tipo team_id: {type(data.get('team_id'))} - Valore: {data.get('team_id')}")
 
         logger.info(f"📶  🔄  Invio dati sistemi criptaggio alla socket {request.sid}")
 

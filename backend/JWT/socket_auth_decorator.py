@@ -15,6 +15,7 @@ def socket_require_role(role: str):
                 return
 
             try:
+
                 decoded = decode_token(token)
 
                 # Se è un amministratore, bypassa i controlli
@@ -48,7 +49,8 @@ def socket_require_token():
                 return
 
             try:
-                decode_token(token)  # Se fallisce, scatena eccezione
+                
+                decoded = decode_token(token)  # Se fallisce, scatena eccezione
                 return f(self, data, *args, **kwargs)
 
             except Exception as e:

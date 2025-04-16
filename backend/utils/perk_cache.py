@@ -29,15 +29,21 @@ def add_perk(team_id : int = -1, perk_name : str = "", perk_cost : int = 0):
     if team_id not in team_perks:
         team_perks[team_id] = []
     
-    # Viene aggiunto il perk alla lista
-    team_perks[team_id].append((perk_cost, perk_name))
-    
-    # Log
-    logger.info(f"📶  ✅  Nuovo perk aggiunto alla cache. Perk: ({perk_name}, {perk_cost}).")
+    # Se il team non ha ancora il perk questo viene aggiunto alla lista corrispondente
+    if not team_has_perk(team_id=team_id, perk_cost=perk_cost, perk_name=perk_name):
+        team_perks[team_id].append((perk_cost, perk_name))
+        logger.info(f"✅  Nuovo perk aggiunto alla cache. Perk: ({perk_name}, {perk_cost}).")
+    else:
+        logger.info(f"✅  Il Perk ({perk_name}, {perk_cost}) era già presente per il team {team_id}.")
+
+
+def team_has_perk(team_id: int, perk_cost: int, perk_name: str) -> bool:
+    perk = (perk_cost, perk_name)
+    return perk in team_perks.get(team_id, [])
 
 
 def activate_perk(team_id : int = -1, perk : dict[str, any] = {}):
-    """Metodo che aggiunge un perk alla cache"""
+    """Metodo che aggiunge un perk alla cache di perk attivi"""
     if team_id == -1 or perk == {}:
         return
     
@@ -100,7 +106,7 @@ def remove_team_lockers(team_id: int = -1) -> None:
     """
     
     if team_id in lockers:
-        lockers[team_id].clear()
+        lockers[team_id] = {}
 
 
 def remove_team_energy_usage(team_id: int = -1) -> None:
@@ -110,7 +116,7 @@ def remove_team_energy_usage(team_id: int = -1) -> None:
     """
     
     if team_id in current_energy_used:
-        current_energy_used[team_id] = {}
+        current_energy_used[team_id] = 0
 
 
 def update_locker(team_id: int = -1, perk_name : str = "", flag : bool = False):
@@ -166,7 +172,9 @@ def send_lockers_cache(locker_name : str = "", team_id: int = -1, socket: str = 
 
 
 def update_perk_cache(team_id: int = -1, data : dict[str, any] = {}) -> None:
-    
+
+    logger.info(f"Update-perk-cache: team id = {team_id}. tipo = {type(team_id)}")
+
     if team_id == -1 or data == {}:
         logger.info("Errore nell'aggiornamento della cache dei perk")
         return

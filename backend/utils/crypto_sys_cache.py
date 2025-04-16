@@ -35,7 +35,7 @@ class CryptingSystemManager:
             self.team_systems[team_id].append((name, password))
 
         if team_id not in self.current_system:
-            self.current_system[team_id] = None
+            self.current_system[team_id] = ""
 
         if name != self.current_system[team_id]:
             self.current_system[team_id] = name
@@ -65,7 +65,7 @@ class CryptingSystemManager:
             return
         
         if team_id not in self.current_system:
-            self.current_system[team_id] = None
+            self.current_system[team_id] = ""
         emit('crypting_system_changed', {"systemName": self.current_system[team_id]}, to=socket, namespace='/socket.io')
 
 
@@ -118,7 +118,7 @@ class CryptingSystemManager:
             self.team_systems[team_id] = []
 
         if team_id in self.current_system:
-            self.current_system[team_id] = None
+            del self.current_system[team_id]
 
 
     # Metodo che controlla se un sistema target e' presente tra quelli del team

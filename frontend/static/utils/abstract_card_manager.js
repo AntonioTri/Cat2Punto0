@@ -153,11 +153,11 @@ export class AbstractCardManager{
             // Uno switch case sceglie la traduzione da applicare
             switch (system_name) {
                 
-                case 'Test1':
+                case 'Serpent':
                     console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
                     break;
                 
-                case 'Test2':
+                case 'Dilithium':
                     console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
                     break;
 
@@ -166,7 +166,7 @@ export class AbstractCardManager{
                     break;
             
                 default:
-                    console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
+                    console.log(`Nessun modello inviato. ${data}`);
                     break;
             
             }
