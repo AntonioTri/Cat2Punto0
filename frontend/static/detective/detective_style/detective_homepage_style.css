@@ -1,19 +1,21 @@
-body {
-
-    position: static;
+html, body {
     margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
+}
+
+body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    overflow: hidden;
     font-family: Arial, sans-serif;
     color: white;
-    position: static;
-    overflow-x: hidden;
-    overflow-y: hidden;
-
 }
+
+  
 
 
 #Deduzione_submit_button{

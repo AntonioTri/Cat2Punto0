@@ -11,6 +11,7 @@ from ProgressionGraph.cache import cached_teams_graphs
 from utils.user_cache import connected_users, connected_users_status
 from utils.perk_cache import team_perks, active_perks, current_energy_used, update_perk_cache, remove_team_perks, remove_team_energy_usage, remove_team_lockers
 from utils.crypto_sys_cache import CryptingSystemManager
+from utils.broadcast_messages import BroadcastMessager
 import threading
 
 logger = getFileLogger(__name__)
@@ -29,6 +30,8 @@ class Socket(Namespace):
         self.reloading_teams = set()
         # Istanza della cache dei sistemi di criptaggio
         self.cryptingCache : CryptingSystemManager = CryptingSystemManager()
+        # Istanza del broadcaster di messaggi
+        self.broadcast_messager : BroadcastMessager = BroadcastMessager()
 
     # Questo metodo registra la socket id univoca per l'utente quando questo effettua il login
     def on_update_socket(self, data):
@@ -115,8 +118,9 @@ class Socket(Namespace):
                 remove_team_perks(team_id=team_id)
                 remove_team_energy_usage(team_id=team_id)
                 remove_team_lockers(team_id=team_id)
-                self.cryptingCache.clear_cache()
-                logger.info(f"✅ Rimozione dei perk, costi e lockers attivi avvenuta con successo.")
+                self.cryptingCache.clear_cache(team_id=team_id)
+                self.broadcast_messager.clear_cache(team_id=team_id)
+                logger.info(f"✅ Rimozione della cache per il team {team_id} avvenuta con successo.")
 
         # Nel caso opposto l'utente aveva solo ricaricato la pagina, nulla accade
         else:
@@ -138,18 +142,6 @@ class Socket(Namespace):
             logger.info(f"✅ Ho eseguito il salvataggio grafo per il team {team_id}. Istanza rimossa dalla cache.")
         else:
             logger.info(f"❌ Errore. Non ci sono istanze di grafi per il team {team_id}. Grafi cashati: {cached_teams_graphs}")
-
-
-    # def on_get_save_data(self, data):
-    #     """Metodo che serve a intercettare la richiesta di un client ed assecondare la sua richiesta di ricevere i dati"""
-    #     personal_id : int = int(data["personal_id"])
-    #     team_id : int = int(data["team_id"])
-    #     socket : str = data["socket"]
-
-    #     logger.info(f"🔄 Provo ad inviare i dati del grafo a {personal_id}.")
-    #     team_graph = cached_teams_graphs[team_id]
-    #     team_graph.bfs_visit_discovered_and_resolved(socket_to_signal=socket)
-    #     logger.info(f"✅ Dati del grafo inviati a utente {personal_id} con successo.")
 
 
     # Questo metodo permette ai comandanti di inviare un messaggio a tutti gli utenti del team
@@ -331,8 +323,6 @@ class Socket(Namespace):
     @socket_require_token()
     def on_retrieve_cryptography_status(self, data):
 
-        logger.info(f"Retrieve - Crypt :Tipo team_id: {type(data.get('team_id'))} - Valore: {data.get('team_id')}")
-
         logger.info(f"📶  🔄  Invio dati sistemi criptaggio alla socket {request.sid}")
 
         # Estrazione dei dati
@@ -347,3 +337,34 @@ class Socket(Namespace):
         logger.info(f"📶  ✅  Invio dati sistemi criptaggio alla socket {request.sid} avvenuto con succeso!")
 
 
+    @socket_require_token()
+    def on_broadcast_message(self, data):
+
+        logger.info(f"📶  🔄  Nuovo broadcast message intercettato. Elaborazione ...")
+        
+        # Estrazione dei dati
+        message = data.get('message', "")
+        emitter = data.get('emitter', "")
+        team_id = data.get('team_id', -1)
+        team_id = int(team_id)
+
+        # Memorizzazione in cache
+        self.broadcast_messager.add_new_message(team_id=team_id, emitter=emitter, message=message)
+
+        logger.info(f"📶  ✅  Invio del messaggio a tutti gli utenti avvenuto con successo!")
+
+
+    @socket_require_token()
+    def on_retrieve_broadcast_messages(self, data):
+
+        logger.info(f"📶  🔄  Invio messaggi broadcast alla socket {request.sid}")
+
+        # Estrazione dei dati
+        socket = data.get('socket', request.sid)
+        team_id = data.get('team_id', -1)
+        team_id = int(team_id)
+
+        # Richiamo dei metodi cache per inviare i dati
+        self.broadcast_messager.send_all_team_messages(team_id=team_id, socket=socket)
+
+        logger.info(f"📶  ✅  Invio messaggi broadcast alla socket {request.sid} avvenuto con succeso!")

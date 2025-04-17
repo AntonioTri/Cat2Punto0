@@ -327,7 +327,7 @@ export class AbstractCardManager{
         scrollableList.style.width = '94%';
         scrollableList.style.marginTop = '2%';
         scrollableList.style.padding = '2%';
-        scrollableList.style.height = 'calc(100% - 20px)'; // Adatta l'altezza al contenitore
+        scrollableList.style.height = 'calc(100% - 20px)';
         scrollableList.style.transform = 'translateX(1%)';
         scrollableList.style.display = 'flex';
         scrollableList.style.flexDirection = 'column';

@@ -40,7 +40,7 @@ loginForm.addEventListener("submit", async function(event) {
             localStorage.setItem('team_id', data.team_id);
             localStorage.setItem('unformatted_role', data.role);
             localStorage.setItem('role', role);
-            localStorage.setItem('detective_name', username);
+            localStorage.setItem('personal_name', username);
             
             // Reindirizzamento in caso di successo
             window.location.replace(`../templates/${role}/${role}_homepage.html`);
