@@ -5,23 +5,35 @@
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     cursor: pointer;
-    transition: background 1.2s ease, box-shadow 0.6s ease, color 0.6s ease;
     position: relative;
     overflow: hidden;
     color: #000;
+    transition: box-shadow 0.4s ease, transform 0.3s ease;
+
+    /* Mobile-friendly animation hint */
+    will-change: box-shadow, transform;
+}
+
+.modulo:hover {
+    transform: scale(1.02);
 }
 
 .intermediate_layer {
-
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background-color: white;
-    transition: opacity 2s ease-in;
     opacity: 1;
     z-index: 100;
     pointer-events: none;
-    transition: opacity 1.5s ease-in;
+    transition: opacity 1.2s ease-in-out;
+}
 
+.intermediate_layer.dissolving {
+    opacity: 0;
+}
+
+.intermediate_layer.materializing {
+    opacity: 1;
 }
 
 .module_text {
@@ -32,17 +44,8 @@
     pointer-events: none;
 }
 
-.intermediate_layer.dissolving{
-    opacity: 0;
-}
-
-.intermediate_layer.materializing{
-    opacity: 1;
-}
-
-/* Stile hacker: verde animato */
+/* Effetto hacker: animazione solo su sfondo */
 .modulo.active {
-    box-shadow: 0 0 12px rgba(0, 255, 0, 0.6);
     background: linear-gradient(
         120deg,
         #0f0 0%,
@@ -50,20 +53,14 @@
         #0f0 100%
     );
     background-size: 200% 200%;
-    animation: hackerBackground 3s ease-in-out infinite alternate;
+    animation: hackerBackground 4s ease-in-out infinite alternate;
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.5);
 }
 
-
+/* Animazione fluida dello sfondo hacker */
 @keyframes hackerBackground {
     0%   { background-position: 0% 50%; }
     100% { background-position: 100% 50%; }
-}
-
-/* Transizione al rimuovere .active (già gestita da transition sopra) */
-
-
-.modulo:hover {
-    transform: scale(1.02);
 }
 
 .overlay {
@@ -77,15 +74,13 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    transition: transform 0.2s ease;
-    transform: scale(1.2);
     opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .overlay.active {
     display: flex;
     opacity: 1;
-    transform: scale(1);
 }
 
 .overlay-content {
@@ -103,7 +98,7 @@
     padding: 8px;
     border-radius: 5px;
     border: 1px solid #ccc;
-  }
+}
 
 .overlay-content button {
     padding: 10px;

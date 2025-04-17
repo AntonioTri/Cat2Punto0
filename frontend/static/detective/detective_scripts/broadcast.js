@@ -16,9 +16,8 @@ export class BroadcastManager extends AbstractCardManager {
         this.addTextArea();
         this.addScrollableList('broadcast_messages');
         this.addSocketListener();
-        this.askCacheData('retrieve_broadcast_messages');
-        this.addMessageToScrollableList("test", "mammt annur", "14:40:40");
-        this.addMessageToScrollableList("test", "mammt annur", "14:40:40");
+        this.askCacheData("retrieve_broadcast_messages");
+        //this.addLocker('Broadcast', 'Broadcast_on', 'Broadcast_off');
     }
 
     addSocketListener(){
@@ -46,7 +45,11 @@ export class BroadcastManager extends AbstractCardManager {
             cursor: 'pointer',
             boxShadow: '0px 0px 6px rgba(0, 0, 0, 0.3)',
             zIndex: '10',
-            transition: 'transform 0.3s ease'
+            transition: 'transform 0.3s ease',
+            WebkitTapHighlightColor: 'transparent',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            outline: 'none'
         });
 
         this.newMessageButton.addEventListener('click', () => {
@@ -119,8 +122,8 @@ export class BroadcastManager extends AbstractCardManager {
                 this.textArea.value = '';
                 this.hideTextArea();
                 this.showMessages();
-                this.sendingMessage = false;
                 this.rotatePlusButton();
+                this.sendingMessage = false;
             }
         });
 

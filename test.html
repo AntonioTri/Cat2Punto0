@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Decryptor Terminal</title>
+  <style>
+    body {
+      background-color: #000;
+      font-family: 'Courier New', Courier, monospace;
+      color: #0f0;
+      padding: 50px;
+      text-align: center;
+    }
+
+    h2 {
+      color: #0f0;
+      text-shadow: 0 0 5px #0f0;
+      margin-bottom: 30px;
+      letter-spacing: 2px;
+    }
+
+    input[type="text"] {
+      padding: 12px;
+      width: 300px;
+      font-size: 18px;
+      background-color: #111;
+      color: #0f0;
+      border: 1px solid #0f0;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #0f0;
+      transition: 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      box-shadow: 0 0 10px #0f0;
+    }
+
+    .switches {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 30px auto;
+    }
+
+    .switches input[type="checkbox"] {
+      appearance: none;
+      width: 30px;
+      height: 30px;
+      background-color: #111;
+      border: 2px solid #0f0;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: 0 0 5px #0f0 inset;
+      transition: background-color 0.2s, box-shadow 0.3s;
+    }
+
+    .switches input[type="checkbox"]:checked {
+      background-color: #0f0;
+      box-shadow: 0 0 10px #0f0, 0 0 5px #0f0 inset;
+    }
+
+    .output {
+      font-size: 24px;
+      background: #111;
+      padding: 20px;
+      border-radius: 8px;
+      width: 350px;
+      margin: auto;
+      margin-top: 30px;
+      border: 1px solid #0f0;
+      box-shadow: 0 0 15px #0f0;
+      animation: glowPulse 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes glowPulse {
+      from {
+        box-shadow: 0 0 10px #0f0;
+      }
+      to {
+        box-shadow: 0 0 20px #0f0, 0 0 5px #0f0 inset;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Terminal Decryption</h2>
+  <input id="inputText" type="text" placeholder="Inserisci testo segreto..." />
+  
+  <div class="switches" id="bitContainer"></div>
+
+  <div class="output">Output: <span id="outputText">---</span></div>
+
+  <script>
+    const bitContainer = document.getElementById('bitContainer');
+    const inputField = document.getElementById('inputText');
+    const output = document.getElementById('outputText');
+
+    const switches = [];
+
+    for (let i = 0; i < 7; i++) {
+      const toggle = document.createElement('input');
+      toggle.type = 'checkbox';
+      toggle.dataset.index = i;
+      toggle.addEventListener('change', updateOutput);
+      bitContainer.appendChild(toggle);
+      switches.push(toggle);
+    }
+
+    inputField.addEventListener('input', updateOutput);
+
+    function updateOutput() {
+      const text = inputField.value.trim();
+      const bits = switches.map(sw => sw.checked ? 1 : 0);
+      const result = customDecrypt(text, bits);
+      output.textContent = result;
+    }
+
+    function customDecrypt(text, bits) {
+      let result = '';
+      const bitSeed = parseInt(bits.join(''), 2);
+
+      for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i);
+        const shift = ((bitSeed + i * 2) * 3) % 26;
+        let newCharCode = charCode;
+
+        if (charCode >= 97 && charCode <= 122) {
+          newCharCode = ((charCode - 97 + shift) % 26) + 97;
+        } else if (charCode >= 65 && charCode <= 90) {
+          newCharCode = ((charCode - 65 + shift) % 26) + 65;
+        }
+
+        result += String.fromCharCode(newCharCode);
+      }
+
+      return result;
+    }
+  </script>
+
+</body>
+</html>
