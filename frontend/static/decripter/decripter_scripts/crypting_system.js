@@ -218,6 +218,4 @@ export class CrypterManager extends AbstractCardManager{
     
         }, 100); 
     }
-    
-
 }

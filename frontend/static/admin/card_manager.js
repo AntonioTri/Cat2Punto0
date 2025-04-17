@@ -18,9 +18,7 @@ export class CardManager {
             selectedCard.style.transform = `translateX(${width}px)`;
             selectedCard.style.opacity = '0';
             
-        } catch (error) {
-            console.log(error);
-        }
+        } catch (error) { return; }
 
 
     }

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Class Based Cifrari</title>
+  <style>
+  
+  #deduction-board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .clue {
+    background: #eee;
+    padding: 10px;
+    border: 1px solid #aaa;
+    cursor: grab;
+  }
+  .drop-zone {
+    width: 200px;
+    height: 100px;
+    background: #f9f9f9;
+    border: 2px dashed #ccc;
+  }
+  
+  </style>
+</head>
+<body>
+
+  <div id="deduction-board">
+    <div class="clue" draggable="true" data-id="clue1">Appunto trovato nel Vicolo</div>
+    <div class="clue" draggable="true" data-id="clue2">Codice criptico: 6Δ3Ω</div>
+    <div class="drop-zone" data-zone="A">Zona A</div>
+    <div class="drop-zone" data-zone="B">Zona B</div>
+  </div>
+  
+  <button id="submit-hypothesis">Formula ipotesi</button>
+  
+
+  <script>
+    let currentDragged = null;
+    let hypothesis = {};
+    
+    document.querySelectorAll('.clue').forEach(clue => {
+      clue.addEventListener('dragstart', () => {
+        currentDragged = clue.getAttribute('data-id');
+      });
+    });
+    
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+      zone.addEventListener('dragover', e => e.preventDefault());
+    
+      zone.addEventListener('drop', () => {
+        const zoneName = zone.getAttribute('data-zone');
+        hypothesis[zoneName] = currentDragged;
+        zone.innerText += `\n➤ ${currentDragged}`;
+      });
+    });
+    
+    document.getElementById('submit-hypothesis').addEventListener('click', () => {
+      console.log('Ipotesi inviata:', hypothesis);
+      socket.emit('submit_hypothesis', hypothesis);
+    });
+    
+  </script>
+</body>
+</html>
