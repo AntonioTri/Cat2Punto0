@@ -1,0 +1,28 @@
+.node-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 50px);
+    grid-template-rows: repeat(4, 50px);
+    gap: 5px;
+    justify-content: center;
+    margin: 20px auto;
+}
+
+.node {
+    width: 50px;
+    height: 50px;
+    background-color: #ececec;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+}
+
+.node:hover {
+    background-color: #dcdcdc;
+    transform: scale(1.05);
+}
+
+.node.selected {
+    background-color: #6c9eff;
+    border-color: #467ddc;
+}

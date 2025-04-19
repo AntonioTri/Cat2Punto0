@@ -3,10 +3,10 @@ import { CheckMark } from '../../check_mark/check_mark.js';
 import { AbstractCardManager } from '../../utils/abstract_card_manager.js';
 
 
-export class DeductionManager extends AbstractCardManager{
+export class RestoreManager extends AbstractCardManager{
 
 
-    constructor(containerSelector = 'Deduzione', checkMark = new CheckMark()){
+    constructor(containerSelector = 'Recupero', checkMark = new CheckMark()){
         super(containerSelector, checkMark);
     }
 

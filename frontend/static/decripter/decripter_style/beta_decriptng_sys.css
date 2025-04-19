@@ -1,0 +1,91 @@
+/* Input testo */
+#inputCryptedText {
+    border-radius: 7px;
+    border: none;
+    padding: 10px;
+    margin: 2% auto;
+    width: 90%;
+    height: 10%;
+    transition: 0.3s ease;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    font-size: x-large;
+    font-family: 'Courier New', Courier, monospace;
+    display: block;
+    outline: none;
+}
+
+/* Container per i selector */
+#selectorContainer {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 10px 0;
+    margin: 10px auto;
+    border-top: 2px solid #7d7d7d;
+    border-bottom: 2px solid #7d7d7d;
+    width: 90%;
+}
+
+/* Ogni select */
+#selectorContainer select {
+    font-size: large;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+    cursor: pointer;
+    margin: 2%;
+}
+
+#selectorContainer select:focus {
+    outline: none;
+    box-shadow: 0 0 8px #4CAF50;
+}
+
+/* Titolo sopra i selector */
+.bit-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-top: 20px;
+}
+
+/* Sottotitolo sotto i selector */
+.bit-subtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-top: 20px;
+}
+
+/* Frecce decorative */
+.bit-arrow {
+    text-align: center;
+    font-size: 2rem;
+    margin: -5px 0;
+    color: #888;
+}
+
+/* Output */
+.output {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    width: 90%;
+    min-height: 60px;
+    border-radius: 7px;
+    background-color: #fff;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+    font-size: x-large;
+    text-align: center;
+    padding: 10px;
+}
+
+/* Testo nell'output */
+#outputText {
+    font-family: 'Courier New', Courier, monospace;
+    color: #333;
+}

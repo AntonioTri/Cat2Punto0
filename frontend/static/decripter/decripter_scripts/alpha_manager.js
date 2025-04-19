@@ -1,18 +1,11 @@
 import { CheckMark } from '../../check_mark/check_mark.js';
 import { AbstractCardManager } from '../../utils/abstract_card_manager.js';
-import { socket } from '../../utils/socket.js';
-
 
 
 export class ALPHAManager extends AbstractCardManager {
-    
-    
-
 
     constructor(containerSelector = 'ALPHA', checkMark = new CheckMark()){
-
         super(containerSelector, checkMark);
-
     }
 
     init(){
