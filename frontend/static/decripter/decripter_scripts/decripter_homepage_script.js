@@ -1,6 +1,7 @@
 import { BurgerMenuManager } from "../../burger_menu/burger_menu_script.js";
 import { decritterAction } from "../../utils/constants.js";
 import { CheckMark } from '../../check_mark/check_mark.js';
+import { HelloPageManager } from "../../utils/hello_page.js";
 import { CrypterManager } from "../../decripter/decripter_scripts/crypting_system.js";
 import { ALPHAManager } from "../../decripter/decripter_scripts/alpha_manager.js";
 import { BETAManager } from "../../decripter/decripter_scripts/beta_manger.js";
@@ -9,9 +10,10 @@ import { RestoreManager } from "../../decripter/decripter_scripts/recupero_manag
 
 const checkMark = new CheckMark();
 
-const burgerMenuManager = new BurgerMenuManager('body', checkMark);
 
 document.addEventListener("socketInitialized", () => {
+
+    const burgerMenuManager = new BurgerMenuManager('body', checkMark);
 
     const crypterManager = new CrypterManager(decritterAction[3], checkMark);
 
@@ -23,4 +25,6 @@ document.addEventListener("socketInitialized", () => {
 
     const restoreManager = new RestoreManager(decritterAction[5], checkMark);
 
+    const helloPageManager = new HelloPageManager('ciao_hello', checkMark);
+    
 })

@@ -18,6 +18,7 @@
 /* Container per i selector */
 #selectorContainer {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 15px;
     padding: 10px 0;
@@ -25,6 +26,7 @@
     border-top: 2px solid #7d7d7d;
     border-bottom: 2px solid #7d7d7d;
     width: 90%;
+    box-sizing: border-box;
 }
 
 /* Ogni select */
@@ -37,8 +39,10 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.2s ease;
     cursor: pointer;
-    margin: 2%;
+    max-width: 200px;
+    min-width: 100px;
 }
+
 
 #selectorContainer select:focus {
     outline: none;

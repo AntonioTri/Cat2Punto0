@@ -14,7 +14,7 @@ export class RestoreManager extends AbstractCardManager{
     init(){
 
         this.setURLS();
-        this.addInputTag(`${this.cardName}_input_form`, 'Deduzione')
+        this.addInputTag(`${this.cardName}_input_form`, 'Codice di recupero')
         this.addSubmitButton()
         this.addResponseMessage()
 
@@ -75,7 +75,7 @@ export class RestoreManager extends AbstractCardManager{
 
                     // Caso in cui la risposta sia corretta
                     case 201:
-                        this.showResponseMessage('Deduzione corretta!')
+                        this.showResponseMessage('Codice di recupero corretto! Recupero dati ...')
                         this.checkMark.success()
                         break;
 
@@ -83,7 +83,7 @@ export class RestoreManager extends AbstractCardManager{
 
             } else {
                 
-                super.showResponseMessage('Deduzione errata.');
+                super.showResponseMessage('Codice errato.');
                 // Compare il check mark per l'errore
                 this.checkMark.error();
             }

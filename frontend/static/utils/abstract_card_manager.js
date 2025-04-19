@@ -207,7 +207,6 @@ export class AbstractCardManager{
         this.addGeneralStyleProperties(nameInputTag, id);
         nameInputTag.type = 'text';
         nameInputTag.placeholder = placeholder;
-        nameInputTag.style.width = '47%';
         this.container.appendChild(nameInputTag);
         this.nameInputTag = nameInputTag;
 
@@ -218,14 +217,12 @@ export class AbstractCardManager{
     addSubmitButton(){
 
         // Dichiariamo un bottone
-        let buttonContainer = document.createElement('div');
         let submitButton = document.createElement('button');
         this.addGeneralStyleProperties(submitButton, `${this.cardName}_submit_button`);
-        submitButton.innerText = 'Submit';
+        submitButton.innerText = 'Invia';
         submitButton.style.border = '1px solid #ccc';
 
-        buttonContainer.appendChild(submitButton);
-        this.container.appendChild(buttonContainer);
+        this.container.appendChild(submitButton);
         this.submitButton = submitButton;
         
         // Aggiunta di un evento on clock per animazioni e chiamate api
@@ -411,9 +408,7 @@ export class AbstractCardManager{
     addGeneralStyleProperties(element = NaN, id = ""){
 
         element.id = id;
-        element.style.margin = '1%';
-        element.style.width = '52%';
-        element.style.padding = '2%';
+        element.style.margin = '2%';
         element.style.borderRadius = '5px';
         element.style.textAlign = 'center'; 
         element.style.fontFamily = `'Courier New', Courier, monospace`;
