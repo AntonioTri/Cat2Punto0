@@ -43,7 +43,8 @@ loginForm.addEventListener("submit", async function(event) {
             localStorage.setItem('personal_name', username);
             
             // Reindirizzamento in caso di successo
-            window.location.replace(`../templates/${role}/${role}_homepage.html`);
+            window.location.href = `../templates/${role}/${role}_homepage.html`;
+
 
         } else {
             // Gestione degli errori dal server

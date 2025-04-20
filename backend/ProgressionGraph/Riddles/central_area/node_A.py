@@ -23,19 +23,27 @@ class A(Riddle):
 
         if sc3 == 200 and sc1 == 200:
 
+
+            # Aggiungiamo il nuvo perk per i permessi alla cache
+            perk_name = "Permessi"
+            perk_cost = 10
+            add_perk(team_id=team_id, perk_name=perk_name, perk_cost=perk_cost)
+            # Inviamo gli strumenti ai comandanti
+            self.sendDiscovery(targets=commander_sockets, signal='add_new_perk', message={"perkName" : perk_name, "perkCost" : perk_cost})
+
             # Aggiungiamo il nuvo perk per i permessi alla cache
             perk_name = "Criptaggio"
             perk_cost = 5
             add_perk(team_id=team_id, perk_name=perk_name, perk_cost=perk_cost)
             # Inviamo gli strumenti ai comandanti
-            super().sendDiscovery(targets=commander_sockets, signal='add_new_perk', message={"perkName" : perk_name, "perkCost" : perk_cost})
+            self.sendDiscovery(targets=commander_sockets, signal='add_new_perk', message={"perkName" : perk_name, "perkCost" : perk_cost})
 
             # Agiungiamo i due sistemi di criptaggio iniziali alla cache
             crypting_system = "Serpent"
             crypting_password = "CoilSecure66"
-            self.cryptingSystem.addTeam_crypting_system(team_id=team_id, name=crypting_system, password=crypting_password)
+            self.cryptingCache.addTeam_crypting_system(team_id=team_id, name=crypting_system, password=crypting_password)
 
             # Inviamo gli strumenti ai decrittatori
-            super().sendDiscovery(targets=decritter_sockets, signal='add_crypting_system', message={"systemName" : crypting_system, "password" : crypting_password})
+            self.sendDiscovery(targets=decritter_sockets, signal='add_crypting_system', message={"systemName" : crypting_system, "password" : crypting_password})
 
             logger.info("📶 ✅  Nodo A. Dati conservati nella cache ed inviati ai detective connessi.")

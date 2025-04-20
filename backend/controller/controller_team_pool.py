@@ -128,10 +128,10 @@ class ControllerTeamPool:
             return [], 404
 
         # Formattazione delle socket
-        formatted_team_members = [member[5] for member in team_members if member[3] == role]
+        formatted_team_sockets = [member[5] for member in team_members if member[3] == role]
         
         # Ritorniamo la lista id socket
-        return formatted_team_members, 200
+        return formatted_team_sockets, 200
 
 
     @staticmethod

@@ -349,7 +349,7 @@ export class AbstractCardManager{
         innerElement.style.display = 'flex';
         innerElement.style.flexDirection = 'column';
         innerElement.style.textAlign = 'left';
-        innerElement.style.justifyContent = 'space-between'; // Cambiato per spazio tra testo e catenaccio
+        innerElement.style.justifyContent = 'space-between';
         innerElement.style.fontSize = '16px';
         innerElement.style.fontWeight = 'bold';
         innerElement.innerText = textContent;

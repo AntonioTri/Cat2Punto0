@@ -1,14 +1,12 @@
-import {API_URL, SOCKET_URL} from '../../config.js';
+import { socket } from '../../utils/socket.js';
 import { CheckMark } from '../../check_mark/check_mark.js';
-import { roles } from '../../utils/constants.js';
 import { AbstractCardManager } from '../../utils/abstract_card_manager.js';
 
 export class PermissionManager extends AbstractCardManager {
 
-    constructor(containerSelector = 'Permessi', checkMark = new CheckMark(), socket = null){
+    constructor(containerSelector = 'Permessi', checkMark = new CheckMark()){
 
         super(containerSelector, checkMark);
-        this.socket = socket;
 
     }
 
@@ -32,7 +30,7 @@ export class PermissionManager extends AbstractCardManager {
         
         setTimeout(() => {
              // Socket listener per controllare che sia arrivato un permesso sui file
-             this.socket.on('permission_required_for_file', (data) => {
+             socket.on('permission_required_for_file', (data) => {
     
                 console.log("Messaggio dalla socket ricevuto: ", data);
                 this.addPermissionListelement('Fascicolo', data.id_fascicolo, data.detective_name, data.detective_socket);
@@ -111,7 +109,7 @@ export class PermissionManager extends AbstractCardManager {
 
         console.log('Provo ad inviare il permesso al client. Dati da inviare: ', data_to_send);
         // Inviamo i dati nella socket
-        this.socket.emit('give_evidence_permission', data_to_send);
+        socket.emit('give_evidence_permission', data_to_send);
 
         // Aggiungiamo la classe deleted al permesso così da applicare le animazioni
         permissionCard.classList.add('deleted');

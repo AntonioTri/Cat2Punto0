@@ -1,4 +1,8 @@
 from utils.crypto_sys_cache import CryptingSystemManager
+from utils.broadcast_messages import BroadcastMessager
+from utils.detectives_evidence_cache import EvidenceCache
+from utils.decripter_cripted_codes_cache import CriptedCodesCache
+from utils.commanders_pending_requestes import PendingCacheManager
 from utils.info_logger import getFileLogger
 from flask_socketio import emit
 import re
@@ -16,7 +20,16 @@ class Riddle:
         """Alla fine del nome dell'enigma deve esserci scritto la sua chiave"""
         self.solution = solution
         self.key : int = int(re.search(r'\d+$', self.solution).group())
-        self.cryptingSystem = CryptingSystemManager()
+        # Istanza della cache dei sistemi di criptaggio
+        self.cryptingCache : CryptingSystemManager = CryptingSystemManager()
+        # Istanza del broadcaster di messaggi
+        self.broadcast_messager : BroadcastMessager = BroadcastMessager()
+        # Istanza della cache per le pending request dei comandanti
+        self.pending_request : PendingCacheManager = PendingCacheManager()
+        # Istanza della cache dei codici di decrittazione
+        self.crypted_codes_cache : CriptedCodesCache = CriptedCodesCache()
+        # Istanza della cache dei fascioli dei detective
+        self.evidence_cache : EvidenceCache = EvidenceCache()
 
 
     def sendDiscovery(self, targets : list[str], signal : str = "", message : dict = {}):

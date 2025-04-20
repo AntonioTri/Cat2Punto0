@@ -12,6 +12,9 @@ from utils.user_cache import connected_users, connected_users_status
 from utils.perk_cache import team_perks, active_perks, current_energy_used, update_perk_cache, remove_team_perks, remove_team_energy_usage, remove_team_lockers
 from utils.crypto_sys_cache import CryptingSystemManager
 from utils.broadcast_messages import BroadcastMessager
+from utils.detectives_evidence_cache import EvidenceCache
+from utils.decripter_cripted_codes_cache import CriptedCodesCache
+from utils.commanders_pending_requestes import PendingCacheManager
 import threading
 
 logger = getFileLogger(__name__)
@@ -32,6 +35,12 @@ class Socket(Namespace):
         self.cryptingCache : CryptingSystemManager = CryptingSystemManager()
         # Istanza del broadcaster di messaggi
         self.broadcast_messager : BroadcastMessager = BroadcastMessager()
+        # Istanza della cache per le pending request dei comandanti
+        self.pending_request : PendingCacheManager = PendingCacheManager()
+        # Istanza della cache dei codici di decrittazione
+        self.crypted_codes_cache : CriptedCodesCache = CriptedCodesCache()
+        # Istanza della cache dei fascioli dei detective
+        self.evidence_cache : EvidenceCache = EvidenceCache()
 
     # Questo metodo registra la socket id univoca per l'utente quando questo effettua il login
     def on_update_socket(self, data):
@@ -300,6 +309,55 @@ class Socket(Namespace):
         logger.info(f"📶  ✅  Retrieve-Perks avvenuto da {socket}con successo")
 
 
+    # Segnale che risponde all'invio delle attuali risorse attive
+    @socket_require_role(role=ROLE.COMANDANTE.value)
+    def on_retrieve_proof(self, data):
+
+        logger.info(f"📶  🔄  Tentativo di invio dati pendenti alla socket {request.sid}. Elaborazione ...")
+
+        socket = data.get('socket', request.sid)
+        team_id = int(data.get("team_id", -1))
+
+        self.pending_request.retireve_current_pending_requests(team_id=team_id, socket=socket)
+        
+        logger.info(f"📶  ✅  Dati pendenti inviati alla socket {request.sid} con successo!")
+
+
+
+
+
+    @socket_require_role(role=ROLE.COMANDANTE.value)
+    def on_approve_code(self, data):
+        
+        logger.info(f"📶  🔄  Richiesta approvazione codice ricevuta. Elaborazione ...")
+
+        code = data.get("code", "")
+        team_id = int(data.get("team_id", -1))
+
+        # Estrazione delle sockets dei decrittatori dal database:
+        sockets = ControllerTeamPool.get_group_sockets(team_id=team_id, role=ROLE.DECRITTATORE.value)
+        # Approvazione nella cache
+        self.pending_request.approve_code_delivery(team_id=team_id, code=code, decritter_sockets=sockets)
+
+        logger.info(f"📶  ✅  Codice {code} approvato correttamente per il team {team_id}.")
+    
+    
+    @socket_require_role(role=ROLE.COMANDANTE.value)
+    def on_approve_evidence(self, data):
+
+        logger.info(f"📶  🔄  Richiesta approvazione fascicolo ricevuta. Elaborazione ...")
+
+        id_fascicolo = int(data.get("id_fascicolo", 0))
+        team_id = int(data.get("team_id", -1))
+
+        # Estrazione delle sockets dei decrittatori dal database:
+        sockets = ControllerTeamPool.get_group_sockets(team_id=team_id, role=ROLE.DETECTIVE.value)
+        # Approvazione nella cache
+        self.pending_request.approve_evidence_delivery(team_id=team_id, id_fascicolo=id_fascicolo, detective_sockets=sockets)
+
+        logger.info(f"📶  ✅  Fascicolo {id_fascicolo} approvato correttamente per il team {team_id}.")
+
+
     # Segnale che aggiorna l'attuale sistema di criptaggio
     @socket_require_role(role=ROLE.DECRITTATORE.value)
     def on_crypting_sys_changed(self, data):
@@ -368,3 +426,35 @@ class Socket(Namespace):
         self.broadcast_messager.send_all_team_messages(team_id=team_id, socket=socket)
 
         logger.info(f"📶  ✅  Invio messaggi broadcast alla socket {request.sid} avvenuto con succeso!")
+
+
+    @socket_require_role(role=ROLE.DETECTIVE.value)
+    def on_retrieve_evidences(self, data):
+
+        logger.info(f"📶  🔄  Invio fascicoli alla socket {request.sid}")
+
+        # Estrazione dei dati
+        socket = data.get('socket', request.sid)
+        team_id = data.get('team_id', -1)
+        team_id = int(team_id)
+
+        # Richiamo dei metodi cache per inviare i dati
+        self.evidence_cache.retrieve_current_evidences(team_id=team_id, socket=socket)
+
+        logger.info(f"📶  ✅  Invio fascicoli alla socket {request.sid} avvenuto con succeso!")
+
+
+    @socket_require_role(role=ROLE.DECRITTATORE.value)
+    def on_retrieve_codes(self, data):
+
+        logger.info(f"📶  🔄  Invio codici decrittazione alla socket {request.sid}")
+
+        # Estrazione dei dati
+        socket = data.get('socket', request.sid)
+        team_id = data.get('team_id', -1)
+        team_id = int(team_id)
+
+        # Richiamo dei metodi cache per inviare i dati
+        self.crypted_codes_cache.retrieve_current_codes(team_id=team_id, socket=socket)
+
+        logger.info(f"📶  ✅  Invio codici decrittazione alla socket {request.sid} avvenuto con succeso!")
