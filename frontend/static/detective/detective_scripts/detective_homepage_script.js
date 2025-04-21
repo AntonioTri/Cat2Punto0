@@ -5,6 +5,7 @@ import { HelloPageManager } from "../../utils/hello_page.js";
 import { FascicoliManager } from "../../detective/detective_scripts/fascicoli.js";
 import { DeductionManager } from "../../detective/detective_scripts/deduzione.js";
 import { BroadcastManager } from "../../detective/detective_scripts/broadcast.js";
+import { StoricEventsManager } from "../../detective/detective_scripts/time_sequence.js";
 
 const checkMark = new CheckMark();
 
@@ -12,9 +13,11 @@ document.addEventListener("socketInitialized", () => {
     
     const burgerMenuManager = new BurgerMenuManager('body', checkMark);
 
-    const fascicoliManager = new FascicoliManager(detectiveActions[2], checkMark);
-    
     const deductionManager = new DeductionManager(detectiveActions[0], checkMark);
+
+    const storicEvenManager = new StoricEventsManager(detectiveActions[1], checkMark);
+    
+    const fascicoliManager = new FascicoliManager(detectiveActions[2], checkMark);
 
     const broadcastManager = new BroadcastManager(detectiveActions[3], checkMark);
 

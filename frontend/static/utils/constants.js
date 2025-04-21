@@ -118,7 +118,7 @@ Non guardarti indietro.<br>
 
 
 const welcomeDetective = `<div id="detectiveWelcome">
-<p><b>✦ BENVENUTO, DETECTIVE ${localStorage.getItem('personal_name')}✦</b></p>
+<p><b>✦ BENVENUTO, DETECTIVE ${localStorage.getItem('personal_name')} ✦</b></p>
 <p><i>Identificazione completata | Livello d’accesso: SPECULUM</i></p>
 <p>...Recupero delle memorie attive in corso...</p>
 <p><b>Analisi in esecuzione...</b></p>

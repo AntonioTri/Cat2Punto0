@@ -25,15 +25,20 @@
     opacity: 1;
     z-index: 100;
     pointer-events: none;
-    transition: opacity 1.2s ease-in-out;
+    transition: opacity 1.2s ease-in-out, visibility 0s 1.2s;
+    visibility: visible;
 }
 
 .intermediate_layer.dissolving {
     opacity: 0;
+    visibility: hidden;
+    transition: opacity 1.2s ease-in-out, visibility 0s 1.2s;
 }
 
 .intermediate_layer.materializing {
     opacity: 1;
+    visibility: visible;
+    transition: opacity 1.2s ease-in-out;
 }
 
 .module_text {

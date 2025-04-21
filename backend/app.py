@@ -1,6 +1,7 @@
 # Importing dei framework Flask e CORS per l'inizializzazione del servizio API
 from flask_jwt_extended import JWTManager, get_jwt, jwt_required
 from JWT.auth_decorator import require_role
+from utils.info_logger import getFileLogger
 from blueprint.auth import auth_blueprint
 from blueprint.user_pool import team_blueprint
 from blueprint.progress import progress_blueprint
@@ -8,10 +9,11 @@ from config.secret_key import SECRET_KEY
 from flask import Flask, jsonify
 from entity.role import ROLE
 from flask_cors import CORS
-import logging
-# Import per la libreria dei servizi streaming
 from flask_socketio import SocketIO
 from streaming_socket.socket import Socket
+import logging
+
+logger = getFileLogger(__name__)
 
 # Configura Flask per stampare i log su stdout
 logging.basicConfig(level=logging.DEBUG)
@@ -51,7 +53,6 @@ def get_routes():
 def get_me():
     me = get_jwt()
     return {"username": me["username"], "role": me["role"]}, 200
-
 
 
 if __name__ == '__main__':

@@ -24,7 +24,7 @@ export class CrypterManager extends AbstractCardManager{
         this.createOverlay();
         this.addCacheListener();
         this.addCryptingEventListener();
-        //this.addLocker("Criptaggio", "Criptaggio_on", "Criptaggio_off");
+        this.addLocker("Criptaggio");
         // Vengono richiesti i dati dalla cache
         this.askCacheData('retrieve_cryptography_status');
 
@@ -187,43 +187,38 @@ export class CrypterManager extends AbstractCardManager{
     }
 
     updateStyles() {
-        // Se esiste un sistema attualmente attivo
         if (this.currentActiveSystem) {
             const previous = this.currentActiveSystem;
             const prevLayer = previous.querySelector('.intermediate_layer');
-    
-            // Ripristina visibilità
+            
+            // Prepara per la transizione di riapparizione
+            prevLayer.style.visibility = 'visible'; // Forza visibilità
             prevLayer.classList.add('materializing');
             prevLayer.classList.remove('dissolving');
-    
-            // Rimuove la classe active dopo la transizione
-            setTimeout(() => {
+            
+            // Rimuove 'active' dopo la transizione
+            prevLayer.addEventListener('transitionend', () => {
                 previous.classList.remove('active');
-            }, 1500);
+            }, { once: true });
         }
     
-        // Delay per la transizione del precedente
         setTimeout(() => {
             this.currentActiveSystem = this.currentSelectedSystem;
-    
             const current = this.currentActiveSystem;
             const currLayer = current.querySelector('.intermediate_layer');
     
-            // Dissolvenza
+            // Prepara per la dissolvenza
+            currLayer.style.visibility = 'visible'; // Assicura visibilità
             currLayer.classList.remove('materializing');
             currLayer.classList.add('dissolving');
-    
-            // Attiva modulo
-            current.classList.add('active');
-    
-            // Una volta finita l'animazione, nasconde davvero il layer
+            
+            // Nascondi dopo l'animazione
             currLayer.addEventListener('transitionend', () => {
-                if (currLayer.classList.contains('dissolving')) {
-                    currLayer.style.display = 'none';  // oppure visibility: hidden;
-                }
+                currLayer.style.visibility = 'hidden';
             }, { once: true });
     
-        }, 100);
+            current.classList.add('active');
+        }, 1200);
     }
     
 }

@@ -514,6 +514,31 @@ class PostgresDB():
             cursor.close()
 
 
+    def get_all_commanders_socket_ids(self):
+        """
+        Recupera tutti gli socket_id dei membri con ruolo 'COMANDANTE' da tutti i team.
+        """
+        cursor = self.connection.cursor()
+        try:
+            query = """
+                SELECT tm.socket_id
+                FROM team_member tm
+                JOIN team_group tg ON tm.group_id = tg.group_id
+                WHERE tm.role = 'COMANDANTE' AND tm.socket_id IS NOT NULL
+            """
+            cursor.execute(query)
+            results = cursor.fetchall()
+            # Estrai solo gli socket_id in una lista
+            socket_ids = [row[0] for row in results]
+            return socket_ids
+        except Exception as e:
+            return {"msg": "Errore durante il recupero degli socket_id dei comandanti", "error": str(e)}, 500
+        finally:
+            cursor.close()
+
+
+
+
     def add_signal_to_team(self, team_id: int, signal: str):
         """
         Metodo per aggiungere un segnale nella tabella signals dato un team_id e un segnale.

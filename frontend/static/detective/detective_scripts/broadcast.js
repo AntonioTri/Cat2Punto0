@@ -17,7 +17,7 @@ export class BroadcastManager extends AbstractCardManager {
         this.addScrollableList('broadcast_messages');
         this.addSocketListener();
         this.askCacheData("retrieve_broadcast_messages");
-        //this.addLocker('Broadcast', 'Broadcast_on', 'Broadcast_off');
+        this.addLocker("Broadcast");
     }
 
     addSocketListener(){

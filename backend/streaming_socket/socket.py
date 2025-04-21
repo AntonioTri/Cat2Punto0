@@ -1,7 +1,6 @@
 from flask_socketio.namespace import Namespace
 from flask_socketio import emit
 from flask import request
-from flask_jwt_extended import jwt_required
 from JWT.socket_auth_decorator import socket_require_role, socket_require_token
 from entity.role import ROLE
 from controller.controller_personal_functions import ControllerPersonalFunctions
@@ -18,10 +17,6 @@ from utils.commanders_pending_requestes import PendingCacheManager
 import threading
 
 logger = getFileLogger(__name__)
-logger.info('[-] Sono il logger dentro la socket, funziono!')
-
-
-
 
 # La classe socket definisce un namespace sul quale inviare specifici segnali
 # Per ogni segnale viene definita una funzione ed il nome del sengale è esattamente
@@ -123,22 +118,15 @@ class Socket(Namespace):
                 cached_teams_graphs[team_id] = None
                 logger.info(f"✅ L'utente era l'ultimo attivo del team, salvataggio dei dati avvenuto con successo.")
                 
-                # Viene inoltre rimossa dalla cache la lista di perk associata al team, il costo ed i locker
-                remove_team_perks(team_id=team_id)
-                remove_team_energy_usage(team_id=team_id)
-                remove_team_lockers(team_id=team_id)
-                self.cryptingCache.clear_cache(team_id=team_id)
-                self.broadcast_messager.clear_cache(team_id=team_id)
+                # Viene inoltre ripulita la cache del team
+                self.clear_cache(team_id=team_id)
+
                 logger.info(f"✅ Rimozione della cache per il team {team_id} avvenuta con successo.")
 
         # Nel caso opposto l'utente aveva solo ricaricato la pagina, nulla accade
         else:
             logger.info(f"✅ L'utente si è riconnesso. Cache invariata.")
-        
 
-           
-        
-        
 
     def save_graph_and_clean_cache(self, team_id, file_name):
         """
@@ -321,8 +309,20 @@ class Socket(Namespace):
         self.pending_request.retireve_current_pending_requests(team_id=team_id, socket=socket)
         
         logger.info(f"📶  ✅  Dati pendenti inviati alla socket {request.sid} con successo!")
+    
 
+    # Segnale che risponde all'invio del numero di token disponibili
+    @socket_require_role(role=ROLE.COMANDANTE.value)
+    def on_retrieve_token_amount(self, data):
 
+        logger.info(f"📶  🔄  Tentativo di invio numero token alla socket {request.sid}. Elaborazione ...")
+
+        socket = data.get('socket', request.sid)
+        team_id = int(data.get("team_id", -1))
+
+        self.pending_request.retrieve_token_amount(team_id=team_id, socket=socket)
+        
+        logger.info(f"📶  ✅  Numero token inviati alla socket {request.sid} con successo!")
 
 
 
@@ -339,6 +339,11 @@ class Socket(Namespace):
         # Approvazione nella cache
         self.pending_request.approve_code_delivery(team_id=team_id, code=code, decritter_sockets=sockets)
 
+        # Estrazione delle sockets dei comandanti dal database:
+        sockets = ControllerTeamPool.get_group_sockets(team_id=team_id, role=ROLE.COMANDANTE.value)
+        # Decremento dei token globali utilizzabili
+        self.pending_request.decrease_token_count(team_id=team_id, commanders_sockets=sockets)
+
         logger.info(f"📶  ✅  Codice {code} approvato correttamente per il team {team_id}.")
     
     
@@ -354,8 +359,32 @@ class Socket(Namespace):
         sockets = ControllerTeamPool.get_group_sockets(team_id=team_id, role=ROLE.DETECTIVE.value)
         # Approvazione nella cache
         self.pending_request.approve_evidence_delivery(team_id=team_id, id_fascicolo=id_fascicolo, detective_sockets=sockets)
+        
+        # Estrazione delle sockets dei comandanti dal database:
+        sockets = ControllerTeamPool.get_group_sockets(team_id=team_id, role=ROLE.COMANDANTE.value)
+        # Decremento dei token globali utilizzabili
+        self.pending_request.decrease_token_count(team_id=team_id, commanders_sockets=sockets)
 
         logger.info(f"📶  ✅  Fascicolo {id_fascicolo} approvato correttamente per il team {team_id}.")
+    
+    
+    @socket_require_role(role=ROLE.COMANDANTE.value)
+    def on_update_token_count(self, data):
+
+        logger.info(f"📶  🔄  Richiesta aumento token globali ricevuta. Elaborazione ...")
+
+         # Estrazione dei dati
+        socket = data.get('socket', request.sid)
+        team_id = int(data.get('team_id', -1))
+        token_number = int(data.get('token_count', 0))
+
+        # Estrazione delle sockets dei comandanti dal database:
+        sockets = ControllerTeamPool.get_group_sockets(team_id=team_id, role=ROLE.COMANDANTE.value)
+        sockets = [_socket for _socket in sockets if _socket != socket ]
+        # Approvazione nella cache
+        self.pending_request.update_token_count(team_id=team_id, token_count=token_number, commanders_sockets=sockets)
+
+        logger.info(f"📶  ✅  Token aumentati globalmente a tutti i comandanti del team {team_id}.")
 
 
     # Segnale che aggiorna l'attuale sistema di criptaggio
@@ -458,3 +487,24 @@ class Socket(Namespace):
         self.crypted_codes_cache.retrieve_current_codes(team_id=team_id, socket=socket)
 
         logger.info(f"📶  ✅  Invio codici decrittazione alla socket {request.sid} avvenuto con succeso!")
+
+
+
+
+
+
+
+
+
+
+
+    def clear_cache(self, team_id = -1):
+
+        remove_team_perks(team_id=team_id)
+        remove_team_energy_usage(team_id=team_id)
+        remove_team_lockers(team_id=team_id)
+        self.cryptingCache.clear_cache(team_id=team_id)
+        self.broadcast_messager.clear_cache(team_id=team_id)
+        self.pending_request.clear_cache(team_id=team_id)
+        self.crypted_codes_cache.clear_cache(team_id=team_id)
+        self.evidence_cache.clear_cache(team_id=team_id)

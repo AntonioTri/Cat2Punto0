@@ -26,7 +26,7 @@ body {
 
 
 #Deduzione_submit_button{
-    background-color: rgb(79, 202, 66);
+    background-color: #ffaa00;
     transition: all 0.3s ease-in-out;
     width: 90%;
     height: 10%;
@@ -35,13 +35,13 @@ body {
 
 /* Cambia colore al passaggio del mouse */
 #Deduzione_submit_button:hover {
-    background-color: rgb(38, 192, 21); /* Cambia al mouse hover */
+    background-color: #eb9c00; /* Cambia al mouse hover */
     cursor: pointer; /* Cambia il cursore a mano */
 }
 
 /* Effetto al click (dezoom e cambiamento colore) al cambiamento della classe active*/
 #Deduzione_submit_button.active {
     transform: scale(0.95); /* Dezoom leggero */
-    background-color: #009d34; /* Colore più scuro al click */
+    background-color: #d68f02; /* Colore più scuro al click */
     box-shadow: 0 0 10px rgba(0, 153, 204, 0.6); /* Aggiunge un'ombra per indicare il focus */
 }

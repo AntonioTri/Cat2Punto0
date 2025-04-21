@@ -65,63 +65,12 @@ export class GAMMAManager extends AbstractCardManager {
         this.container.appendChild(output);
 
         inputText.addEventListener('input', () => {
-            this.generateCorrectPath();
             this.renderGrid();
         });
 
-        this.generateCorrectPath();
         this.renderGrid();
     }
 
-    generateCorrectPath() {
-        const text = this.inputText.value.trim();
-        const seed = text.split('').reduce((acc, char, i) => acc + char.charCodeAt(0) * (i + 1), 0);
-    
-        const visited = new Set();
-        const path = [];
-    
-        let x = seed % this.gridSize;
-        let y = (seed >> 3) % this.gridSize;
-        path.push([x, y]);
-        visited.add(`${x},${y}`);
-    
-        const directions = [
-            [1, 0],  // right
-            [0, 1],  // down
-            [-1, 0], // left
-            [0, -1]  // up
-        ];
-    
-        let attempts = 0;
-    
-        while (path.length < 6 && attempts < 100) {
-            const dirIndex = (seed >> (path.length * 3)) % 4;
-            const [dx, dy] = directions[dirIndex];
-    
-            const newX = x + dx;
-            const newY = y + dy;
-    
-            const coordKey = `${newX},${newY}`;
-    
-            if (
-                newX >= 0 && newX < this.gridSize &&
-                newY >= 0 && newY < this.gridSize &&
-                !visited.has(coordKey)
-            ) {
-                x = newX;
-                y = newY;
-                path.push([x, y]);
-                visited.add(coordKey);
-            }
-    
-            attempts++;
-        }
-        
-        //TODO: scegliere i percorsi corretti
-        console.log('Percorso corretto:', path);
-        this.correctPath = path;
-    }
-    
 
     renderGrid() {
         this.grid.innerHTML = '';
@@ -140,51 +89,42 @@ export class GAMMAManager extends AbstractCardManager {
     }
 
     onNodeClick(x, y, node) {
-        const coordKey = `${x},${y}`;
-    
-        // Controlla se il nodo è già stato selezionato
         const existingIndex = this.currentPath.findIndex(([cx, cy]) => cx === x && cy === y);
     
         if (existingIndex !== -1) {
-            // Rimuove il nodo selezionato
             this.currentPath.splice(existingIndex, 1);
             node.classList.remove('selected');
         } else {
-            // Aggiunge se non presente
             this.currentPath.push([x, y]);
             node.classList.add('selected');
         }
     
-        // Verifica se il percorso è completo
-        if (this.currentPath.length === this.correctPath.length) {
-            const match = this.currentPath.every((c, i) => c[0] === this.correctPath[i][0] && c[1] === this.correctPath[i][1]);
-            this.outputText.innerText = match
-                ? this.decrypt(this.inputText.value, this.correctPath)
-                : '❌ Percorso errato';
-        } else {
+        const text = this.inputText.value.trim();
+        if (!text || this.currentPath.length === 0) {
             this.outputText.innerText = 'Percorso in costruzione...';
+            return;
         }
+    
+        const decrypted = this.decrypt(text, this.currentPath);
+        this.outputText.innerText = decrypted;
     }
+    
     
 
     decrypt(text, path) {
         let result = '';
-        const pathSeed = path.reduce((acc, [x, y]) => acc + x * 3 + y * 5, 0);
-
+    
         for (let i = 0; i < text.length; i++) {
-            const shift = (pathSeed + i * 7) % 26;
+            const [x, y] = path[i % path.length];
+    
+            const shift = ((x * 11 + y * 7 + i * 5) % 94); // range stampabile ASCII
             const charCode = text.charCodeAt(i);
-            let newCode = charCode;
-
-            if (charCode >= 65 && charCode <= 90) {
-                newCode = ((charCode - 65 + shift) % 26) + 65;
-            } else if (charCode >= 97 && charCode <= 122) {
-                newCode = ((charCode - 97 + shift) % 26) + 97;
-            }
-
-            result += String.fromCharCode(newCode);
+    
+            const newChar = String.fromCharCode(32 + ((charCode + shift - 32) % 94)); // da 32 a 126
+            result += newChar;
         }
-
+    
         return result;
     }
+    
 }

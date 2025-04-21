@@ -18,7 +18,8 @@ export class FascicoliManager extends AbstractCardManager{
         this.defineSocketSignals();
         this.askCacheData("retrieve_evidences");
         this.addResponseMessage();
-        //this.addLocker("fascicoli", "fascicoli_on", "fascicoli_off");
+        this.addLocker("Fascicoli");
+
     }
     
     
@@ -28,12 +29,10 @@ export class FascicoliManager extends AbstractCardManager{
         // Evento socket che intercetta l'arrivo di un nuovo fascicolo da aggiungere
         socket.on('add_new_evidence', (fascicolo) => {
             this.addElementToList(fascicolo);
-            console.log('Aggiunta di un nuovo fascicolo', fascicolo);
         });
 
         // Definizione del segnale per dare il permesso di accesso ad un fascicolo
         socket.on('evidence_permission_gained', (response) => {
-            console.log('Permessi ricevuti per i fascicoli:', response);
 
             // Se il permesso e' stato positivo viene concesso di accedere al fascicolo
             if(response.permission){
@@ -97,9 +96,6 @@ export class FascicoliManager extends AbstractCardManager{
 
     addEventsOnElement(fascicolo){
 
-        console.log("fascicolo: ", fascicolo);
-        console.log("permissionMap: ", this.permissionMap);
-        
         // Se il fascicolo non ha bisogno di permesso lo mostriamo direttamente
         if(!fascicolo.permission_required) {
             super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);

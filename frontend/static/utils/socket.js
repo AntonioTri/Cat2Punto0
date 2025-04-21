@@ -85,6 +85,21 @@ socket.on('error', (response) => {
 
 
 
+socket.on("connect_error", (err) => {
+    console.error("❌ Errore di connessione socket:", err);
+});
+
+socket.on("error", (err) => {
+    console.error("❌ Errore generico socket:", err);
+});
+
+socket.io.on("reconnect_attempt", () => {
+    console.warn("🔁 Tentativo di riconnessione in corso...");
+});
+
+
+
+
 // Intercetta l'evento di ricarica o chiusura della pagina
 window.addEventListener('beforeunload', function() {
     // Imposta un flag per indicare che la pagina sta per essere ricaricata o chiusa

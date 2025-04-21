@@ -20,6 +20,7 @@ class PendingCacheManager:
             # Cache dei codici e fascicoli in attesa per ogni team
             self.pending_codes: dict[int, list[tuple[str, str]]] = {}  # (code, description)
             self.pending_evidences: dict[int, list[tuple[str, str, int, bool]]] = {}  # (titolo, contenuto, id_fascicolo, permission_required)
+            self.token_count : dict [int, int] = {} 
 
             self.codes_cache = CriptedCodesCache()
             self.evidence_cache = EvidenceCache()
@@ -109,6 +110,33 @@ class PendingCacheManager:
             emit('new_pending_evidence', { "titolo": titolo, "id_fascicolo": id_fascicolo }, to=socket, namespace='/socket.io')
 
 
+    def update_token_count(self, team_id : int = -1, token_count : int = 0, commanders_sockets : list [str] = []):
+        """Metodo che invia a tutti i comandanti connessi l'attuale token count"""
+        if team_id not in self.token_count:
+            self.token_count[team_id] = 0
+        
+        self.token_count[team_id] = token_count
+
+        for socket in commanders_sockets:
+            emit('new_token_amount', {"amount": token_count}, to=socket, namespace='/socket.io')
+
+
+    def decrease_token_count(self, team_id : int = -1, commanders_sockets : list [str] = []):
+        
+        if team_id in self.token_count and self.token_count[team_id] > 0:
+            self.token_count[team_id] -= 1
+        elif team_id not in self.token_count:
+            self.token_count[team_id] = 0
+
+        for socket in commanders_sockets:
+            emit('new_token_amount', {"amount": self.token_count[team_id]}, to=socket, namespace='/socket.io')
+
+
+
+    def retrieve_token_amount(self, team_id : int = -1, socket : str = ""):
+        """ Metodo che segnala lla socket chiamante l'attuale quantità di token disponibili"""
+        token_count = self.token_count.get(team_id, 0)
+        emit('new_token_amount', {"amount": token_count}, to=socket, namespace='/socket.io')
 
 
     def clear_cache(self, team_id: int = -1):
@@ -118,4 +146,9 @@ class PendingCacheManager:
 
         if team_id in self.pending_evidences:
             self.pending_evidences[team_id] = []
+
+        if team_id in self.token_count:
+            self.token_count[team_id] = []
+
+        
         logger.info(f"🧹 Cache pendente dei comandanti pulita per team {team_id}")

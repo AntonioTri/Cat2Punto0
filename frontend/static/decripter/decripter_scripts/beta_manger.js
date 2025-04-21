@@ -90,63 +90,36 @@ export class BETAManager extends AbstractCardManager {
         }
     }
 
-    generateCorrectSequence(text) {
-        const base = text.split('').reduce((acc, char, i) => acc + char.charCodeAt(0) * (i + 1), 0);
-        const sequence = [];
-
-        for (let i = 0; i < this.numSelectors; i++) {
-            // Valori da 1 a 5
-            const val = ((base >> (i * 3)) % 5) + 1;
-            sequence.push(this.options[val-1]);
-        }
-
-        //TODO: Selezionare le parole candidate
-        // Comando per vedere la sequenza in fase di debug 
-        console.log(sequence);
-        return sequence;
-    }
-
     checkDecryption() {
         const text = this.inputText.value.trim();
         if (!text) {
             this.outputText.innerText = 'In attesa della combinazione ...';
             return;
         }
-
-        const correctSequence = this.generateCorrectSequence(text);
+    
         const selectedSequence = this.selectors.map(sel => sel.value);
-        const isCorrect = selectedSequence.every((val, idx) => val === correctSequence[idx]);
-
-        if (isCorrect) {
-            this.outputText.innerText = this.decrypt(text, correctSequence);
-        } else {
-            this.outputText.innerText = '❌ Combinazione errata';
-        }
+        const decryptedText = this.decrypt(text, selectedSequence);
+    
+        this.outputText.innerText = decryptedText;
     }
+    
 
     decrypt(text, seq) {
-        
         let result = '';
     
         for (let i = 0; i < text.length; i++) {
+            const char = text[i];
             const keyword = seq[i % seq.length];
-            const mappedValue = this.mapKeywordToNumber(keyword);
-            const shift = (mappedValue * 3) % 26;
+            const keywordIndex = this.mapKeywordToNumber(keyword);
+            const shift = ((char.charCodeAt(0) + keywordIndex * (i + 7)) % 94);
+            const newCharCode = 32 + (shift % 94);
     
-            const charCode = text.charCodeAt(i);
-            let newCode = charCode;
-    
-            if (charCode >= 65 && charCode <= 90) {
-                newCode = ((charCode - 65 + shift) % 26) + 65;
-            } else if (charCode >= 97 && charCode <= 122) {
-                newCode = ((charCode - 97 + shift) % 26) + 97;
-            }
-    
-            result += String.fromCharCode(newCode);
+            result += String.fromCharCode(newCharCode);
         }
     
         return result;
     }
+    
     
 
     mapKeywordToNumber(keyword) {

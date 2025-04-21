@@ -35,10 +35,14 @@ export class AbstractCardManager{
 
 
     // Metodo che aggiunge alla card il blocco, impedendo di usare le funzioni normalmente
-    addLocker(signal = "", signalOn = "", signalOff = ""){
+    addLocker(signal = ""){
+
+        // Vengono definiti i segnali di accensione e spegnimento
+        const signalOn = signal + "_on";
+        const signalOff = signal + "_off";
 
         // Viene creato il locker dedicato
-        //this.createLocker();
+        this.createLocker();
         // Viene attivato
         this.activateLocker();
         // E vengono impostati i listener alla socket per il segnale di sblocco
@@ -66,61 +70,40 @@ export class AbstractCardManager{
         
         // Aggiunge il contenuto all’overlay
         locker.appendChild(content);
-    
-        // Aggiunge l’overlay alla card
-        this.card.appendChild(locker);
-    
-        console.log(`🧊 Locker creato sopra la card: ${this.card.id || this.cardName}`);
-    }
-    
 
-    // Metodo per attivare il locker con animazione
-    activateLocker() {
-        console.log(`Locker per la carta ${this.cardName} ATTIVATO! La carta è bloccata!`);
-
-        // Crea il div se non esiste
-        if (this.lockerOverlay) return; // evita duplicati
-
-        const overlay = document.createElement('div');
-        overlay.classList.add('card-locker-overlay');
-        overlay.innerHTML = `<span class="locker-label">☠️ LOCKED</span>`;
-        this.card.appendChild(overlay);
-        this.lockerOverlay = overlay;
-
-        // Forza uno stato iniziale fuori scala e invisibile
-        overlay.style.opacity = '0';
-        overlay.style.transform = 'scale(1.2)';
+        // Indice z e tempi di
+        locker.style.zIndex = '1000';
+        locker.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
         
-        // Trigger reflow for transition to work
-        void overlay.offsetWidth;
+        // Forza uno stato iniziale fuori scala e invisibile
+        locker.style.opacity = '0';
+        locker.style.transform = 'scale(1.2)';
+        
+        // Reference al locker
+        this.locker = locker;
 
-        // Anima verso visibile e scala normale
-        overlay.style.opacity = '1';
-        overlay.style.transform = 'scale(1)';
-
-        // Viene impostato il livello z
-        overlay.style.zIndex = '1000';
     }
+
+
+    activateLocker() {
+
+        this.card.appendChild(this.locker);
+        
+        void this.locker.offsetWidth;
+        this.locker.style.opacity = '1';
+        this.locker.style.transform = 'scale(1)';
+    }
+    
 
     // Metodo per disattivare il locker con animazione inversa
     deactivateLocker() {
-        if (!this.lockerOverlay) return;
-
-        console.log(`Locker per la carta ${this.cardName} DISATTIVATO! La carta è ora utilizzabile!`);
-
-        const overlay = this.lockerOverlay;
-
+        
         // Anima verso invisibile e ingrandito
-        overlay.style.opacity = '0';
-        overlay.style.transform = 'scale(1.2)';
+        this.locker.style.opacity = '0';
+        this.locker.style.transform = 'scale(1.2)';
+        
+        setTimeout(() => { this.locker.remove(); }, 400);
 
-        // Dopo l'animazione, rimuovilo
-        overlay.addEventListener('transitionend', () => {
-            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-            this.lockerOverlay = null;
-            // Viene impostato il livello z
-            overlay.style.zIndex = '-1000';
-        }, { once: true });
     }
 
 
