@@ -92,7 +92,7 @@ class CryptingSystemManager:
             emit('add_crypting_system', {"systemName": name, "password": password}, to=socket, namespace='/socket.io')
     
 
-    def send_new_unique_system(self, team_id : int = -1, decritter_sockets : list[str] = [], name : str = "", password : str = ""):
+    def add_new_unique_system(self, team_id : int = -1, decritter_sockets : list[str] = [], name : str = "", password : str = ""):
         """
             Quando invocato questo metodo invia a tutte le socket sengalate il nuvo sistema di criptaggio
         """

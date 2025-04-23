@@ -19,7 +19,7 @@ export class ALPHAManager extends AbstractCardManager {
         this.outputText = null;
         this.addElements();
         this.addDownloaderPDF('Scarica il manuale ALPHA', 'SISTEMA_ALPHA');
-        //this.addLocker("ALPHA");
+        this.addLocker("ALPHA");
 
 
     };

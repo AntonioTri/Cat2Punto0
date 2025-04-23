@@ -18,6 +18,7 @@ export class ResourcesManager extends AbstractCardManager {
         this.addSocketListener();
         this.addCryptingEventListener();
         this.askCacheData('retrieve_perks');
+        this.addSinglePerk(5, 'Criptaggio');
     }
 
     setURLs() {

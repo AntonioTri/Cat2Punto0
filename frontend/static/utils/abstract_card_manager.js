@@ -336,7 +336,7 @@ export class AbstractCardManager{
     
     
     
-    addElementToScrollableList(id = "", textContent = "None", contenuto = "some_content", isProtected = false) {
+    addElementToScrollableList(id = "", textContent = "None") {
         let innerElement = document.createElement('div');
         innerElement.id = id;
         innerElement.style.width = '94%';
@@ -362,10 +362,7 @@ export class AbstractCardManager{
     
 
     // Questo metodo mostra una card che compare e scompare in sovrimpressione al click di uno specifico tasto
-    showInfoCard(storageKey = NaN, title = ""){
-
-        // Estraiamo il content salvato dal local storage tramite la key
-        const content = localStorage.getItem(storageKey);
+    showInfoCard(title = "", content = ""){
 
         this.evidenceManager.showCard(title, content);
 

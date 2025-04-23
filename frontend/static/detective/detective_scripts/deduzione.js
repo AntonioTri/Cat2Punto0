@@ -17,6 +17,7 @@ export class DeductionManager extends AbstractCardManager{
         this.addInputTag(`${this.cardName}_input_form`, 'Deduzione')
         this.addSubmitButton()
         this.addResponseMessage()
+        this.addLocker("Deduzione");
 
     }
 

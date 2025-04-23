@@ -15,16 +15,14 @@ export class FascicoliManager extends AbstractCardManager{
         this.fascicoli = [];
 
         this.addScrollableList('evidence_list');
-        this.defineSocketSignals();
+        this.addSocketListener();
         this.askCacheData("retrieve_evidences");
-        this.addResponseMessage();
-        this.addLocker("Fascicoli");
 
     }
     
     
     // Questo metodo inizializza tutti i segnali associati ai fascicoli
-    defineSocketSignals(){
+    addSocketListener(){
 
         // Evento socket che intercetta l'arrivo di un nuovo fascicolo da aggiungere
         socket.on('add_new_evidence', (fascicolo) => {
@@ -79,7 +77,7 @@ export class FascicoliManager extends AbstractCardManager{
         this.updatePermissionMap(fascicolo);
 
         // Aggiunta dell'elemento
-        const elementAdded = this.addElementToScrollableList(`${fascicolo.id_fascicolo}`, fascicolo.titolo, fascicolo.contenuto, fascicolo.permission_required);
+        const elementAdded = this.addElementToScrollableList(`${fascicolo.id_fascicolo}`, fascicolo.titolo);
 
         // Aggiunta dei dettagli interni
         this.addStatusToEvidence(elementAdded, fascicolo);
@@ -98,7 +96,7 @@ export class FascicoliManager extends AbstractCardManager{
 
         // Se il fascicolo non ha bisogno di permesso lo mostriamo direttamente
         if(!fascicolo.permission_required) {
-            super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);
+            super.showInfoCard(fascicolo.titolo, fascicolo.contenuto);
 
         // Se il fascicolo e' protetto e se non e' mai stato inviato il segnale per esso  
         // allora viene inviato un segnale ai capitani
@@ -129,7 +127,7 @@ export class FascicoliManager extends AbstractCardManager{
 
         // Altrimenti se la card ha bisogno di permesso ma questo è stato concesso, la mostriamo
         } else if(fascicolo.permission_required && this.permissionMap[fascicolo.id_fascicolo]["permission_gained"]) {
-            super.showInfoCard(`fascicolo_numero_${fascicolo.id_fascicolo}`, fascicolo.titolo);
+            super.showInfoCard(fascicolo.titolo, fascicolo.contenuto);
         }
 
     }

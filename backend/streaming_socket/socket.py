@@ -14,6 +14,8 @@ from utils.broadcast_messages import BroadcastMessager
 from utils.detectives_evidence_cache import EvidenceCache
 from utils.decripter_cripted_codes_cache import CriptedCodesCache
 from utils.commanders_pending_requestes import PendingCacheManager
+from utils.commanders_evidences import ReservedProofsCache
+from utils.timeline_cache import HistoricalEventsCache
 import threading
 
 logger = getFileLogger(__name__)
@@ -36,6 +38,10 @@ class Socket(Namespace):
         self.crypted_codes_cache : CriptedCodesCache = CriptedCodesCache()
         # Istanza della cache dei fascioli dei detective
         self.evidence_cache : EvidenceCache = EvidenceCache()
+        # Istanza della cache dei fascicoli riservati dei comandanti
+        self.reserved_proofs_cache : ReservedProofsCache = ReservedProofsCache()
+        # Istanza della cache degli eventi timeline dei detective
+        self.historical_events_cache : HistoricalEventsCache = HistoricalEventsCache()
 
     # Questo metodo registra la socket id univoca per l'utente quando questo effettua il login
     def on_update_socket(self, data):
@@ -384,6 +390,21 @@ class Socket(Namespace):
         logger.info(f"📶  ✅  Token aumentati globalmente a tutti i comandanti del team {team_id}.")
 
 
+    @socket_require_role(role=ROLE.DECRITTATORE.value)
+    def on_retrieve_reserved_evidences(self, data):
+        logger.info(f"📶  🔄  Invio prove riservate alla socket {request.sid}")
+
+        # Estrazione dei dati
+        socket = data.get('socket', request.sid)
+        team_id = int(data.get('team_id', -1))
+
+        # Richiamo del metodo della cache per inviare le prove riservate
+        self.reserved_proofs_cache.retrieve_current_reserved_proofs(team_id=team_id, socket=socket)
+
+        logger.info(f"📶  ✅  Invio prove riservate alla socket {request.sid} completato con successo!")
+
+
+
     # Segnale che aggiorna l'attuale sistema di criptaggio
     @socket_require_role(role=ROLE.DECRITTATORE.value)
     def on_crypting_sys_changed(self, data):
@@ -468,6 +489,20 @@ class Socket(Namespace):
         self.evidence_cache.retrieve_current_evidences(team_id=team_id, socket=socket)
 
         logger.info(f"📶  ✅  Invio fascicoli alla socket {request.sid} avvenuto con succeso!")
+
+
+    @socket_require_role(role=ROLE.DETECTIVE.value)
+    def on_retrieve_historical_events(self, data):
+        logger.info(f"📶  🔄  Invio eventi storici alla socket {request.sid}")
+
+        # Estrazione dati
+        socket = data.get('socket', request.sid)
+        team_id = int(data.get('team_id', -1))
+
+        # Richiamo metodo della cache
+        self.historical_events_cache.retrieve_current_events(team_id=team_id, socket=socket)
+
+        logger.info(f"📶  ✅  Invio eventi storici alla socket {request.sid} completato con successo!")
 
 
     @socket_require_role(role=ROLE.DECRITTATORE.value)

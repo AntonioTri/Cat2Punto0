@@ -1,0 +1,5 @@
+CRYPTING_SYSTEM_1       = ["Dilithium", "WarpFlux0"]
+CRYPTING_SYSTEM_2       = ["Serpent", "CoilSecure66"]
+CRYPTING_SYSTEM_3       = ["Nyarl-Crypt", "sh0gg0th_Hz443"]
+CRYPTING_SYSTEM_4       = ["Eld-Rune-Compiler", "ru1nGlyph_171"]
+CRYPTING_SYSTEM_5       = ["DeepVault", "voidS0cket_Xxthl"]

@@ -21,6 +21,7 @@ export class PendingRequestsManager extends AbstractCardManager {
         this.addSocketListeners();
         this.askCacheData('retrieve_proof');
         this.askCacheData('retrieve_token_amount');
+        this.addLocker('Distribuzione');
         // Richiami la funzione ciclica che aggiorna il contatore ogni 5 minuti
         this.tokenTimer();
     }

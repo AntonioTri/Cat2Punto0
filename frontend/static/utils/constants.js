@@ -1,5 +1,5 @@
 // Definiamo le azioni
-const commanderActions      =     ['Risorse', 'Prove', 'Distribuzione', 'Permessi', 'ciao_hello'];
+const commanderActions      =     ['Risorse', 'Prove', 'Distribuzione', 'Permessi', 'Protocollo', 'ciao_hello'];
 const decritterAction       =     ['ALPHA', 'BETA', 'GAMMA', 'Sistemi', 'Codici', 'Recupero', 'ciao_hello'];
 const detectiveActions      =     ['Deduzione', 'Timeline', 'Fascicoli', 'Broadcast', 'ciao_hello'];
 const admin                 =     ['create_team', 'add_team_member', 'download_team', 'reset_passwords'];

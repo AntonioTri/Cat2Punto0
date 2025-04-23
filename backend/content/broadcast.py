@@ -1,0 +1,5 @@
+MESSAGE_FROM_ARCHITECT_1        = ["Architetto", "... il flusso ..."]
+MESSAGE_FROM_ARCHITECT_2        = ["Architetto", "... lo sento ..."]
+MESSAGE_FROM_ARCHITECT_3        = ["Architetto", "Allora forse non tutto è perduto"]
+MESSAGE_FROM_ARCHITECT_4        = ["Architetto", "Qualcuno potrà conoscere, la ostra storia"]
+MESSAGE_FROM_ARCHITECT_5        = ["Architetto", "Il sistema sembrerebbe funzionare ..."]

@@ -26,7 +26,7 @@ class PendingCacheManager:
             self.evidence_cache = EvidenceCache()
 
 
-    def add_pending_code(self, team_id: int = -1, code: str = "", description: str = ""):
+    def add_pending_code(self, team_id: int = -1, commanders_sockets: list[str] = [], code: str = "", description: str = ""):
         """Metodo che agiunge una pendin request relativa ai codici."""
 
         if team_id not in self.pending_codes:
@@ -36,10 +36,11 @@ class PendingCacheManager:
         logger.info(f"📦 Codice aggiunto alla cache dei comandanti: {code}")
 
         # Notifica a tutti i comandanti
-        emit('new_pending_code', {"code": code, "description": description, "team_id": team_id}, broadcast=True, namespace='/socket.io')
+        for socket in commanders_sockets:
+            emit('new_pending_code', {"code": code, "description": description}, to=socket, namespace='/socket.io')
 
 
-    def add_pending_evidence(self, team_id: int = -1, titolo: str = "", contenuto: str = "", id_fascicolo: int = 0, permission_required: bool = False):
+    def add_pending_evidence(self, team_id: int = -1, commanders_sockets: list[str] = [], titolo: str = "", contenuto: str = "", id_fascicolo: int = 0, permission_required: bool = False):
         """Metodo che agiunge una pendin request relativa ai fascicoli."""
 
         if team_id not in self.pending_evidences:
@@ -49,10 +50,8 @@ class PendingCacheManager:
         logger.info(f"📦 Fascicolo aggiunto alla cache dei comandanti: {titolo}")
 
         # Notifica a tutti i comandanti
-        emit('new_pending_evidence', {
-            "titolo": titolo,
-            "id_fascicolo": id_fascicolo
-        }, broadcast=True, namespace='/socket.io')
+        for socket in commanders_sockets:
+            emit('new_pending_evidence', {"titolo": titolo, "id_fascicolo": id_fascicolo }, to=socket, namespace='/socket.io')
 
 
     def approve_code_delivery(self, team_id: int = -1, code: str = "", decritter_sockets: list[str] = []):

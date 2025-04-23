@@ -3,10 +3,10 @@ import { CheckMark } from '../../check_mark/check_mark.js';
 import { AbstractCardManager } from '../../utils/abstract_card_manager.js';
 
 
-export class RestoreManager extends AbstractCardManager{
+export class ProtocolsManager extends AbstractCardManager{
 
 
-    constructor(containerSelector = 'Recupero', checkMark = new CheckMark()){
+    constructor(containerSelector = 'Protocollo', checkMark = new CheckMark()){
         super(containerSelector, checkMark);
     }
 
@@ -14,10 +14,10 @@ export class RestoreManager extends AbstractCardManager{
     init(){
 
         this.setURLS();
-        this.addInputTag(`${this.cardName}_input_form`, 'Codice di recupero')
+        this.addInputTag(`${this.cardName}_input_form`, 'Protocollo di sicurezza')
         this.addSubmitButton()
         this.addResponseMessage()
-        this.addLocker("Recupero");
+        this.addLocker("Protocollo");
 
     }
 
@@ -25,10 +25,10 @@ export class RestoreManager extends AbstractCardManager{
     // Metodo che quando invocato estrae i dati dal form e li invia all'API
     async sendRequest(){
 
-        const code = this.nameInputTag.value;
+        const protocol = this.nameInputTag.value;
         // Se Non sono stati inseriti nomi non viene inviato il segnale
-        if (code !== "") {
-            this.manageRequest(code);
+        if (protocol !== "") {
+            this.manageRequest(protocol);
             
         // Viene reimpostata la flag se non vi sono nomi inseriti
         } else {
@@ -37,14 +37,14 @@ export class RestoreManager extends AbstractCardManager{
 
     }
 
-    async manageRequest(code = ""){
+    async manageRequest(protocol = ""){
         
         // try-catch per gestire gli errori
         try {
 
             // Definizione dei dati da inviare
             const data_to_send = {
-                answer : code,
+                answer : protocol,
                 team_id : localStorage.getItem('team_id'),
                 socket : localStorage.getItem('socket')
             }
@@ -76,7 +76,7 @@ export class RestoreManager extends AbstractCardManager{
 
                     // Caso in cui la risposta sia corretta
                     case 201:
-                        this.showResponseMessage('Codice di recupero corretto! Recupero dati ...')
+                        this.showResponseMessage('Protocollo recuperato! Avvio dei sistemi ...')
                         this.checkMark.success()
                         break;
 
@@ -84,7 +84,7 @@ export class RestoreManager extends AbstractCardManager{
 
             } else {
                 
-                super.showResponseMessage('Codice errato.');
+                super.showResponseMessage('Protocollo inesistente.');
                 // Compare il check mark per l'errore
                 this.checkMark.error();
             }
@@ -119,7 +119,3 @@ export class RestoreManager extends AbstractCardManager{
 
 
 }
-
-
-
-

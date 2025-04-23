@@ -14,3 +14,31 @@ body {
     font-family: Arial, sans-serif;
     color: white;
 }
+
+
+#Protocollo_input_form {
+    width: 90%;
+    height: 10%;
+    font-size: x-large;
+}
+
+#Protocollo_submit_button{
+    background-color: rgb(186, 104, 200);
+    transition: all 0.3s ease-in-out;
+    width: 90%;
+    height: 10%;
+    font-size: x-large;
+}
+
+/* Cambia colore al passaggio del mouse */
+#Protocollo_submit_button:hover {
+    background-color: rgb(179, 66, 199); /* Cambia al mouse hover */
+    cursor: pointer; /* Cambia il cursore a mano */
+}
+
+/* Effetto al click (dezoom e cambiamento colore) al cambiamento della classe active*/
+#Protocollo_submit_button.active {
+    transform: scale(0.95); /* Dezoom leggero */
+    background-color: rgb(145, 25, 166); /* Colore più scuro al click */
+    box-shadow: 0 0 10px rgba(133, 0, 204, 0.6); /* Aggiunge un'ombra per indicare il focus */
+}

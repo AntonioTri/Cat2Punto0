@@ -14,7 +14,6 @@ export class EvidenceManager{
 
 
     // Metodo che crea la carta, aggiungendo l'evento di scomparsa e cancellazione al tocco
-    // Metodo che crea la carta, aggiungendo l'evento di scomparsa e cancellazione al tocco
     showCard(title, content) {
         // === CREAZIONE OVERLAY CON FADE-IN ===
         const overlay = document.createElement('div');
@@ -54,8 +53,22 @@ export class EvidenceManager{
             evidenceCard.classList.add('evidence_active');
         }, 10);
 
-        // Aggiungiamo l'evento `click` per la rimozione
-        evidenceCard.addEventListener('click', () => {
+        // === Aggiungiamo una X per chiudere la card ===
+        const closeBtn = document.createElement('div');
+        closeBtn.innerText = '×';
+        closeBtn.style.position = 'absolute';
+        closeBtn.style.top = '5px';
+        closeBtn.style.right = '15px';
+        closeBtn.style.fontSize = '50px';
+        closeBtn.style.color = '#ffa200';
+        closeBtn.style.cursor = 'pointer';
+        closeBtn.style.fontWeight = 'bold';
+        closeBtn.style.zIndex = '102';
+
+        evidenceCard.appendChild(closeBtn);
+
+        // Aggiungiamo l'evento `click` SOLO sulla X per la rimozione
+        closeBtn.addEventListener('click', () => {
             // Cambia lo stato a "inactive" per attivare l'animazione di scomparsa
             evidenceCard.classList.remove('evidence_active');
             evidenceCard.classList.add('evidence_inactive');
@@ -69,7 +82,10 @@ export class EvidenceManager{
                 overlay.remove(); // Rimuove anche lo sfondo nero
             }, 500); // deve combaciare col tempo di transizione della card
         });
-    }
+
+
+}
+
 
 
     
