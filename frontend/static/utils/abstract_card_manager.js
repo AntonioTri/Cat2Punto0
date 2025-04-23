@@ -1,5 +1,7 @@
 import { CheckMark } from '../../static/check_mark/check_mark.js';
 import { EvidenceManager } from '../../static/utils/evidence_manager.js';
+import { socket } from '../../static/utils/socket.js';
+import { API_URL } from '../../static/config.js';
 
 export class AbstractCardManager{
 
@@ -23,7 +25,7 @@ export class AbstractCardManager{
 
 
     init(){
-        throw new Error("Il metodo 'area' deve essere implementato nella sottoclasse");
+        throw new Error("Il metodo 'init' deve essere implementato nella sottoclasse");
     };
 
     async sendRequest(){
@@ -32,15 +34,178 @@ export class AbstractCardManager{
     };
 
 
+    // Metodo che aggiunge alla card il blocco, impedendo di usare le funzioni normalmente
+    addLocker(signal = ""){
+
+        // Vengono definiti i segnali di accensione e spegnimento
+        const signalOn = signal + "_on";
+        const signalOff = signal + "_off";
+
+        // Viene creato il locker dedicato
+        this.createLocker();
+        // Viene attivato
+        this.activateLocker();
+        // E vengono impostati i listener alla socket per il segnale di sblocco
+        socket.on(signalOn, (msg) => { console.log(msg.msg); this.deactivateLocker()});
+        // E per il segnale di blocco
+        socket.on(signalOff, (msg) => { console.log(msg.msg); this.activateLocker()});
+        // Viene poi inviata la richiesta per ottenere l'attuale stato della cache
+        this.askForLockerStatus(signal);
+
+    };
+
+    // Metodo che crea lo screen del lock in sovrapposizione alla card attuale
+    createLocker() {
+        // Evita di creare locker multipli
+        if (this.card.querySelector('.locker-overlay')) return;
+    
+        // Crea il div dell'overlay
+        const locker = document.createElement('div');
+        locker.classList.add('locker-overlay');
+    
+        // Contenuto centrale: simbolo o scritta
+        const content = document.createElement('div');
+        content.classList.add('locker-content');
+        content.innerText = '🔒 BLOCCATO';
+        
+        // Aggiunge il contenuto all’overlay
+        locker.appendChild(content);
+
+        // Indice z e tempi di
+        locker.style.zIndex = '1000';
+        locker.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        
+        // Forza uno stato iniziale fuori scala e invisibile
+        locker.style.opacity = '0';
+        locker.style.transform = 'scale(1.2)';
+        
+        // Reference al locker
+        this.locker = locker;
+
+    }
+
+
+    activateLocker() {
+
+        this.card.appendChild(this.locker);
+        
+        void this.locker.offsetWidth;
+        this.locker.style.opacity = '1';
+        this.locker.style.transform = 'scale(1)';
+    }
+    
+
+    // Metodo per disattivare il locker con animazione inversa
+    deactivateLocker() {
+        
+        // Anima verso invisibile e ingrandito
+        this.locker.style.opacity = '0';
+        this.locker.style.transform = 'scale(1.2)';
+        
+        setTimeout(() => { this.locker.remove(); }, 400);
+
+    }
+
+
+
+    // Questo metodo chiede i dati nella cache del back end
+    askCacheData(signal_root){
+
+        const data_to_send = {
+            token : localStorage.getItem('access_token'),
+            socket : localStorage.getItem('socket'),
+            team_id : localStorage.getItem('team_id')
+        }
+
+        socket.emit(signal_root, data_to_send);
+        console.log('Richiesta Dati cache per la carta: ', this.cardName);
+
+    };
+
+
+    // Se richiamato il metodo agiunge un anchor point per scaricare un pdf
+    addDownloaderPDF(anchorPointText = "", pdfName = ""){
+
+        const anchor = document.createElement('a');
+        anchor.href =`${window.location.protocol}//${window.location.host}/static/PDF/${pdfName}.pdf`;
+        anchor.download = `${pdfName}.pdf`;
+        anchor.className = 'pdf-download';
+        anchor.innerText = `${anchorPointText}`;
+
+        // Reference nella classe
+        this.anchor = anchor;
+        this.container.appendChild(this.anchor);
+
+    };
+
+
+    // Questo metodo se chiamato attiva nella classe un listener di un evento globale
+    // Vengono tradotti tutti gli elementi criptati della carta sulla base del modello di criptaggio
+    // inviato dal segnale
+    addCryptingEventListener(){
+
+        socket.on('crypting_system_changed', (data) => {
+            
+            // Estrazione del nome dall'evento
+            const system_name = data.systemName;
+
+            // Uno switch case sceglie la traduzione da applicare
+            switch (system_name) {
+                
+                case 'Serpent':
+                    console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
+                    break;
+                
+                case 'Dilithium':
+                    console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
+                    break;
+
+                case 'Test3':
+                    console.log(`Traduco la carta ${this.cardName} secondo il mdello ${system_name}.`);
+                    break;
+            
+                default:
+                    console.log(`Nessun modello inviato. ${data}`);
+                    break;
+            
+            }
+        });
+    }
+
+
+
+    async askForLockerStatus(lockerName = ""){
+
+        // try-catch per gestire gli errori
+        try {
+            // Inviamo la richiesta con 'fetch'
+            const URL = `${API_URL}/get_locker_statuses?team_id=${localStorage.getItem('team_id')}&socket=${localStorage.getItem('socket')}&locker_name=${lockerName}`;
+            const response = await fetch(URL, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem('access_token')}`,  // Aggiungi il token di autorizzazione
+                    "Content-Type": "application/json"  // Specifica che invii JSON
+                }
+            });
+
+            if(!response.ok){
+                console.log(`🌐❌  Errore nel richiedere la cache dei locker attivi. Risposta: ${response}`);
+            }
+
+        } catch (error) {
+            console.log('🌐❌  Errore durante la get per gli status attivi: ', error);
+        }
+
+    };
+
     // Metodo che aggiunge un input tag
-    addInputTag(id = ""){
+    addInputTag(id = "", placeholder = ""){
 
         // Dichiarmiamo un input tag, aggiungiamo id e dimensioni, poi lo aggiungiamo al DOM
         let nameInputTag = document.createElement('input');
         this.addGeneralStyleProperties(nameInputTag, id);
         nameInputTag.type = 'text';
-        nameInputTag.placeholder = 'Username';
-        nameInputTag.style.width = '47%';
+        nameInputTag.placeholder = placeholder;
         this.container.appendChild(nameInputTag);
         this.nameInputTag = nameInputTag;
 
@@ -51,14 +216,12 @@ export class AbstractCardManager{
     addSubmitButton(){
 
         // Dichiariamo un bottone
-        let buttonContainer = document.createElement('div');
         let submitButton = document.createElement('button');
         this.addGeneralStyleProperties(submitButton, `${this.cardName}_submit_button`);
-        submitButton.innerText = 'Submit';
+        submitButton.innerText = 'Invia';
         submitButton.style.border = '1px solid #ccc';
 
-        buttonContainer.appendChild(submitButton);
-        this.container.appendChild(buttonContainer);
+        this.container.appendChild(submitButton);
         this.submitButton = submitButton;
         
         // Aggiunta di un evento on clock per animazioni e chiamate api
@@ -160,7 +323,7 @@ export class AbstractCardManager{
         scrollableList.style.width = '94%';
         scrollableList.style.marginTop = '2%';
         scrollableList.style.padding = '2%';
-        scrollableList.style.height = 'calc(100% - 20px)'; // Adatta l'altezza al contenitore
+        scrollableList.style.height = 'calc(100% - 20px)';
         scrollableList.style.transform = 'translateX(1%)';
         scrollableList.style.display = 'flex';
         scrollableList.style.flexDirection = 'column';
@@ -173,7 +336,7 @@ export class AbstractCardManager{
     
     
     
-    addElementToScrollableList(id = "", textContent = "None", contenuto = "some_content", isProtected = false) {
+    addElementToScrollableList(id = "", textContent = "None") {
         let innerElement = document.createElement('div');
         innerElement.id = id;
         innerElement.style.width = '94%';
@@ -185,7 +348,7 @@ export class AbstractCardManager{
         innerElement.style.display = 'flex';
         innerElement.style.flexDirection = 'column';
         innerElement.style.textAlign = 'left';
-        innerElement.style.justifyContent = 'space-between'; // Cambiato per spazio tra testo e catenaccio
+        innerElement.style.justifyContent = 'space-between';
         innerElement.style.fontSize = '16px';
         innerElement.style.fontWeight = 'bold';
         innerElement.innerText = textContent;
@@ -199,10 +362,7 @@ export class AbstractCardManager{
     
 
     // Questo metodo mostra una card che compare e scompare in sovrimpressione al click di uno specifico tasto
-    showInfoCard(storageKey = NaN, title = ""){
-
-        // Estraiamo il content salvato dal local storage tramite la key
-        const content = localStorage.getItem(storageKey);
+    showInfoCard(title = "", content = ""){
 
         this.evidenceManager.showCard(title, content);
 
@@ -244,9 +404,7 @@ export class AbstractCardManager{
     addGeneralStyleProperties(element = NaN, id = ""){
 
         element.id = id;
-        element.style.margin = '1%';
-        element.style.width = '52%';
-        element.style.padding = '2%';
+        element.style.margin = '2%';
         element.style.borderRadius = '5px';
         element.style.textAlign = 'center'; 
         element.style.fontFamily = `'Courier New', Courier, monospace`;

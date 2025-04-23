@@ -14,7 +14,7 @@ export class CreateTeamManager extends AbstractCardManager{
 
         this.setURLS();
         super.setCardProperty();
-        super.addInputTag(`${this.cardName}_input_form`);
+        super.addInputTag(`${this.cardName}_input_form`, 'Username');
         super.addSubmitButton();
         super.addResponseMessage();
 
@@ -57,7 +57,7 @@ export class CreateTeamManager extends AbstractCardManager{
             if (response.ok) {
                 // La risposta è stata corretta
                 const data = await response.json();  // Converte la risposta in JSON
-                // TODO: aggiungere il messaggio in sovrimpressione
+                
                 console.log(data);
                 // Compare il check mark per il successo
                 this.checkMark.success();

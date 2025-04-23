@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rete di Consenso - Comandanti</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #e3e3e3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #79ffe1;
+    }
+
+    .vote-container {
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+
+    .question {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .options {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .option {
+      padding: 0.6rem 1rem;
+      background-color: #222;
+      border: 1px solid #555;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .option:hover {
+      background-color: #333;
+    }
+
+    .selected {
+      border-color: #79ffe1;
+      background-color: #0f2f2f;
+    }
+
+    .result {
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rete di Consenso</h1>
+
+  <div class="vote-container" data-question-id="q1">
+    <div class="question">1. Come va usato il Kromium?</div>
+    <div class="options">
+      <div class="option" data-value="Ricerca">Ricerca</div>
+      <div class="option" data-value="Militarizzazione">Militarizzazione</div>
+      <div class="option" data-value="Controllo sociale">Controllo sociale</div>
+    </div>
+    <div class="result" id="result-q1">Nessun voto registrato.</div>
+  </div>
+
+  <div class="vote-container" data-question-id="q2">
+    <div class="question">2. Eldia è…</div>
+    <div class="options">
+      <div class="option" data-value="Entità benevola">Entità benevola</div>
+      <div class="option" data-value="Minaccia">Minaccia</div>
+      <div class="option" data-value="Costrutto alieno">Costrutto alieno</div>
+    </div>
+    <div class="result" id="result-q2">Nessun voto registrato.</div>
+  </div>
+
+  <div class="vote-container" data-question-id="q3">
+    <div class="question">3. In caso di emergenza cultisti?</div>
+    <div class="options">
+      <div class="option" data-value="Isolamento">Isolamento</div>
+      <div class="option" data-value="Censura totale">Censura totale</div>
+      <div class="option" data-value="Dialogo">Dialogo</div>
+    </div>
+    <div class="result" id="result-q3">Nessun voto registrato.</div>
+  </div>
+
+  <script>
+    const voteContainers = document.querySelectorAll('.vote-container');
+
+    voteContainers.forEach(container => {
+      const options = container.querySelectorAll('.option');
+      const resultBox = container.querySelector('.result');
+      const questionId = container.getAttribute('data-question-id');
+
+      options.forEach(option => {
+        option.addEventListener('click', () => {
+          // Rimuovi selezione dalle altre
+          options.forEach(o => o.classList.remove('selected'));
+          option.classList.add('selected');
+
+          const value = option.getAttribute('data-value');
+          resultBox.textContent = `Hai votato: ${value}`;
+
+          // Simula invio dati (qui va il socket.emit)
+          console.log(`[VOTO REGISTRATO] ${questionId} → ${value}`);
+          // Esempio: socket.emit("voto", { id: questionId, scelta: value });
+        });
+      });
+    });
+  </script>
+</body>
+</html>

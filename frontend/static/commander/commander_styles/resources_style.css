@@ -1,0 +1,217 @@
+#Risorse {
+    margin: 0;
+    background: #f0f0f0;
+    /* Usa una posizione relativa per creare un contesto per i posizionamenti assoluti */
+    position: relative;
+    overflow: hidden;
+    border-radius: 7px;
+    /* Se non ti serve più il flex layout, puoi rimuoverlo, oppure usarlo solo per altri elementi */
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
+}
+
+
+.resources_inner_content {
+    background: linear-gradient(135deg, #1a001f, #79069c, #1a001f);
+    background-size: 200% 200%;
+    animation: gradientShift 20s ease infinite;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    border-radius: 7px;
+}
+  
+/* Animazione lenta del gradiente */
+@keyframes gradientShift {
+    0% {
+    background-position: 0% 50%;
+    }
+    50% {
+    background-position: 100% 50%;
+    }
+    100% {
+    background-position: 0% 50%;
+    }
+
+}
+  
+
+.ball {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    touch-action: none;
+    transition: left 0.6s ease-in-out, top 0.6s ease-in-out;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    background: linear-gradient(145deg, rgb(165, 14, 179), rgb(0, 174, 255));
+    border-radius: 50%;
+    z-index: 1;
+    overflow: visible;
+}
+
+/* Numero al centro */
+.ball-number {
+    font-weight: bold;
+    color: white;
+    font-size: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+
+.ball-corona {
+    position: absolute;
+    top: calc(-50% px); 
+    left: calc(-50% px);
+    transform: translate(-50%, -50%);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, black, #d91bdc);
+    -webkit-mask: radial-gradient(circle, transparent 25px, black 25px);
+    mask: radial-gradient(circle, transparent 23px, black 25px);
+    animation: rotateBall 12s linear infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+
+
+/* Pulsazione */
+@keyframes pulseBall {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+    }
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    }
+}
+
+/* Rotazione lenta */
+@keyframes rotateBall {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.anchor {
+    width: 40px; /* oppure la dimensione dinamica se lo preferisci, ad esempio: 60px */
+    height: 40px;
+    background: red;
+    border-radius: 50%;
+    /* Passa a posizionamento assoluto */
+    position: absolute;
+}
+
+
+.anchor {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, #222 40%, #111 100%);
+    transition: transform 0.6s ease, box-shadow 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+  
+.anchor-core {
+    width: 60%;
+    height: 60%;
+    background: black;
+    border-radius: 50%;
+    z-index: 2;
+}
+  
+.anchor-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(1);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.6), transparent 75%);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+  
+/* Stato usato */
+.anchor[data-used="true"] {
+    transform: scale(1.2);
+    box-shadow: 0 0 12px rgba(138, 43, 226, 0.6);
+}
+  
+.anchor[data-used="true"] .anchor-pulse {
+    animation: pulseAura 2s ease-in-out infinite;
+    opacity: 1;
+    transform: scale(1.6);
+}
+  
+/* Pulsazione */
+@keyframes pulseAura {
+    0% {
+      opacity: 0.4;
+      transform: scale(1.3);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.6);
+    }
+    100% {
+      opacity: 0.4;
+      transform: scale(1.3);
+    }
+}
+  
+
+/* Animazioni */
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 10px #a020f0, 0 0 30px #6a0dad;
+    }
+    100% {
+        box-shadow: 0 0 20px #d580ff, 0 0 40px #9c27b0;
+    }
+}
+
+@keyframes fadePulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.4;
+    }
+}
+
+@keyframes pulseHalo {
+    0%, 100% {
+        transform: scale(1.2);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.4);
+        opacity: 0.9;
+    }
+}
+
+@keyframes rotateAether {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+} 

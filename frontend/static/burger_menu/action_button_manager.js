@@ -105,6 +105,7 @@ export class ActionButtonManager{
                             element.classList.remove('inactive');
                             element.style.transform = 'translate(0%, 0%)';
                             element.classList.add('active');
+                            element.style.zIndex = "100";
                         }
                     
                     // altrimenti viene disattivato
@@ -114,6 +115,7 @@ export class ActionButtonManager{
                             element.classList.remove('active');
                             element.style.transform = 'translate(50%, 50%)';
                             element.classList.add('inactive');
+                            element.style.zIndex = "-100";
                         }
                     }
                 });

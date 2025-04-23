@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trama Sensoriale</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #101010;
+      color: white;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #indizi, #mappa {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin: 30px 0;
+    }
+
+    .indizio {
+      background: #333;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: grab;
+      border: 1px solid #666;
+      user-select: none;
+    }
+
+    .cella {
+      width: 140px;
+      height: 100px;
+      background: #1e1e1e;
+      border: 2px dashed #555;
+      border-radius: 6px;
+      padding: 6px;
+      text-align: center;
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .cella p {
+      margin: 0;
+      font-weight: bold;
+    }
+
+    button {
+      margin: 30px auto;
+      display: block;
+      padding: 10px 18px;
+      font-size: 16px;
+      background: #0984e3;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #74b9ff;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Trama Sensoriale</h1>
+
+  <div id="indizi">
+    <div class="indizio" draggable="true" data-id="ind1">🌫️ Nebbia sottile</div>
+    <div class="indizio" draggable="true" data-id="ind2">🔊 Urlo lontano</div>
+    <div class="indizio" draggable="true" data-id="ind3">📸 Lampo accecante</div>
+  </div>
+
+  <div id="mappa">
+    <div class="cella" data-fonte="visione" data-sensazione="paura">
+      <p>👁️ Visione</p>
+      <p>😨 Paura</p>
+    </div>
+    <div class="cella" data-fonte="suono" data-sensazione="rabbia">
+      <p>🔊 Suono</p>
+      <p>😡 Rabbia</p>
+    </div>
+    <div class="cella" data-fonte="foto" data-sensazione="stupore">
+      <p>📸 Foto</p>
+      <p>😲 Stupore</p>
+    </div>
+  </div>
+
+  <button id="check-trama">Verifica Trama</button>
+
+  <script>
+    let dragged = null;
+    const collocazioni = {};
+
+    document.querySelectorAll('.indizio').forEach(ind => {
+      ind.addEventListener('dragstart', () => {
+        dragged = ind;
+      });
+    });
+
+    document.querySelectorAll('.cella').forEach(cella => {
+      cella.addEventListener('dragover', e => e.preventDefault());
+
+      cella.addEventListener('drop', () => {
+        if (!dragged) return;
+        const id = dragged.getAttribute('data-id');
+        const fonte = cella.getAttribute('data-fonte');
+        const sensazione = cella.getAttribute('data-sensazione');
+        cella.innerHTML = `<p>${fonte}</p><p>${sensazione}</p><strong>${dragged.textContent}</strong>`;
+        collocazioni[id] = { fonte, sensazione };
+        dragged.style.opacity = 0.4;
+        dragged.draggable = false;
+        dragged = null;
+      });
+    });
+
+    document.getElementById('check-trama').addEventListener('click', () => {
+      console.log("Trama composta:", collocazioni);
+      // socket.emit('trama_sensoriale', collocazioni);
+    });
+  </script>
+
+</body>
+</html>

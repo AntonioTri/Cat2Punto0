@@ -1,7 +1,6 @@
 // Import della variabile API_URL settata in automatico nel file di config
 import {API_URL} from './config.js';
 const URL = `${API_URL}/login`;
-import { socket } from './utils/socket.js';
 
 // Selezione del form
 const loginForm = document.getElementById("login_form");
@@ -41,10 +40,11 @@ loginForm.addEventListener("submit", async function(event) {
             localStorage.setItem('team_id', data.team_id);
             localStorage.setItem('unformatted_role', data.role);
             localStorage.setItem('role', role);
-            localStorage.setItem('detective_name', username);
+            localStorage.setItem('personal_name', username);
             
             // Reindirizzamento in caso di successo
-            window.location.replace(`../templates/${role}/${role}_homepage.html`);
+            window.location.href = `../templates/${role}/${role}_homepage.html`;
+
 
         } else {
             // Gestione degli errori dal server

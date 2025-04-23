@@ -1,0 +1,128 @@
+.modulo {
+    background-color: #ffffff;
+    padding: 20px;
+    margin-top: 2%;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    color: #000;
+    transition: box-shadow 0.4s ease, transform 0.3s ease;
+
+    /* Mobile-friendly animation hint */
+    will-change: box-shadow, transform;
+}
+
+.modulo:hover {
+    transform: scale(1.02);
+}
+
+.intermediate_layer {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: white;
+    opacity: 1;
+    z-index: 100;
+    pointer-events: none;
+    transition: opacity 1.2s ease-in-out, visibility 0s 1.2s;
+    visibility: visible;
+}
+
+.intermediate_layer.dissolving {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1.2s ease-in-out, visibility 0s 1.2s;
+}
+
+.intermediate_layer.materializing {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 1.2s ease-in-out;
+}
+
+.module_text {
+    position: relative;
+    z-index: 101;
+    text-align: center;
+    color: black;
+    pointer-events: none;
+}
+
+/* Effetto hacker: animazione solo su sfondo */
+.modulo.active {
+    background: linear-gradient(
+        120deg,
+        #0f0 0%,
+        #0b0 50%,
+        #0f0 100%
+    );
+    background-size: 200% 200%;
+    animation: hackerBackground 4s ease-in-out infinite alternate;
+    box-shadow: 0 0 12px rgba(0, 255, 0, 0.5);
+}
+
+/* Animazione fluida dello sfondo hacker */
+@keyframes hackerBackground {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.overlay-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    position: relative;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.overlay-content input {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.overlay-content button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.overlay-content button:hover {
+    background-color: #0056b3;
+}
+
+.close-btn {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    color: gray;
+}

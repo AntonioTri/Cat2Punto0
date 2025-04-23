@@ -1,0 +1,5 @@
+CODE_1              = ["6yh7ujik", "Un codice per testare 1."]
+CODE_2              = ["2308fjeg", "Un codice per testare 2."]
+CODE_3              = ["q3x4tgmp", "Un codice per testare 3."]
+CODE_4              = ["x234tmy7", "Un codice per testare 4."]
+CODE_5              = ["n0234t79", "Un codice per testare 5."]

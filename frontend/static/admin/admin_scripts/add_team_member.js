@@ -75,8 +75,8 @@ export class AddTeamMemberManager extends AbstractCardManager{
             // Verifica se la risposta è OK
             if (response.ok) {
                 // La risposta è stata corretta
-                const data = await response.json();  // Converte la risposta in JSON
-                // TODO: aggiungere il messaggio in sovrimpressione
+                const data = await response.json();
+                
                 console.log(data);
                 // Compare il check mark per il successo
                 this.checkMark.success();
@@ -143,8 +143,8 @@ export class AddTeamMemberManager extends AbstractCardManager{
             // Verifica se la risposta è OK
             if (response.ok) {
                 // La risposta è stata corretta
-                const data = await response.json();  // Converte la risposta in JSON
-                // TODO: aggiungere il messaggio in sovrimpressione
+                const data = await response.json();  
+
                 console.log(data);
                 // Memorizzazione in locale dei dati ricevuti
                 this.teamsName = data.teams;

@@ -190,7 +190,7 @@ class PostgresDB():
 
         try:
             # Check per controllare che il team esista
-            if not self.team_exists(team_id):
+            if not self.team_exists(team_id) or team_id == "NOT_A_TEAM":
                 return {"msg": f"Il team con id {team_id} NON esiste"}, 404
             
             # Esecuzione della query
@@ -330,6 +330,27 @@ class PostgresDB():
             return {"error": f"Errore durante l'accesso: {e}"}, 500
 
 
+    # Questo metodo ritrna il team id basandosi sull'id personale
+    # Questo metodo ritorna il team_id basandosi sull'id_personale
+    def get_team_id_from_user_id(self, id_personale: int = None):
+        cursor = self.connection.cursor()
+
+        try:
+            query = "SELECT team_id FROM team_member WHERE id_personale = %s"
+            cursor.execute(query, (id_personale,))
+            result = cursor.fetchone()
+
+            cursor.close()
+
+            if not result:
+                return {"team_id": None, "status": 404, "message": "Nessun team trovato"}
+
+            return {"team_id": result[0], "status": 200}
+
+        except Exception as e:
+            return {"team_id": None, "status": 500, "message": f"Errore durante la ricerca: {str(e)}"}
+
+
 
     # Questo metodo aggiorna la socket relativa a un utente
     def update_socket_id(self, user_id: int, socket_id: str):
@@ -427,6 +448,95 @@ class PostgresDB():
 
         finally:
             cursor.close()
+
+
+    def get_team_id_by_socket_id(self, socket_id: str):
+        """
+        Metodo per ottenere il team_id di un utente a partire dalla sua socket_id.
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Esecuzione della query per trovare il team_id dato un socket_id
+            cursor.execute("""
+                SELECT tm.team_id
+                FROM team_member tm
+                WHERE tm.socket_id = %s
+            """, (socket_id,))
+
+            # Recupera il risultato della query
+            result = cursor.fetchone()
+
+            # Se nessun risultato viene trovato, restituisci un errore o None
+            if not result:
+                return {"error": f"Nessun team trovato per socket_id {socket_id}"}, 404
+
+            # Restituisci il team_id trovato
+            return {"team_id": result[0]}, 200
+
+        except Exception as e:
+            print(f"Errore durante la ricerca del team_id per la socket_id {socket_id}: {e}")
+            return {"error": f"Errore durante la ricerca del team_id: {e}"}, 500
+
+        finally:
+            cursor.close()
+
+
+    def get_user_id_from_socket_id(self, socket_id : str = ""):
+        """
+        Metodo per ottenere il personal id di un utente a partire dalla sua socket_id.
+        """
+        cursor = self.connection.cursor()
+
+        try:
+            # Esecuzione della query per trovare il team_id dato un socket_id
+            cursor.execute("""
+                SELECT tm.id_personale
+                FROM team_member tm
+                WHERE tm.socket_id = %s
+            """, (socket_id,))
+
+            # Recupera il risultato della query
+            result = cursor.fetchone()
+
+            # Se nessun risultato viene trovato, restituisci un errore o None
+            if not result:
+                return {"error": f"Nessun ID trovato per socket_id {socket_id}"}, 404
+
+            # Restituisci il team_id trovato
+            return {"personal_id": result[0]}, 200
+
+        except Exception as e:
+            print(f"Errore durante la ricerca del personal id per la socket_id {socket_id}: {e}")
+            return {"error": f"Errore durante la ricerca dell peersonal id: {e}"}, 500
+
+        finally:
+            cursor.close()
+
+
+    def get_all_commanders_socket_ids(self):
+        """
+        Recupera tutti gli socket_id dei membri con ruolo 'COMANDANTE' da tutti i team.
+        """
+        cursor = self.connection.cursor()
+        try:
+            query = """
+                SELECT tm.socket_id
+                FROM team_member tm
+                JOIN team_group tg ON tm.group_id = tg.group_id
+                WHERE tm.role = 'COMANDANTE' AND tm.socket_id IS NOT NULL
+            """
+            cursor.execute(query)
+            results = cursor.fetchall()
+            # Estrai solo gli socket_id in una lista
+            socket_ids = [row[0] for row in results]
+            return socket_ids
+        except Exception as e:
+            return {"msg": "Errore durante il recupero degli socket_id dei comandanti", "error": str(e)}, 500
+        finally:
+            cursor.close()
+
+
 
 
     def add_signal_to_team(self, team_id: int, signal: str):

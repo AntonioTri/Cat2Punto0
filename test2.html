@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archivio Mnemonico - Detective</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #fragment-pool, #timeline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+      justify-content: center;
+    }
+
+    .fragment {
+      background: #333;
+      color: white;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: grab;
+      user-select: none;
+      border: 1px solid #555;
+      transition: opacity 0.3s;
+    }
+
+    .slot {
+      width: 120px;
+      height: 60px;
+      background: #1e1e1e;
+      border: 2px dashed #888;
+      border-radius: 6px;
+      text-align: center;
+      line-height: 60px;
+      font-weight: bold;
+      color: #bbb;
+    }
+
+    button {
+      display: block;
+      margin: 30px auto;
+      padding: 10px 20px;
+      background-color: #00b894;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #019875;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Archivio Mnemonico</h1>
+
+  <div id="fragment-pool">
+    <div class="fragment" draggable="true" data-id="frag1">⚡ Interferenza 03</div>
+    <div class="fragment" draggable="true" data-id="frag2">📸 Foto parziale 07</div>
+    <div class="fragment" draggable="true" data-id="frag3">📝 Log vocale 12</div>
+  </div>
+
+  <div id="timeline">
+    <div class="slot" data-slot="1">Slot 1</div>
+    <div class="slot" data-slot="2">Slot 2</div>
+    <div class="slot" data-slot="3">Slot 3</div>
+  </div>
+
+  <button id="submit-sequence">Verifica Sequenza</button>
+
+  <script>
+    let draggedFragment = null;
+    const timelineSequence = {};
+
+    document.querySelectorAll('.fragment').forEach(frag => {
+      frag.addEventListener('dragstart', () => {
+        draggedFragment = frag;
+      });
+    });
+
+    document.querySelectorAll('.slot').forEach(slot => {
+      slot.addEventListener('dragover', e => e.preventDefault());
+
+      slot.addEventListener('drop', () => {
+        if (!draggedFragment) return;
+
+        const slotNum = slot.getAttribute('data-slot');
+        slot.innerText = draggedFragment.innerText;
+        timelineSequence[slotNum] = draggedFragment.getAttribute('data-id');
+
+        // Disabilita il frammento usato
+        draggedFragment.style.opacity = 0.4;
+        draggedFragment.draggable = false;
+        draggedFragment = null;
+      });
+    });
+
+    document.getElementById('submit-sequence').addEventListener('click', () => {
+      console.log('Sequenza inviata:', timelineSequence);
+      // socket.emit('submit_sequence', timelineSequence); // Attiva solo se usi socket.io
+    });
+  </script>
+</body>
+</html>

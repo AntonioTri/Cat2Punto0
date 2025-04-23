@@ -18,9 +18,7 @@ export class CardManager {
             selectedCard.style.transform = `translateX(${width}px)`;
             selectedCard.style.opacity = '0';
             
-        } catch (error) {
-            console.log(error);
-        }
+        } catch (error) { return; }
 
 
     }
@@ -141,7 +139,6 @@ export class CardManager {
         card.style.fontFamily = `'Courier New', Courier, monospace`;
         card.style.backgroundColor = 'rgb(225, 228, 217)';
         card.style.boxShadow = '0px 0px 25px 1px rgba(0, 0, 0, 0.5)';
-        card.style.overflow = 'hidden';
 
         const textLable = document.createElement('div');
         textLable.position = 'relative';
