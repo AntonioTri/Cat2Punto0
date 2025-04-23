@@ -236,8 +236,7 @@ class Socket(Namespace):
     @socket_require_role(role=ROLE.COMANDANTE.value)
     def on_perk_updated(self, data):
         
-        logger.info(f"[-] Perk modificato. Dati: {data}")
-        logger.info('🔄 Provo ad estrarre le socket degli altri comandanti')
+        logger.info('🔄 Provo ad aggiornare i perk attivi ...')
 
         # Estrazione dei dati degli altri comandanti sulla base del team id
         members, status_code = ControllerTeamPool.get_all_team_group_socket(team_id=int(data["team_id"]), role="COMANDANTE")
@@ -260,8 +259,6 @@ class Socket(Namespace):
                 if socket_id and socket_id != current_sid:
                     emit('perk_got_updated', message_to_send, to=socket_id)
 
-
-            logger.info('✅ Aggiornamenti inviati con successo!')
 
             # Viene anche aggiornata la cache dei perk attivi e la cache per l'attuale costo usato
             update_perk_cache(team_id=int(data["team_id"]), data=data)

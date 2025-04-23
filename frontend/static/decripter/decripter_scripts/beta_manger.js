@@ -18,6 +18,8 @@ export class BETAManager extends AbstractCardManager {
         this.outputText = null;
 
         this.addElements();
+        this.addDownloaderPDF('Scarica il manuale BETA', 'SISTEMA_BETA');
+        this.addLocker("BETA");
     }
 
     addElements() {

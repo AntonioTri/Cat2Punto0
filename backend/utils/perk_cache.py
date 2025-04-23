@@ -173,8 +173,6 @@ def send_lockers_cache(locker_name : str = "", team_id: int = -1, socket: str = 
 
 def update_perk_cache(team_id: int = -1, data : dict[str, any] = {}) -> None:
 
-    logger.info(f"Update-perk-cache: team id = {team_id}. tipo = {type(team_id)}")
-
     if team_id == -1 or data == {}:
         logger.info("Errore nell'aggiornamento della cache dei perk")
         return

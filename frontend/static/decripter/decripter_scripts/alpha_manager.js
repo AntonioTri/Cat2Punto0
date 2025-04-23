@@ -18,8 +18,8 @@ export class ALPHAManager extends AbstractCardManager {
         this.output = null;
         this.outputText = null;
         this.addElements();
-        //this.addLocker('ALPHA', 'ALPHA_on', 'ALPHA_off');
-        //this.askForLockerStatus('ALPHA');
+        this.addDownloaderPDF('Scarica il manuale ALPHA', 'SISTEMA_ALPHA');
+        //this.addLocker("ALPHA");
 
 
     };

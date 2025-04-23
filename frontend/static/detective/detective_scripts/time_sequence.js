@@ -18,9 +18,7 @@ export class StoricEventsManager extends AbstractCardManager {
         this.addScrollableList('storic_event_list');
         this.addSocketListener();
         this.askCacheData("retrieve_historical_events");
-        this.addNewEvent('test1', 'descrizione test 1');
-        this.addNewEvent('test2', 'descrizione test 2');
-        this.addNewEvent('test3', 'descrizione test 3');
+        this.addLocker("Timeline");
     }
 
     addSocketListener() {

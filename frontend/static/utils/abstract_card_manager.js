@@ -123,6 +123,22 @@ export class AbstractCardManager{
     };
 
 
+    // Se richiamato il metodo agiunge un anchor point per scaricare un pdf
+    addDownloaderPDF(anchorPointText = "", pdfName = ""){
+
+        const anchor = document.createElement('a');
+        anchor.href =`${window.location.protocol}//${window.location.host}/static/PDF/${pdfName}.pdf`;
+        anchor.download = `${pdfName}.pdf`;
+        anchor.className = 'pdf-download';
+        anchor.innerText = `${anchorPointText}`;
+
+        // Reference nella classe
+        this.anchor = anchor;
+        this.container.appendChild(this.anchor);
+
+    };
+
+
     // Questo metodo se chiamato attiva nella classe un listener di un evento globale
     // Vengono tradotti tutti gli elementi criptati della carta sulla base del modello di criptaggio
     // inviato dal segnale

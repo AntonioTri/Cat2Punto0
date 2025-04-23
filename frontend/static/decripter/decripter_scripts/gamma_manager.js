@@ -17,6 +17,8 @@ export class GAMMAManager extends AbstractCardManager {
 
         this.gridSize = 4; // 4x4 griglia
         this.addElements();
+        this.addDownloaderPDF('Scarica il manuale GAMMA', 'SISTEMA_GAMMA');
+        this.addLocker("GAMMA");
     }
 
     addElements() {
