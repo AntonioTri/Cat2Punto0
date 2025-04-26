@@ -19,7 +19,7 @@ export class ALPHAManager extends AbstractCardManager {
         this.outputText = null;
         this.addElements();
         this.addDownloaderPDF('Scarica il manuale ALPHA', 'SISTEMA_ALPHA');
-        this.addLocker("ALPHA");
+        //this.addLocker("ALPHA");
 
 
     };
@@ -137,6 +137,30 @@ export class ALPHAManager extends AbstractCardManager {
         return result;
     
     };
+
+    customEncrypt(text, bits) {
+        let result = '';
+        const bitSeed = parseInt(bits.join(''), 2);
+    
+        for (let i = 0; i < text.length; i++) {
+            const charCode = text.charCodeAt(i);
+            const shift = ((bitSeed + i * 2) * 3) % 26;
+            let newCharCode = charCode;
+    
+            if (charCode >= 97 && charCode <= 122) {
+                // lettere minuscole
+                newCharCode = ((charCode - 97 - shift + 26) % 26) + 97;
+            } else if (charCode >= 65 && charCode <= 90) {
+                // lettere maiuscole
+                newCharCode = ((charCode - 65 - shift + 26) % 26) + 65;
+            }
+    
+            result += String.fromCharCode(newCharCode);
+        }
+    
+        return result;
+    }
+    
 
 
 

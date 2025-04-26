@@ -56,10 +56,11 @@ class Riddle:
 
     def unlock_commander_evidence(self, team_id : int = -1, COMMANDER_EVIDENCE : list = [], commander_sockets : list[str] = []):
         """Metodo per sbloccare una prova riservata dei comandanti di un team"""
-        self.reserved_proofs_cache.add_reserved_proof(commanders_sockets=commander_sockets, 
-                                                      title=COMMANDER_EVIDENCE[0], 
-                                                      content=COMMANDER_EVIDENCE[1], 
-                                                      id_evidence=COMMANDER_EVIDENCE[2])
+        self.reserved_proofs_cache.add_reserved_proof(commanders_sockets=commander_sockets,
+                                                      team_id=team_id,
+                                                      id_evidence=COMMANDER_EVIDENCE[0],
+                                                      title=COMMANDER_EVIDENCE[1], 
+                                                      content=COMMANDER_EVIDENCE[2])
         
 
     def unlock_pending_code(self, team_id : int = -1, PENDING_CODE_REQUEST : list = [], commander_sockets : list[str] = []):
@@ -74,9 +75,9 @@ class Riddle:
         """Metodo che sblocca un nuovo perk ad un team specifico"""
         self.pending_request.add_pending_evidence(team_id=team_id,
                                                   commanders_sockets=commander_sockets,
-                                                  titolo=PENDING_EVIDENCE_REQUEST[0],
-                                                  contenuto=PENDING_EVIDENCE_REQUEST[1],
-                                                  id_fascicolo=PENDING_EVIDENCE_REQUEST[2],
+                                                  titolo=PENDING_EVIDENCE_REQUEST[1],
+                                                  contenuto=PENDING_EVIDENCE_REQUEST[2],
+                                                  id_fascicolo=PENDING_EVIDENCE_REQUEST[0],
                                                   permission_required=PENDING_EVIDENCE_REQUEST[3])
 
 
@@ -100,9 +101,9 @@ class Riddle:
         """Metodo che al richiamo sblocca una nuova prova per i detective"""
         self.evidence_cache.add_evidence(team_id=team_id,
                                          detective_sockets=detective_sockets,
-                                         titolo=DETECTIVE_EVIDENCE[0],
-                                         contenuto=DETECTIVE_EVIDENCE[1],
-                                         id_fascicolo=DETECTIVE_EVIDENCE[2],
+                                         titolo=DETECTIVE_EVIDENCE[1],
+                                         contenuto=DETECTIVE_EVIDENCE[2],
+                                         id_fascicolo=DETECTIVE_EVIDENCE[0],
                                          permission_required=DETECTIVE_EVIDENCE[3])
 
 
