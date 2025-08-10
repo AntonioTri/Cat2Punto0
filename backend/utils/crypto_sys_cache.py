@@ -107,7 +107,8 @@ class CryptingSystemManager:
 
         # Emit del messaggio
         for socket in decritter_sockets:
-            emit('add_crypting_system', {"systemName": name, "password": password}, to=socket, namespace='/socket.io')
+            if socket is not None:
+                emit('add_crypting_system', {"systemName": name, "password": password}, to=socket, namespace='/socket.io')
 
 
     def clear_cache(self, team_id : int = -1):

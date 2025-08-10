@@ -27,7 +27,8 @@ class EvidenceCache:
 
         # Viene inviata ad ogni socket detective
         for socket in detective_sockets:
-            emit('add_new_evidence', {"titolo" :titolo, "contenuto" : contenuto, "id_fascicolo" : id_fascicolo, "permission_required" : permission_required}, to=socket, namespace='/socket.io')
+            if socket is not None:
+                emit('add_new_evidence', {"titolo" :titolo, "contenuto" : contenuto, "id_fascicolo" : id_fascicolo, "permission_required" : permission_required}, to=socket, namespace='/socket.io')
 
     
     def retrieve_current_evidences(self, team_id : int = -1, socket : str = ""):

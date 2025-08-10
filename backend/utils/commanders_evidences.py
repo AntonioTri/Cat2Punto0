@@ -28,7 +28,8 @@ class ReservedProofsCache:
 
         # Invio della prova a tutte le socket dei decrittatori specificati
         for socket in commanders_sockets:
-            emit('add_new_reserved_evidence', { "title": title, "content": content, "id_evidence": id_evidence }, to=socket, namespace='/socket.io')
+            if socket is not None:
+                emit('add_new_reserved_evidence', { "title": title, "content": content, "id_evidence": id_evidence }, to=socket, namespace='/socket.io')
 
 
     def retrieve_current_reserved_proofs(self, team_id: int = -1, socket: str = ""):

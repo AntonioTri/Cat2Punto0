@@ -27,7 +27,8 @@ class HistoricalEventsCache:
 
         # Invio dell'evento a tutte le socket
         for socket in detectives_sockets:
-            emit('add_new_storic_event', { "titolo": titolo, "descrizione": descrizione }, to=socket, namespace='/socket.io')
+            if socket is not None:
+                emit('add_new_storic_event', { "titolo": titolo, "descrizione": descrizione }, to=socket, namespace='/socket.io')
 
 
     def retrieve_current_events(self, team_id: int = -1, socket: str = ""):

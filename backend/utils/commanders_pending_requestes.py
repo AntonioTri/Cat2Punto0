@@ -37,7 +37,8 @@ class PendingCacheManager:
 
         # Notifica a tutti i comandanti
         for socket in commanders_sockets:
-            emit('new_pending_code', {"code": code, "description": description}, to=socket, namespace='/socket.io')
+            if socket is not None:
+                emit('new_pending_code', {"code": code, "description": description}, to=socket, namespace='/socket.io')
 
 
     def add_pending_evidence(self, team_id: int = -1, commanders_sockets: list[str] = [], titolo: str = "", contenuto: str = "", id_fascicolo: int = 0, permission_required: bool = False):
@@ -51,7 +52,8 @@ class PendingCacheManager:
 
         # Notifica a tutti i comandanti
         for socket in commanders_sockets:
-            emit('new_pending_evidence', {"titolo": titolo, "id_fascicolo": id_fascicolo }, to=socket, namespace='/socket.io')
+            if socket is not None:
+                emit('new_pending_evidence', {"titolo": titolo, "id_fascicolo": id_fascicolo }, to=socket, namespace='/socket.io')
 
 
     def approve_code_delivery(self, team_id: int = -1, code: str = "", decritter_sockets: list[str] = []):

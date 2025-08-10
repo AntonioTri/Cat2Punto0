@@ -28,7 +28,8 @@ class CriptedCodesCache :
 
         # Viene inviata ad ogni socket decrittatore
         for socket in decritter_sockets:
-            emit('add_new_code', {"code" : code, "description" : description}, to=socket, namespace='/socket.io')
+            if socket is not None:
+                emit('add_new_code', {"code" : code, "description" : description}, to=socket, namespace='/socket.io')
 
     
     def retrieve_current_codes(self, team_id : int = -1, socket : str = ""):
