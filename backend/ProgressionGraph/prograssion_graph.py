@@ -253,6 +253,8 @@ class ProgressionGraph:
         # Aggiungi il nodo di partenza alla coda e segnalo come visitato
         queue.append(start_node)
         visited_nodes.add(start_node.getKey())
+        # Al nodo radice viene eseguita una signal team per inviare i dati della sorgente
+        start_node.signalTeam(team_to_signal=team_to_signal)
 
         while queue:
             # Estrai il nodo corrente dalla coda

@@ -5,7 +5,8 @@ import { HelloPageManager } from "../../utils/hello_page.js";
 import { PermissionManager } from "../../commander/commander_scripts/permission.js";
 import { ResourcesManager } from "../../commander/commander_scripts/resources.js";
 import { PendingRequestsManager } from "../../commander/commander_scripts/pending_request.js";
-import { ProtocolsManager } from "../../commander/commander_scripts/anwers_manager.js";
+import { ProtocolsManager } from "../../commander/commander_scripts/anwers_manager.js"; 
+import { ReservedEvidencesManager } from "../../commander/commander_scripts/reserved_evidences.js"; 
 
 const checkMark = new CheckMark();
 
@@ -15,6 +16,8 @@ document.addEventListener("socketInitialized", () => {
     const burgerMenuManager = new BurgerMenuManager('body', checkMark);
     
     const resourcesManager = new ResourcesManager(commanderActions[0], checkMark);
+
+    const reservedEvidencesManager = new ReservedEvidencesManager(commanderActions[1], checkMark);
     
     const pendingRequestsManager = new PendingRequestsManager(commanderActions[2], checkMark);
     

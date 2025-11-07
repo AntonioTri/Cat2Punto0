@@ -281,13 +281,13 @@ export class ResourcesManager extends AbstractCardManager {
                 this.totalCost -= cost;
                 const corona = ball.querySelector('.ball-corona');
                 corona.style.animation = 'rotateBall 12s linear infinite';
+                this.sendPerkUpdate(index, ball.id, null);
             }
 
             this.freeAnchor(ball);
             ball.dataset.anchored = 'false';
             ball.dataset.anchorId = null;
             this.resetBallPosition(ball, origin);
-            this.sendPerkUpdate(index, ball.id, null);
             this.updateEnergyTag(ball.id);
         }
     }

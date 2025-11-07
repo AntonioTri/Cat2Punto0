@@ -4,8 +4,8 @@ from ProgressionGraph.Riddles.riddles import Riddle
 from typing import override
 from content.fascioli import FASCICOLO_1, FASCICOLO_2, FASCICOLO_3
 from content.reserved_evidences import PROVA_RISERVATA_1, PROVA_RISERVATA_2, PROVA_RISERVATA_3, PROVA_RISERVATA_4
-from content.fascicoli_pendenti import FASCICOLO_PENDENTE_1, FASCICOLO_PENDENTE_2, FASCICOLO_PENDENTE_3, FASCICOLO_PENDENTE_4, FASCICOLO_PENDENTE_5
-from content.perks import PERK_PROTOCOLLO, PERK_RECUPERO, PERK_DEDUZIONE, PERK_DISTRIBUZIONE, PERK_ALPHA, PERK_BROADCAST
+from content.fascicoli_pendenti import FASCICOLO_PENDENTE_1, FASCICOLO_PENDENTE_2, FASCICOLO_PENDENTE_3
+from content.perks import PERK_PROTOCOLLO, PERK_RECUPERO, PERK_DEDUZIONE, PERK_DISTRIBUZIONE, PERK_BROADCAST
 from content.codes import CODE_1, CODE_2, CODE_3
 from content.codici_pendenti import PENDING_CODE_1, PENDING_CODE_2, PENDING_CODE_3
 from content.broadcast import MESSAGE_FROM_ARCHITECT_1, MESSAGE_FROM_ARCHITECT_2, MESSAGE_FROM_ARCHITECT_3
@@ -36,7 +36,6 @@ class SourceNode(Riddle):
             self.unlock_perk(team_id=team_id, PERK=PERK_RECUPERO, commander_sockets=commander_sockets)
             self.unlock_perk(team_id=team_id, PERK=PERK_DEDUZIONE, commander_sockets=commander_sockets)
             self.unlock_perk(team_id=team_id, PERK=PERK_DISTRIBUZIONE, commander_sockets=commander_sockets)
-            self.unlock_perk(team_id=team_id, PERK=PERK_ALPHA, commander_sockets=commander_sockets)
             self.unlock_perk(team_id=team_id, PERK=PERK_BROADCAST, commander_sockets=commander_sockets)
 
             # Sblocco dei codici iniziali
@@ -63,8 +62,6 @@ class SourceNode(Riddle):
             self.unlock_pending_evidence(team_id=team_id, PENDING_EVIDENCE_REQUEST=FASCICOLO_PENDENTE_1, commander_sockets=commander_sockets)
             self.unlock_pending_evidence(team_id=team_id, PENDING_EVIDENCE_REQUEST=FASCICOLO_PENDENTE_2, commander_sockets=commander_sockets)
             self.unlock_pending_evidence(team_id=team_id, PENDING_EVIDENCE_REQUEST=FASCICOLO_PENDENTE_3, commander_sockets=commander_sockets)
-            self.unlock_pending_evidence(team_id=team_id, PENDING_EVIDENCE_REQUEST=FASCICOLO_PENDENTE_4, commander_sockets=commander_sockets)
-            self.unlock_pending_evidence(team_id=team_id, PENDING_EVIDENCE_REQUEST=FASCICOLO_PENDENTE_5, commander_sockets=commander_sockets)
 
             # Invio dei codici pendenti
             self.unlock_pending_code(team_id=team_id, PENDING_CODE_REQUEST=PENDING_CODE_1, commander_sockets=commander_sockets) 

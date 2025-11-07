@@ -19,7 +19,7 @@ FASCICOLO_3 = [3, "La Trascrizione Incompleta",
     "Nell'ultimo consiglio dei vertici, fu redatto un verbale, ma il documento originale fu rapidamente censurato. "
     "La versione recuperata mostra numerose anomalie: interruzioni, omissioni e sigle apparentemente senza senso. "
     "Tra di esse spicca la stringa 'xn43g920' incastonata in mezzo a una discussione sullo stato delle difese interne. "
-    "Alcuni analisti ipotizzano che il codice sia un riferimento cifrato a una risorsa o un protocollo nascosto. "
-    "Nota: la trascrizione porta il sigillo della Sezione di Sicurezza, il che ne aumenta l'importanza.",
+    "Alcuni analisti ipotizzano che il codice sia un riferimento criptato e che debba essere concatenato ad un altro codice per avere valenza. "
+    "Nota: la trascrizione porta il sigillo del dipartimento di Sicurezza, il che ne aumenta l'importanza.",
     False]
 

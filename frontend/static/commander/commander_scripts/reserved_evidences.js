@@ -17,9 +17,7 @@ export class ReservedEvidencesManager extends AbstractCardManager {
 
         this.addScrollableList('reserved_evidence_list');
         this.addSocketListener();
-        this.askCacheData("retrieve_evidences");
-        this.addLocker("Prove");
-
+        this.askCacheData("retrieve_reserved_evidences");
 
     };
 

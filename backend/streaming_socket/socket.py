@@ -390,7 +390,7 @@ class Socket(Namespace):
         logger.info(f"📶  ✅  Token aumentati globalmente a tutti i comandanti del team {team_id}.")
 
 
-    @socket_require_role(role=ROLE.DECRITTATORE.value)
+    @socket_require_role(role=ROLE.COMANDANTE.value)
     def on_retrieve_reserved_evidences(self, data):
         logger.info(f"📶  🔄  Invio prove riservate alla socket {request.sid}")
 
@@ -540,3 +540,6 @@ class Socket(Namespace):
         self.pending_request.clear_cache(team_id=team_id)
         self.crypted_codes_cache.clear_cache(team_id=team_id)
         self.evidence_cache.clear_cache(team_id=team_id)
+        self.historical_events_cache.clear_cache(team_id=team_id)
+        self.reserved_proofs_cache.clear_cache(team_id=team_id)
+        

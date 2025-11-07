@@ -14,7 +14,6 @@ PERK_TIMELINE           = ["Timeline", 3]
 PERK_BROADCAST          = ["Broadcast", 4]
 
 # Perk dei decrittatori, danno accesso ai vari sistemi di decrittazione e al sistema globale di traduzione
-PERK_ALPHA              = ["ALPHA", 2]
 PERK_BETA               = ["BETA", 3]
 PERK_GAMMA              = ["GAMMA", 4]
 PERK_CRIPTAGGIO         = ["Criptaggio", 6]
